@@ -1,0 +1,32 @@
+# venv (junction local; venv real fica em Z:\venvs\pdf2md)
+.venv/
+
+# caches Python (devem estar em Z:\caches via env vars)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE/editor
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+
+# corpus — PDFs originais não vão pro git (são pesados; resultados gerados sim)
+corpus/_sources/
+
+# diretórios temp do pipeline
+/tmp_*/
+/temp_*/
+
+# build / dist
+dist/
+build/
+*.egg-info/

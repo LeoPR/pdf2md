@@ -1,0 +1,32 @@
+[project]
+name = "pdf2md"
+version = "0.1.0-dev"
+description = "Conversor PDF↔MD com round-trip mensurável e otimização adaptativa de imagens"
+authors = [
+    { name = "Leonardo Marques de Souza", email = "leonardo.marques.souza@gmail.com" }
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+
+# Dependências mínimas para o pipeline base.
+# Empacotamento como pip-installable é T108 (open).
+dependencies = [
+    "marker-pdf>=1.10",
+    "pillow>=11",
+    "pymupdf>=1.27",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+# pytest é exceção — não tem env var oficial; explicitamos
+cache_dir = "Z:\\caches\\pytest"
