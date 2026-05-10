@@ -21,8 +21,8 @@ trabalhados sem se preocupar com setup.
 | [T022](closed/T022_cache_corpus_em_z.md) | (c) | Cache de corpus em `Z:\caches\corpus\pdf2md\` |
 | [T023](closed/T023_convencao_venv_por_experimento.md) | (c) | Convenção de venv por experimento |
 | [T024](closed/T024_reorganizacao_tickets_em_faixas.md) | (c) | Reorganização tickets em faixas (`kind:`) |
-| [T030](open/T030_revisao_literatura.md) | (o) | Revisão de literatura inicial |
-| [T040](open/T040_corpus_canonico_inicial.md) | (o) | Corpus canônico inicial (8-12 entradas) |
+| [T030](closed/T030_revisao_literatura.md) | (c) | Revisão de literatura inicial — `docs/LITERATURA.md` |
+| [T040](in_progress/T040_corpus_canonico_inicial.md) | (p) | Corpus canônico (7/8-12 entradas; 1 pendente download manual) |
 | [T105](closed/T105_substituir_extracao_antiga_eliminar_v2_anti_padra.md) | (c) | Substituir extração antiga (eliminar `_v2`) |
 | [T430](open/T430_corpus_livre_para_testes_urls_licencas.md) | (o) | Corpus livre — URLs + licenças (substituído por T040 + manifests; manter como histórico ou fechar) |
 
@@ -54,7 +54,7 @@ Cada um destes tem ou terá um experimento correspondente em [`../lab/eNN_/`](..
 
 | Ticket | Status | Título | Experimento sugerido |
 |---|---|---|---|
-| [T050](open/T050_baseline_marker_reproduzivel.md) | (o) | Baseline marker reproduzível | `lab/e00_baseline_marker/` |
+| [T050](in_progress/T050_baseline_marker_reproduzivel.md) | (p) | Baseline marker reproduzível (estrutura criada, falta executar) | `lab/e00_baseline_marker/` |
 | [T106](closed/T106_extra_extraction_study.md) | (c) | Estudo extração com DPI alternativo | (rodado ad-hoc, sem lab/) |
 | [T137](research/T137_denoising_jpeg_pre_compressao.md) | (r) | Denoising JPEG antes da compressão | futuro `lab/eXX_jpeg_denoise/` |
 | [T410](research/T410_testar_ferramentas_alternativas_nougat_mineru_pdftotext.md) | (r) | Testar ferramentas alternativas (Nougat, MinerU, pdftotext) | família `lab/e1X_*` |
@@ -67,7 +67,7 @@ Discussões arquiteturais que orientam outros tickets. Vivem aqui, não em `lab/
 
 | Ticket | Status | Título |
 |---|---|---|
-| [T031](open/T031_definicao_de_metricas.md) | (o) | Definir métricas além de token-similarity |
+| [T031](closed/T031_definicao_de_metricas.md) | (c) | Definir métricas — `docs/METRICS.md` |
 | [T100](research/T100_roadmap_conversor_pdf_md_bidirecional.md) | (r) | Roadmap conversor (meta original) |
 | [T400](research/T400_conversor_projeto_autonomo.md) | (r) | Conversor como projeto autônomo (meta) |
 | [T401](open/T401_documentar_hierarquia_de_prioridades.md) | (o) | Hierarquia de prioridades (PHILOSOPHY.md) |
@@ -78,15 +78,25 @@ Discussões arquiteturais que orientam outros tickets. Vivem aqui, não em `lab/
 
 ## Fase 0 — montar a bancada
 
-T020-T024 são os macro-tickets que executaram a montagem inicial da
-bancada (criação de `lab/`, manifests, protocolo). Todos `closed` em
-2026-05-09.
+Estado em **2026-05-10**:
 
-T030, T040, T050 são os próximos macro-tickets de infra:
-- **T030** — revisão de literatura (gera `docs/LITERATURA.md`)
-- **T031** — métricas (gera `docs/METRICS.md`)
-- **T040** — popular `corpus/_canonical/MANIFEST.md` com 8-12 PDFs
-- **T050** — baseline reproduzível (`lab/e00_baseline_marker`)
+| ID | Ticket | Estado | Saída |
+|---|---|---|---|
+| T020 | Estrutura `lab/` + protocolo | ✓ closed | `lab/`, `docs/LAB_PROTOCOL.md` |
+| T021 | Manifest sources read-only | ✓ closed | `corpus/_sources/MANIFEST.md` |
+| T022 | Cache em `Z:\` | ✓ closed | `Z:\caches\corpus\pdf2md\` |
+| T023 | Convenção de venv por experimento | ✓ closed | docs em LAB_PROTOCOL |
+| T024 | Reorganização tickets em faixas | ✓ closed | `kind:` + `INDEX.md` |
+| T030 | Revisão de literatura | ✓ closed | `docs/LITERATURA.md` |
+| T031 | Definição de métricas | ✓ closed | `docs/METRICS.md` |
+| T040 | Corpus canônico inicial | ⏳ in_progress | 7 entradas no MANIFEST (6 baixadas + 1 pendente). Cobre 4/9 categorias. |
+| T050 | Baseline marker reproduzível | ⏳ in_progress | `lab/e00_baseline_marker/` (estrutura pronta; falta executar — venv + run) |
 
-Esses 4 fecham a Fase 0. Depois disso, abrir família `lab/e1X_*` para
-comparação de ferramentas (T410).
+Para fechar a Fase 0:
+
+- **T040**: alcançar 8-12 entradas (faltam categorias livro_image_heavy, livro_classical_typography, multilingual_pt; baixar manualmente o PMC)
+- **T050**: rodar o experimento (instalar deps no venv `pdf2md_lab_e00`, executar `run.ps1`, preencher `RESULT.md`)
+
+Depois da Fase 0, abrir família `lab/e1X_*` para comparação de
+ferramentas (T410): Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling
+(decisão informada pela literatura — ver [`docs/LITERATURA.md`](../docs/LITERATURA.md) §3).
