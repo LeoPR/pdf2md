@@ -17,21 +17,28 @@ Objetivo: corpus pequeno mas representativo das categorias problemáticas do con
 - 1 multilíngue / pt-BR
 - 1 tipografia clássica
 
-## Cobertura atual (T040 v1.1, 2026-05-10)
+## Cobertura atual (T040 v1.2, 2026-05-10)
 
-**8 entradas, 7 baixadas + 1 pendente.** Atinge a meta inferior (8-12).
-Cobre 5 das 9 categorias-meta. Categorias `livro_image_heavy`,
-`slides_pptx_export` (já coberto via `_sources/`) e `multilingual_pt`
-ficam para v2 do corpus.
+**17 entradas, 12 baixadas + 5 pendentes.** Cobre **9 das 11 categorias** (a
+taxonomia foi expandida em 2026-05-10 com categorias "sujas" — ver
+[`../_sources/MANIFEST.md`](../_sources/MANIFEST.md)).
 
-| categoria | entradas |
-|---|---|
-| paper_math_heavy | 2 |
-| multi_col_dense | 1 |
-| livro_math_heavy | 2 |
-| livro_classical_typography | 1 |
-| scanned_image_only | 1 |
-| paper_bio_med | 1 (pendente — PMC bloqueia scrapers; só download manual via browser) |
+| categoria | entradas | baixadas |
+|---|---|---|
+| paper_math_heavy | 2 | 2 |
+| multi_col_dense | 2 | 1 (CDC; 1 BERT já contava) |
+| livro_math_heavy | 2 | 2 |
+| livro_classical_typography | 1 | 1 |
+| scanned_image_only | 1 | 1 (+ 1 PMC pendente também conta aqui) |
+| scanned_with_bad_ocr | 3 | 1 (Atkins baixado; Merriman + FR-1985 pendentes) |
+| slides_pptx_export | 2 | 1 (MIT OCW baixado; ACM Gambetta pendente) |
+| gov_form | 2 | 2 (IRS f1040 e FR-1936 baixados) |
+| paper_bio_med | 2 | 0 (PMC bloqueia scrapers; ambos pendentes) |
+
+Gaps: `mobile_capture_scan` e `photo_collage_overlay` (sem fonte com
+licença redistribuível clara — documentado em [`../../docs/PDFS_SUJOS_CANDIDATOS.md`](../../docs/PDFS_SUJOS_CANDIDATOS.md)).
+
+Total em `Z:\caches\corpus\pdf2md\`: **12 PDFs, ~119 MB**.
 
 ---
 
@@ -306,4 +313,287 @@ notes: |
 
   Frontiers in Physiology, CC-BY (redistribuível). Categoria bio_med
   representa pipeline em domínio fora da física/CS.
+```
+
+---
+
+## Entradas — categoria "sujos" (2026-05-10)
+
+Documentos que **degradam o pipeline** intencionalmente. Origem da pesquisa em [`../../docs/PDFS_SUJOS_CANDIDATOS.md`](../../docs/PDFS_SUJOS_CANDIDATOS.md).
+
+### ocw_mit_6_0002_lec1 — MIT OCW 6.0002 Lecture 1
+
+```yaml
+id: ocw_mit_6_0002_lec1
+title: 'MIT 6.0002 Introduction to Computational Thinking and Data Science — Lecture 1'
+authors: [John Guttag, Eric Grimson]
+year: 2016
+publisher: MIT OpenCourseWare
+license: cc_by_nc_sa
+category: slides_pptx_export
+pages: 31
+
+origin:
+  type: url
+  url: https://ocw.mit.edu/courses/6-0002-introduction-to-computational-thinking-and-data-science-fall-2016/0a353b26f1c6bd161b28b3f249aa05d1_MIT6_0002F16_lec1.pdf
+
+local_copy:
+  path: Z:\caches\corpus\pdf2md\ocw_mit_6_0002_lec1.pdf
+  sha256: cf9ac01c099a3d3062493c692efbfd75554c16357c240f3b4b4e644537c6a345
+  downloaded_at: 2026-05-10
+
+sha256: cf9ac01c099a3d3062493c692efbfd75554c16357c240f3b4b4e644537c6a345
+size_bytes: 624715
+added_at: 2026-05-10
+
+notes: |
+  PowerPoint exportado como PDF. Esperado: round-trip 40-60% (similar
+  ao caso IBM Quantum lesson 1, mas em CS clássico).
+```
+
+### acm_gambetta_qiskit_2018 — Gambetta QISKit ACM Webinar (pendente)
+
+```yaml
+id: acm_gambetta_qiskit_2018
+title: 'QISKit: A Swiss Army Knife for Quantum Computation (ACM TechTalk)'
+authors: [Jay Gambetta]
+year: 2018
+publisher: ACM Learning Center / IBM
+license: acm_open_webinar  # ambíguo — slides IBM hospedados em ACM
+category: slides_pptx_export
+
+origin:
+  type: url
+  url: https://learning.acm.org/binaries/content/assets/leaning-center/webinar-slides/2018/jaygambetta_webinarslides_compressed-1.pdf
+  alternates:
+    - https://learning.acm.org/techtalks/qiskit
+
+local_copy: null
+
+sha256: null
+size_bytes: null
+added_at: 2026-05-10
+
+notes: |
+  WebFetch deu 403 (rate-limit ACM). Tentar com User-Agent de browser real
+  ou download manual. **Atenção à licença**: slides são IBM hospedados em
+  ACM — tratar como "uso educacional", não redistribuir o PDF binário.
+  Pareamento direto com o caso histórico IBM Quantum lesson 1 (28.9%).
+```
+
+### ia_atkins_pure_mathematics_1874 — Pure Mathematics (Atkins, 1874)
+
+```yaml
+id: ia_atkins_pure_mathematics_1874
+title: 'Pure mathematics, including arithmetic, algebra, geometry, and plane trigonometry'
+authors: [Edward Atkins]
+year: 1874
+publisher: William Collins, Sons, & Company
+license: public_domain
+category: scanned_with_bad_ocr
+
+origin:
+  type: url
+  url: https://archive.org/download/puremathematicsi00atkirich/puremathematicsi00atkirich.pdf
+  alternates:
+    - https://archive.org/details/puremathematicsi00atkirich
+
+local_copy:
+  path: Z:\caches\corpus\pdf2md\ia_atkins_pure_mathematics_1874.pdf
+  sha256: 44f60228ef044c75cab8bba1632ebb308fe555c21e2228fb6431a5700af2e6b2
+  downloaded_at: 2026-05-10
+
+sha256: 44f60228ef044c75cab8bba1632ebb308fe555c21e2228fb6431a5700af2e6b2
+size_bytes: 32280168
+added_at: 2026-05-10
+
+notes: |
+  IA scan com text-layer OCR sob a imagem. Tipografia Victoriana
+  (long-s, ligaturas) confunde Tesseract. Esperado: round-trip < 30%.
+  Categoria diferente de `ia_mathematics00wils` (Wilson 1800 é image-only;
+  Atkins tem text-layer OCR ruim — degradação distinta).
+```
+
+### ia_merriman_higher_mathematics_1898 — Higher Mathematics (Merriman, 1898) (pendente)
+
+```yaml
+id: ia_merriman_higher_mathematics_1898
+title: 'Higher mathematics. A text-book for classical and engineering colleges'
+authors: [Mansfield Merriman]
+year: 1898
+publisher: John Wiley & Sons
+license: public_domain
+category: scanned_with_bad_ocr
+
+origin:
+  type: url
+  url: https://archive.org/download/merrimantextbook00merrrich/merrimantextbook00merrrich.pdf
+  alternates:
+    - https://archive.org/details/merrimantextbook00merrrich
+
+local_copy: null
+
+sha256: null
+size_bytes: null
+added_at: 2026-05-10
+
+notes: |
+  Redundante com Atkins (mesma categoria) — pendente download para v2 do
+  corpus se quisermos comparar drift sistemático entre décadas diferentes
+  de scan-com-OCR. Tamanho esperado: ~35 MB.
+```
+
+### pmc_woese_1965_genetic_code — Woese 1965 PNAS (pendente)
+
+```yaml
+id: pmc_woese_1965_genetic_code
+title: 'On the Evolution of the Genetic Code'
+authors: [Carl R. Woese]
+year: 1965
+publisher: National Academy of Sciences (PNAS)
+license: public_domain  # PNAS pré-1978
+category: scanned_image_only
+
+origin:
+  type: url
+  url: https://pmc.ncbi.nlm.nih.gov/articles/PMC300511/
+  alternates:
+    - https://pmc.ncbi.nlm.nih.gov/articles/instance/300511/pdf/pnas00187-0078.pdf
+
+local_copy: null
+
+sha256: null
+size_bytes: null
+added_at: 2026-05-10
+
+notes: |
+  PMC bloqueia download automatizado (mesmo problema do pmc_10811782).
+  Download manual via browser. Substitui parcialmente o gap bio_med +
+  scanned_image_only ao mesmo tempo. Layout 2-coluna de revista
+  científica mid-20th-c, "hot metal" typography.
+```
+
+### govinfo_fr_1985_08_30 — Federal Register 1985-08-30 (pendente)
+
+```yaml
+id: govinfo_fr_1985_08_30
+title: 'Federal Register, Vol. 50, No. 169 (August 30, 1985)'
+authors:
+  source: U.S. Government Publishing Office
+year: 1985
+license: public_domain  # US Government Work, 17 USC § 105
+category: scanned_with_bad_ocr
+
+origin:
+  type: url
+  url: https://www.govinfo.gov/content/pkg/FR-1985-08-30/pdf/FR-1985-08-30.pdf
+  alternates:
+    - https://www.govinfo.gov/app/details/FR-1985-08-30
+
+local_copy: null
+
+sha256: null
+size_bytes: null
+added_at: 2026-05-10
+
+notes: |
+  Federal Register pré-1994 — scan retroativo da GPO, OCR posterior, 3
+  colunas densas, regulamentos. Pendente porque > 10 MB; baixar via curl
+  separado se precisar comparar com FR-1936 (born-digital).
+```
+
+### govinfo_fr_1936_07_09 — Federal Register 1936 Vol. I
+
+```yaml
+id: govinfo_fr_1936_07_09
+title: 'Federal Register, Vol. 1, No. 84 (July 9, 1936)'
+authors:
+  source: U.S. Government Publishing Office
+year: 1936
+license: public_domain  # US Government Work, 17 USC § 105
+category: gov_form
+pages: 10
+
+origin:
+  type: url
+  url: https://www.govinfo.gov/content/pkg/FR-1936-07-09/pdf/FR-1936-07-09.pdf
+
+local_copy:
+  path: Z:\caches\corpus\pdf2md\govinfo_fr_1936_07_09.pdf
+  sha256: 71feac562d5565e813b1bffb3a8ef3418e666f46d1b0a79915de36f33306a9e7
+  downloaded_at: 2026-05-10
+
+sha256: 71feac562d5565e813b1bffb3a8ef3418e666f46d1b0a79915de36f33306a9e7
+size_bytes: 1896025
+added_at: 2026-05-10
+
+notes: |
+  Born-digital recente (digitalização da GPO produziu PDF nativo); fontes
+  BookmanOldStyle embeded. Contraste com FR-1985-08-30 (scan puro com OCR).
+  Tipografia anos 30 + densidade de citações cruzadas.
+```
+
+### cdc_mmwr_73_35_a1 — CDC MMWR (2024) — caso "limpo mas multi-col"
+
+```yaml
+id: cdc_mmwr_73_35_a1
+title: 'E-Cigarette and Nicotine Pouch Use Among Middle and High School Students — United States, 2024'
+authors:
+  source: Centers for Disease Control and Prevention (CDC), MMWR
+year: 2024
+license: public_domain
+category: multi_col_dense
+
+origin:
+  type: url
+  url: https://www.cdc.gov/mmwr/volumes/73/wr/pdfs/mm7335a1-H.pdf
+  alternates:
+    - https://www.cdc.gov/mmwr/volumes/73/wr/mm7335a1.htm
+
+local_copy:
+  path: Z:\caches\corpus\pdf2md\cdc_mmwr_73_35_a1.pdf
+  sha256: 95570c7dc7f6cf11f1789de207e67dc7bb559d6392db312a4d80430827b25c03
+  downloaded_at: 2026-05-10
+
+sha256: 95570c7dc7f6cf11f1789de207e67dc7bb559d6392db312a4d80430827b25c03
+size_bytes: 270005
+added_at: 2026-05-10
+
+notes: |
+  Caso "limpo mas multi-col" — valida que o pipeline não quebra em PDFs
+  governamentais bem-feitos. Diferencia degradação por tipografia (Atkins,
+  Wilson) vs por layout (este). Esperado: round-trip 70-85%.
+```
+
+### irs_f1040_2025 — IRS Form 1040 (2025)
+
+```yaml
+id: irs_f1040_2025
+title: 'IRS Form 1040 — U.S. Individual Income Tax Return (2025)'
+authors:
+  source: Internal Revenue Service
+year: 2025
+license: public_domain  # US Government Work
+category: gov_form
+
+origin:
+  type: url
+  url: https://www.irs.gov/pub/irs-pdf/f1040.pdf
+  alternates:
+    - https://www.irs.gov/forms-pubs/about-form-1040
+
+local_copy:
+  path: Z:\caches\corpus\pdf2md\irs_f1040_2025.pdf
+  sha256: 3d31c226df0d189ced80e039d01cf0f8820c1019681a0f0ca6264de277b7e982
+  downloaded_at: 2026-05-10
+
+sha256: 3d31c226df0d189ced80e039d01cf0f8820c1019681a0f0ca6264de277b7e982
+size_bytes: 220237
+added_at: 2026-05-10
+
+notes: |
+  AcroForm (form-fields PDF) + checkboxes + camadas sobrepostas. Conteúdo
+  fragmentado em pequenas caixas. Esperado: round-trip < 50% — pipeline
+  PDF→MD raramente lida bem com form-fields. IRS atualiza URL por ano
+  fiscal; sha256 pode mudar quando 2026 for publicado.
 ```

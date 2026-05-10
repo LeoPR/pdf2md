@@ -19,10 +19,17 @@ Campos:
 - `pages` (int): número de páginas.
 - `license` (str): `proprietary` | `cc_by` | `cc_by_sa` | `cc_by_nc` | `public_domain` | `arxiv non-exclusive` | `read-only-online` | outro.
 - `category` (str): taxonomia controlada (ver `docs/METRICS.md` quando criado). Atual:
-    - `livro_math_heavy`, `livro_image_heavy`, `livro_classical_typography`
-    - `paper_math_heavy`, `paper_bio_med`
-    - `slides_pptx_export`, `scanned_image_only`
-    - `multi_col_dense`, `multilingual_pt`
+    - **Livros / livros-texto**: `livro_math_heavy`, `livro_image_heavy`, `livro_classical_typography`
+    - **Papers acadêmicos**: `paper_math_heavy`, `paper_bio_med`
+    - **Documentos "sujos"** (degradam o pipeline):
+        - `slides_pptx_export` (caixas de texto sobrepostas, fórmulas-como-imagem)
+        - `scanned_image_only` (sem text-layer, OCR puro)
+        - `scanned_with_bad_ocr` (text-layer corrompido sob imagem; conflita com re-OCR)
+        - `gov_form` (form-fields PDF, AcroForm, tipografia antiga)
+        - `mobile_capture_scan` (CamScanner-style; baixo contraste; ainda sem amostra livre)
+        - `photo_collage_overlay` (texto sobreposto a fotos; ainda sem amostra livre)
+    - **Layout / formato**: `multi_col_dense` (papers IEEE-style, government 2-3 col)
+    - **Linguagem**: `multilingual_pt`
 - `origin` (obj):
     - `type`: `local` (path em outro projeto) ou `url` (download externo).
     - `path` (se local): path absoluto, read-only.
