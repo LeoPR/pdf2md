@@ -8,6 +8,7 @@ fase: 4
 depende_de: []
 blocks: []
 tags: [conversor, imagens, otimizacao, fase4, research]
+kind: imagens
 ---
 
 ## Contexto

@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T400]
 blocks: []
 tags: [research, fallback, low-resource]
+kind: experimento
 ---
 
 ## Contexto

@@ -43,6 +43,7 @@ fase: 1
 depende_de: []
 blocks: [T013, T014]
 tags: [conversor, marker, gpu]
+kind: pipeline
 ---
 
 ## Contexto
@@ -84,13 +85,34 @@ Mensagens curtas com a métrica/decisão chave no fim.
 
 | Faixa | Tema |
 |---|---|
+| T020-T099 | Infra do projeto pdf2md (bancada, manifests, lab protocol, corpus, baseline) |
 | T100-T199 | Pipeline de extração (marker, restructure, round-trip, stats) |
 | T130-T139 | Otimização adaptativa de imagens (família T130) |
 | T400-T499 | Projeto autônomo (testes alternativos, corpus livre, fallback low-resource, design philosophy) |
 | T900+ | Reservados para emergências/hotfix sem categorização |
 
-T001-T099 (infra), T200-T299 (disciplina) e T300-T399 (pesquisa
-complementar) **não se aplicam aqui** — pertencem ao AulaQuantum.
+T001-T019 (infra do AulaQuantum), T200-T299 (disciplina) e T300-T399
+(pesquisa complementar) **não se aplicam aqui** — pertencem ao AulaQuantum.
+
+## Faixa `kind:` (separação infra ↔ ciência)
+
+Toda hipótese deve poder ser testada sem ter que se preocupar em montar
+a bancada. Por isso o frontmatter de cada ticket tem `kind:` que classifica
+o ticket numa de 5 faixas:
+
+| `kind` | O que cabe | Exemplos |
+|---|---|---|
+| `infra` | Setup, manifests, lab protocol, venv, gitignore, scripts utilitários, corpus | T020, T040, T050 |
+| `pipeline` | Pipeline atual (marker, restructure, round-trip, stats) — código estável | T101-T106, T107, T108 |
+| `imagens` | Decisões arquiteturais sobre imagens (T130 family) | T130, T131 |
+| `experimento` | Hipóteses testáveis com critério mensurável; rodam em [`../lab/`](../lab/) | T410, T420, T450 |
+| `decisao` | Discussões arquiteturais, categorias, princípios de design | T400, T401, T440, T451 |
+
+O índice agrupado por `kind:` fica em [`INDEX.md`](INDEX.md).
+
+Hipóteses concretas (= `kind: experimento`) idealmente vivem em
+[`../lab/eNN_<slug>/`](../lab/), com o ticket apenas referenciando o
+experimento. Tickets de `decisao` ficam aqui — não vão pro lab.
 
 ## Rotação para `_archive`
 

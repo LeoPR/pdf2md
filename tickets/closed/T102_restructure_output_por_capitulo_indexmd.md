@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T101]
 blocks: [T103, T105]
 tags: [conversor, restructure]
+kind: pipeline
 ---
 
 ## Contexto

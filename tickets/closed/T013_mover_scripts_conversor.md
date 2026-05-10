@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T011]
 blocks: [T014]
 tags: [infra, refactor, ferramentas]
+kind: infra
 ---
 
 ## Contexto

@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T400]
 blocks: []
 tags: [corpus, free, test-data, licenses]
+kind: infra
 ---
 
 ## Contexto

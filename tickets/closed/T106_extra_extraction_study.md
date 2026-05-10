@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T101]
 blocks: []
 tags: [conversor, marker, qualidade, estudo]
+kind: experimento
 ---
 
 ## Contexto

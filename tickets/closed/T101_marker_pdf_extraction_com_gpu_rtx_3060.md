@@ -8,6 +8,7 @@ fase: 1
 depende_de: []
 blocks: [T102]
 tags: [conversor, marker, gpu]
+kind: pipeline
 ---
 
 ## Contexto

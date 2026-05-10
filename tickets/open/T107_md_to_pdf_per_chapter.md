@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T102]
 blocks: []
 tags: [conversor, pdf, gerar]
+kind: pipeline
 ---
 
 ## Contexto

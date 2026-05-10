@@ -8,6 +8,7 @@ fase: 4
 depende_de: [T130]
 blocks: []
 tags: [conversor, imagens, otimizacao, fase4, n_c]
+kind: imagens
 ---
 
 ## Contexto

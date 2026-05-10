@@ -7,6 +7,7 @@ fase: 1
 depende_de: [T001, T102]
 blocks: []
 tags: [conversor, git, padronizacao]
+kind: infra
 ---
 
 ## Contexto

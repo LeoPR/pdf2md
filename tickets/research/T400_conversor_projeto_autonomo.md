@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T100]
 blocks: []
 tags: [conversor, projeto-autonomo, meta]
+kind: decisao
 ---
 
 ## Contexto

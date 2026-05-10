@@ -7,6 +7,7 @@ fase: 1
 depende_de: []
 blocks: [T101, T102, T103, T104]
 tags: [conversor, roadmap, meta]
+kind: decisao
 ---
 
 ## Contexto

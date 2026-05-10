@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T103]
 blocks: []
 tags: [conversor, roundtrip, baseline]
+kind: pipeline
 ---
 
 ## Contexto

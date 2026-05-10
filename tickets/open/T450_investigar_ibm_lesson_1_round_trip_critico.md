@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T100]
 blocks: []
 tags: [conversor, debug, round-trip, slides, pptx]
+kind: experimento
 ---
 
 ## Contexto

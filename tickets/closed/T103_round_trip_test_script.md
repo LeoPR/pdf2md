@@ -8,6 +8,7 @@ fase: 1
 depende_de: []
 blocks: [T104]
 tags: [conversor, roundtrip, validacao]
+kind: pipeline
 ---
 
 ## Contexto

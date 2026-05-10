@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T400, T450]
 blocks: []
 tags: [conversor, slides, pptx, fonte-mista, research]
+kind: decisao
 ---
 
 ## Contexto

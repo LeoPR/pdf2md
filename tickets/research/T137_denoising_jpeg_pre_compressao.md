@@ -8,6 +8,7 @@ fase: 4
 depende_de: [T130, T131]
 blocks: []
 tags: [conversor, imagens, otimizacao, denoising, fase4, research]
+kind: experimento
 ---
 
 ## Contexto

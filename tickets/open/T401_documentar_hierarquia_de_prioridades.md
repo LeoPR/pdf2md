@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T400]
 blocks: []
 tags: [design, philosophy, hierarquia]
+kind: decisao
 ---
 
 ## Contexto

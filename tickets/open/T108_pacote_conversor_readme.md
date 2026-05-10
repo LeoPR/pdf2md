@@ -8,6 +8,7 @@ fase: 1
 depende_de: [T101, T102, T103, T107]
 blocks: []
 tags: [conversor, packaging, doc]
+kind: pipeline
 ---
 
 ## Contexto
