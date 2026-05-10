@@ -1,9 +1,9 @@
 ---
 id: T030
 titulo: Revisão de literatura inicial
-status: open
+status: closed
 criado_em: 2026-05-09
-fechado_em:
+fechado_em: 2026-05-10
 fase: 0
 depende_de: []
 blocks: [T031]

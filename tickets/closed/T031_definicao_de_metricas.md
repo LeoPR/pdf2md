@@ -1,9 +1,9 @@
 ---
 id: T031
 titulo: Definição de métricas além de token-similarity
-status: open
+status: closed
 criado_em: 2026-05-09
-fechado_em:
+fechado_em: 2026-05-10
 fase: 0
 depende_de: [T030]
 blocks: [T050]

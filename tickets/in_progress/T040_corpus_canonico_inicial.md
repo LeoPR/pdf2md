@@ -1,7 +1,7 @@
 ---
 id: T040
 titulo: Popular corpus canônico inicial (8-12 PDFs)
-status: open
+status: in_progress
 criado_em: 2026-05-09
 fechado_em:
 fase: 0

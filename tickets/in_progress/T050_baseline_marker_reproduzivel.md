@@ -1,7 +1,7 @@
 ---
 id: T050
 titulo: Baseline marker reproduzível (lab/e00_baseline_marker)
-status: open
+status: in_progress
 criado_em: 2026-05-09
 fechado_em:
 fase: 0
