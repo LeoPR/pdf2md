@@ -17,17 +17,21 @@ Objetivo: corpus pequeno mas representativo das categorias problemáticas do con
 - 1 multilíngue / pt-BR
 - 1 tipografia clássica
 
-## Cobertura atual (T040 v1, 2026-05-10)
+## Cobertura atual (T040 v1.1, 2026-05-10)
 
-7 entradas (6 baixadas + 1 pendente). Cobre 4 das 9 categorias-meta. Categorias `livro_image_heavy`, `livro_classical_typography`, `slides_pptx_export` (já coberto via `_sources/`), `multilingual_pt` ficam para v2 do corpus.
+**8 entradas, 7 baixadas + 1 pendente.** Atinge a meta inferior (8-12).
+Cobre 5 das 9 categorias-meta. Categorias `livro_image_heavy`,
+`slides_pptx_export` (já coberto via `_sources/`) e `multilingual_pt`
+ficam para v2 do corpus.
 
 | categoria | entradas |
 |---|---|
 | paper_math_heavy | 2 |
 | multi_col_dense | 1 |
 | livro_math_heavy | 2 |
+| livro_classical_typography | 1 |
 | scanned_image_only | 1 |
-| paper_bio_med | 1 (pendente download manual — publishers bloqueiam scrapers) |
+| paper_bio_med | 1 (pendente — PMC bloqueia scrapers; só download manual via browser) |
 
 ---
 
@@ -192,6 +196,42 @@ notes: |
   diferente, tradição tipográfica diferente. Excelente para validar se
   a métrica de extração captura conteúdo independente de estilo. Versão
   de Julho/2015 — mais recente que ph229_ch1.
+```
+
+### ia_newton_principia — The Mathematical Principles of Natural Philosophy (Newton, 1729 translation)
+
+```yaml
+id: ia_newton_principia
+title: The Mathematical Principles of Natural Philosophy
+authors: [Isaac Newton]
+year: 1729  # tradução inglesa do Principia (1687 original)
+license: public_domain
+category: livro_classical_typography
+pages: 594
+
+origin:
+  type: url
+  url: https://archive.org/download/newtonspmathema00newtrich/newtonspmathema00newtrich.pdf
+  alternates:
+    - https://archive.org/details/newtonspmathema00newtrich
+
+local_copy:
+  path: Z:\caches\corpus\pdf2md\ia_newton_principia.pdf
+  sha256: 07ff23e18f431ec812a6c954ce57c3ec1e92dbc2ea01e16f228eb22ba97de370
+  downloaded_at: 2026-05-10
+
+sha256: 07ff23e18f431ec812a6c954ce57c3ec1e92dbc2ea01e16f228eb22ba97de370
+size_bytes: 60451456
+added_at: 2026-05-10
+
+notes: |
+  Escaneado pelo Internet Archive — também é raster (sobreposição com
+  scanned_image_only). Diferença vs `ia_mathematics00wils`: este tem
+  matemática clássica (geometria + cálculo nas raízes) com tipografia
+  do século XVIII. Categoria primária `livro_classical_typography`
+  porque o foco é tipografia/notação histórica, e a categoria
+  scanned_image_only já está coberta por mathematics00wils.
+  60 MB — maior PDF do corpus canônico.
 ```
 
 ### ia_mathematics00wils — Mathematics (Wilson, c. 1799-1800)
