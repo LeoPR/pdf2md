@@ -54,20 +54,33 @@ def extract_tokens(text: str) -> list:
 
 
 def md_to_pdf(md_path: Path, pdf_path: Path):
-    """Gera PDF a partir do MD via pandoc + chrome."""
+    """Gera PDF a partir do MD via pandoc + chrome.
+
+    Passa --resource-path para o pandoc resolver imagens relativas ao MD,
+    e valida que o Chrome efetivamente gerou o PDF (Chrome às vezes
+    retorna exit 0 sem criar o arquivo).
+    """
     html_path = pdf_path.with_suffix(".html")
+    chapter_dir = md_path.parent
     subprocess.run([
         PANDOC, str(md_path),
         "-o", str(html_path),
         "--standalone", "--embed-resources",
         "--katex",
+        "--resource-path", str(chapter_dir),
     ], check=True)
     subprocess.run([
         CHROME, "--headless", "--disable-gpu", "--no-pdf-header-footer",
-        f"--print-to-pdf={pdf_path}",
-        "--virtual-time-budget=20000",
+        f"--print-to-pdf={pdf_path.absolute()}",
+        "--virtual-time-budget=30000",
         f"file:///{html_path.absolute().as_posix().replace(' ', '%20')}",
     ], check=True)
+    if not pdf_path.exists() or pdf_path.stat().st_size == 0:
+        raise RuntimeError(
+            f"Chrome não criou PDF em {pdf_path} (exit code foi 0 mas "
+            f"arquivo {'inexistente' if not pdf_path.exists() else 'vazio'}). "
+            f"HTML preservado em {html_path} para inspeção."
+        )
 
 
 def pdf_to_md(pdf_path: Path, output_dir: Path) -> Path:

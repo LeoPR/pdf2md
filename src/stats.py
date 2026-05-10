@@ -270,14 +270,28 @@ def normalize_md(text: str) -> str:
     return text.strip()
 
 
+_LATEX_CMD_RE = re.compile(r"\\[a-zA-Z]+")
+_HEADING_RE = re.compile(r"(?:^|\n)#+ ")
+_URL_RE = re.compile(r"https?://|ftp://")
+
+
 def categorize_divergence(a_str: str, b_str: str) -> str:
-    """Classifica um delta entre tokens."""
+    """Classifica um delta entre tokens.
+
+    Math é detectado de forma estrita: tem `$` (dollar) OU comando LaTeX
+    `\\<letras>` real (não escapes como `\\*` ou `\\_`). URLs e footnote
+    markers (`<sup>\\*</sup>https://...`) não são mais classificados como
+    math (regressão observada no e02 em CDC MMWR — 65% "math" com 0 fórmulas).
+    """
     s = a_str + " " + b_str
     if not s.strip():
         return "whitespace"
-    if any(c in s for c in ("$", "\\")):
+    # URLs primeiro: links de footnote estavam virando "math" via backslash em <sup>\*</sup>
+    if _URL_RE.search(s):
+        return "other"
+    if "$" in s or _LATEX_CMD_RE.search(s):
         return "math"
-    if "#" in s:
+    if _HEADING_RE.search(s):
         return "heading"
     if "**" in s or "_" in s:
         return "emphasis"
