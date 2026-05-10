@@ -47,7 +47,7 @@ year: 2021
 arxiv_id: 2106.05919v2
 license: arxiv non-exclusive
 category: paper_math_heavy
-pages: 30
+pages: 98  # corrigido em 2026-05-10 após e01 — havia estimado 30 inicialmente
 
 origin:
   type: url

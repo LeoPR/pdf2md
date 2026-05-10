@@ -50,7 +50,7 @@ Decisões arquiteturais sobre tratamento de imagens extraídas.
 | [T130](research/T130_image_optimization.md) | (r) | Otimização de imagens (meta) |
 | [T131](closed/T131_classificador_e_compressao_imagens_nc.md) | (c) | Classificador + compressão níveis 1-2 (−38.6% no N&C) |
 | [T135](research/T135_ssim_gate_qualidade.md) | (r) | Gate SSIM antes/depois — Frente D |
-| [T136](open/T136_breakdown_formato_stats.md) | (o) | Breakdown por formato em `_stats.md` — Frente D |
+| [T136](closed/T136_breakdown_formato_stats.md) | (c) | Breakdown por formato em `_stats.md` (validado em e01) — Frente D |
 
 ## `experimento` — Hipóteses testáveis
 
@@ -59,6 +59,7 @@ Cada um destes tem ou terá um experimento correspondente em [`../lab/eNN_/`](..
 | Ticket | Status | Título | Experimento sugerido | Frente |
 |---|---|---|---|---|
 | [T050](closed/T050_baseline_marker_reproduzivel.md) | (c) | Baseline marker reproduzível — round-trip 95.09% (bate histórico) | `lab/e00_baseline_marker/` (.frozen) | A |
+| (sem ticket) | — | **Baseline em 3 categorias do corpus canônico** — round-trip 91.34%-98.58% | `lab/e01_baseline_corpus_categorias/` (.frozen) | A |
 | [T106](closed/T106_extra_extraction_study.md) | (c) | Estudo extração com DPI alternativo | (rodado ad-hoc, sem lab/) | C |
 | [T132](research/T132_potrace_svg_line_art.md) | (r) | potrace para line art → SVG | futuro `lab/eXX_potrace/` | C+D |
 | [T133](research/T133_detector_de_formula.md) | (r) | Detector de fórmula heurístico | futuro `lab/eXX_formula_detect/` | C |
