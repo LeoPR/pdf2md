@@ -23,6 +23,7 @@ amadureceu além do escopo daquela disciplina. Mora em
 | Detecção fórmula → LaTeX (pix2tex) | Roadmap (T133/T134) |
 | Pacote `pip install pdf2md` | Roadmap (T108) |
 
+Arquitetura completa: ver [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 Filosofia de design: ver [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md).
 Como a bancada experimental funciona: ver [`docs/LAB_PROTOCOL.md`](docs/LAB_PROTOCOL.md).
 
@@ -49,7 +50,11 @@ pdf2md/
 │   ├── INDEX.md       (agrupado por kind: infra/pipeline/imagens/experimento/decisao)
 │   └── README.md      (formato e convenções)
 ├── docs/
-│   ├── PHILOSOPHY.md          (hierarquia de prioridades)
+│   ├── ARQUITETURA.md         (overview das 4 camadas + diagramas)
+│   ├── arquitetura/           (detalhes por camada — extração, otimização, reconstrução, métricas, pipeline)
+│   ├── PHILOSOPHY.md          (hierarquia de prioridades + eixo de representação)
+│   ├── METRICS.md             (painel de métricas adotado)
+│   ├── LITERATURA.md          (revisão de papers e benchmarks)
 │   ├── LAB_PROTOCOL.md        (regras de bancada — ciclo, promoção, descarte)
 │   └── CLAUDE_MEMORY.md       (memórias herdadas do AulaQuantum)
 └── corpus/

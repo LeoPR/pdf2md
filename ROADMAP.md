@@ -9,6 +9,40 @@ Cada item aponta para tickets concretos em [`tickets/`](tickets/) e ao [`INDEX.m
 
 ---
 
+## Arquitetura em 4 camadas
+
+```
+   ┌──────── ROUND-TRIP (validador permanente) ────────┐
+   ▼                                                   │
+ PDF ──▶ [Cam 1: extração]   ──▶ MD ──┐                │
+        marker / Nougat / MinerU      │                │
+        / olmOCR / Docling             │ [Cam 2: otim.]│
+                                       │  PNG paleta   │
+                                       │  SVG, LaTeX   │
+                                       ▼               │
+ PDF' ◀── [Cam 3: reconstrução] ◀── MD' ───────────────┤
+        pandoc + Chrome + KaTeX                        │
+        (alt: Tectonic, Typst, WeasyPrint)             │
+                                                       ▼
+                                  [Cam 4: métrica] → sim%, divergências
+                                  SequenceMatcher + 8 categorias
+                                  (futuro: WER, TEDS, CDM, count-diff)
+```
+
+**Detalhamento completo**: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md). Por camada:
+
+| Camada | Documento | Estado atual |
+|---|---|---|
+| 1 — Extração | [`docs/arquitetura/01_extracao.md`](docs/arquitetura/01_extracao.md) | marker-pdf 1.10.2 (GPU) |
+| 2 — Otimização | [`docs/arquitetura/02_otimizacao.md`](docs/arquitetura/02_otimizacao.md) | PNG paleta lossy (T131) |
+| 3 — Reconstrução | [`docs/arquitetura/03_reconstrucao.md`](docs/arquitetura/03_reconstrucao.md) | pandoc + Chrome + KaTeX |
+| 4 — Métrica | [`docs/arquitetura/04_metricas.md`](docs/arquitetura/04_metricas.md) | round-trip 95.09% N&C, 91-99% corpus |
+| Pipeline | [`docs/arquitetura/05_pipeline.md`](docs/arquitetura/05_pipeline.md) | scripts standalone em `src/` |
+
+Eixo ortogonal de **representação** (raster → texto semântico) em [`docs/PHILOSOPHY.md §"Eixo de representação"`](docs/PHILOSOPHY.md).
+
+---
+
 ## Frentes de cobertura
 
 Cinco frentes representam o escopo total do conversor. Cada frente tem ROI
