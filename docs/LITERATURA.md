@@ -1,6 +1,13 @@
-# Literatura — conversão PDF → texto/MD
+# Literatura — conversão PDF → texto/MD (v1)
 
 *Compilado em 2026-05-10 para informar T031 (definição de métricas) e T040/T050 (corpus e baseline).*
+
+> **Atualização**: ver também [`LITERATURA_v2.md`](LITERATURA_v2.md) (2026-05-10+) com:
+> - Cobertura do padrão de alucinação detectado em `lab/e03_atkins_wilson_scan/` (validado por T071) — **parece ser contribuição original**
+> - Atualizações de ferramentas (MinerU2.5-Pro abr/2026 95.69 OmniDocBench v1.6; Granite-Docling-258M set/2025; olmOCR-2 out/2025; DeepSeek-OCR, dots.ocr, PaddleOCR-VL, GLM-OCR — todos novos)
+> - **CDM rebaixada** — LLM-as-judge (r=0.78) correlaciona ~2× melhor que CDM (r=0.34) em fórmulas ([Horn & Keuper dez/25, arXiv 2512.09874](https://arxiv.org/abs/2512.09874))
+> - AcroForm via pypdf `get_fields()` — workaround para caso IRS f1040 (round-trip 46%)
+> - Backlog Q11–Q17 (próximos experimentos sugeridos)
 
 Este documento situa o `pdf2md` (marker-pdf + pandoc + Chrome/KaTeX, round-trip 95.1% no Nielsen & Chuang cap. 4) frente ao estado-da-arte de 2024–2026. Foca em conversão de livros e papers acadêmicos com matemática densa — o caso de uso de pesquisa em computação quântica.
 

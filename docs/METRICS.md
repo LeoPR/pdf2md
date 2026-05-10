@@ -30,7 +30,14 @@ Aplicado a toda extração via `stats.py` e a todo experimento `lab/eNN_*`. Thre
 - **Origem**: variante da WER clássica de OCR/ASR; uso para MD seguindo [arXiv 2404.18664](https://arxiv.org/html/2404.18664v1) (mascaramento de markup)
 - **Limitação aceita**: sensível a reading order. Reportar **WER-bag** (bag-of-words variant) em paralelo para isolar erro de ordem.
 
-### M2. CDM (Character Detection Matching) para fórmulas
+### M2. ~~CDM~~ → **LLM-as-judge** para fórmulas
+
+> **Atualização 2026-05-10 (via [LITERATURA_v2.md §5.2](LITERATURA_v2.md))**: CDM foi **rebaixada** a métrica secundária após Horn & Keuper ([arXiv 2512.09874](https://arxiv.org/abs/2512.09874), dez/2025) mostrarem que **LLM-as-judge correlaciona 2× melhor com julgamento humano** (Pearson r=0.78 vs CDM r=0.34) em fórmulas. CDM tem falsos positivos em erros estruturais e falsos negativos em símbolos Unicode (`\alpha` vs `α`).
+>
+> **Recomendação atualizada**: M2 primária = LLM-as-judge (Gemini-2.0-flash ou GPT-4o); CDM mantém-se como secondary check (continua útil para *count* de fórmulas idênticas, falha em ranking fino).
+> Backlog Q13 (em LITERATURA_v2 §6.3) propõe validação concreta no nosso corpus.
+
+#### CDM (Character Detection Matching) — agora secondary
 
 Renderiza fórmula predita e GT em imagem, faz matching visual de caracteres com bounding boxes, calcula F1.
 
@@ -38,7 +45,7 @@ Renderiza fórmula predita e GT em imagem, faz matching visual de caracteres com
 - **Threshold**: ok F1 ≥ 0.95; atenção 0.85–0.95; falha < 0.85
 - **Origem**: Wang et al., CVPR 2025 ([arXiv 2409.03643](https://arxiv.org/abs/2409.03643)); 96% de concordância humana vs ~64% de BLEU
 - **Implementação**: usar [`UniMERNet/cdm`](https://github.com/opendatalab/UniMERNet/tree/main/cdm). Roda offline.
-- **Quando aplica**: experimentos que comparam ferramentas de extração de fórmula (T410, futuras famílias `lab/e1X_*`)
+- **Quando aplica**: como secondary check em experimentos que comparam ferramentas de extração de fórmula (T410, futuras famílias `lab/e1X_*`)
 
 ### M3. TEDS para tabelas
 
