@@ -216,8 +216,26 @@ def folder_metrics(folder: Path) -> dict:
     chs = out["chapters"]
     if chs:
         agg_latex = Counter()
+        agg_format = Counter()
+        agg_format_bytes: dict[str, int] = {}
         for c in chs.values():
             agg_latex.update(c["math"].get("latex_cmd_top10", {}))
+            for fmt, n in c["images"].get("by_format", {}).items():
+                agg_format[fmt] += n
+            # Bytes por formato exigem walking the files de novo? Não — agregamos por count*avg seria errado.
+            # Recoletamos do filesystem para precisão (T136).
+        # T136: breakdown bytes por formato lendo o filesystem novamente
+        for c_id, c in chs.items():
+            ch_folder = Path(c["images"].get("_folder", "")) if isinstance(c["images"].get("_folder"), str) else None
+            # Fallback: derivar do path do MD
+            md_path = Path(c["path"])
+            for candidate_dir in [md_path.parent, md_path.parent / "images"]:
+                if not candidate_dir.is_dir():
+                    continue
+                for f in candidate_dir.iterdir():
+                    suf = f.suffix.lower().lstrip(".")
+                    if suf in ("jpeg", "jpg", "png", "svg") and f.is_file():
+                        agg_format_bytes[suf] = agg_format_bytes.get(suf, 0) + f.stat().st_size
         out["totals"] = {
             "chapter_count": len(chs),
             "lines": sum(c["lines"] for c in chs.values()),
@@ -231,6 +249,8 @@ def folder_metrics(folder: Path) -> dict:
             "ligature_artifacts": sum(c["ligature_artifacts"] for c in chs.values()),
             "images_count": sum(c["images"]["count"] for c in chs.values()),
             "images_total_bytes": sum(c["images"]["total_bytes"] for c in chs.values()),
+            "images_by_format": dict(agg_format),           # T136: count por formato (agregado)
+            "images_bytes_by_format": agg_format_bytes,     # T136: bytes por formato (agregado)
             "code_blocks": sum(c["code_blocks"] for c in chs.values()),
             "tables_rough": sum(c["tables_rough"] for c in chs.values()),
             "latex_cmd_top20_aggregated": dict(agg_latex.most_common(20)),
@@ -445,20 +465,39 @@ def render_md(stats: dict) -> str:
     img_total_bytes = tot.get("images_total_bytes", 0)
     img_count = tot.get("images_count", 0)
     if img_count:
-        # Agregar formatos por capítulo
-        formats = Counter()
-        for c in out["chapters"].values():
-            formats.update(c.get("images", {}).get("by_format", {}))
         lines += [
             "## Imagens",
             "",
             f"- Total: **{img_count}** imagens, **{fmt_bytes(img_total_bytes)}**",
             f"- Tamanho médio: {fmt_bytes(img_total_bytes // max(img_count, 1))}",
-            "- Formatos:",
+            "",
         ]
-        for fmt, count in formats.most_common():
-            lines.append(f"  - `{fmt}`: {count}")
-        lines.append("")
+
+        # T136: breakdown por formato (count, bytes, % bytes)
+        formats_count = tot.get("images_by_format", {})
+        formats_bytes = tot.get("images_bytes_by_format", {})
+        if not formats_count:
+            # Fallback (caso totals não tenha sido populado): re-agregar dos chapters
+            formats_count = Counter()
+            for c in out["chapters"].values():
+                formats_count.update(c.get("images", {}).get("by_format", {}))
+            formats_count = dict(formats_count)
+
+        if formats_count:
+            lines += [
+                "### Breakdown por formato",
+                "",
+                "| Formato | Count | Bytes | % bytes |",
+                "|---|---:|---:|---:|",
+            ]
+            sorted_formats = sorted(formats_count.items(), key=lambda x: -x[1])
+            for fmt, count in sorted_formats:
+                fmt_b = formats_bytes.get(fmt, 0)
+                pct = (fmt_b / img_total_bytes * 100) if img_total_bytes else 0
+                bytes_str = fmt_bytes(fmt_b) if fmt_b else "—"
+                pct_str = f"{pct:.1f}%" if fmt_b else "—"
+                lines.append(f"| `{fmt}` | {count:,} | {bytes_str} | {pct_str} |")
+            lines.append("")
 
     # ============== Por seção ==============
     chs = out.get("chapters", {})
