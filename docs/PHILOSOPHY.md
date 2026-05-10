@@ -80,6 +80,49 @@ ignorada — o que importa é o conteúdo + estrutura + busca.
 - **"Manter quebras de página"** vs **"Texto fluido para leitura"**: priorizar fluido (1ª).
 - **"Formato canônico estável"** vs **"Inovações ML constantes"**: estabilidade (1ª, 2ª).
 
+## Eixo de representação
+
+Em paralelo à hierarquia de objetivos acima, cada elemento extraído pode ser
+representado em diferentes níveis de semântica. Do menos para o mais semântico:
+
+| Nível | Representação | Compactação | Editabilidade | Buscabilidade |
+|---|---|---|---|---|
+| 1 | Bitmap arbitrário (JPEG, PNG raster) | baixa-média | nula | nula |
+| 2 | Bitmap otimizado (PNG paleta lossless, 1-bit) | média | nula | nula |
+| 3 | Vetor (SVG path) | alta para line art | parcial | nula |
+| 4 | Texto vetorial (texto + fonte + geometria + brasão residual) | muito alta | total (texto) | total (texto) |
+| 5 | Texto semântico (LaTeX, MD) | máxima | total | total + estrutura |
+
+### Regra de operação
+
+Para cada elemento extraído, escolher a **representação mais semântica** que
+**não viola a 1ª prioridade** (conteúdo). Se houver dúvida ou risco de perda,
+descer para o nível mais conservador.
+
+Exemplos práticos:
+
+| Caso | Nível alvo | Por quê |
+|---|---|---|
+| Fórmula em imagem renderizada (`F = ma`) | 5 (LaTeX) se OCR confidence ≥ 0.85; senão 1 | Searchable, compacto. Nível 1 evita corromper conteúdo se OCR errar. |
+| Logo Cambridge bicromática | 2 (PNG paleta lossless) hoje; 4 (re-render do nome + brasão como bitmap) ambicioso | T131 closed; T180 trata o pulo |
+| Diagrama de circuito quântico (line art) | 3 (SVG via potrace) se line art puro | T132 |
+| Foto / continuous tone | 1 (mantido) | Forçar paleta corromperia |
+| Tabela vinda como imagem | 5 (MD reconstruído) se classificador detectar tabela; senão 3/2 | Conexão T133 + T134 |
+
+### Como interage com a hierarquia de objetivos
+
+Os dois eixos são **ortogonais**: a hierarquia (1ª-4ª prioridade) define **o que
+vale preservar**; o eixo de representação define **como** preservar com o melhor
+trade-off entre tamanho, edição e busca.
+
+Conflito típico: aplicar Nível 4-5 pode falhar (OCR errado de fórmula) e violar
+a 1ª prioridade. Por isso a regra é "mais semântico que **não viola conteúdo**" —
+não "sempre o mais semântico". Quando em dúvida, **descer um nível**.
+
+Esses dois eixos juntos sustentam a estratégia de longo prazo: **extrair o
+máximo de informação primeiro, depois maximizar qualidade com a maior
+compressão semântica possível** sem sacrificar conteúdo.
+
 ## O ponto fundamental
 
 Se você se perder durante uma decisão de design, pergunte:
