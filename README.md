@@ -24,6 +24,7 @@ amadureceu além do escopo daquela disciplina. Mora em
 | Pacote `pip install pdf2md` | Roadmap (T108) |
 
 Filosofia de design: ver [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md).
+Como a bancada experimental funciona: ver [`docs/LAB_PROTOCOL.md`](docs/LAB_PROTOCOL.md).
 
 ## Estrutura
 
@@ -32,8 +33,8 @@ pdf2md/
 ├── README.md          (este arquivo — estado atual e como usar)
 ├── DIARIO.md          (timeline narrativa do projeto)
 ├── ROADMAP.md         (visão de fases e próximos passos)
-├── pyproject.toml     (template, ainda não pip-installable)
-├── src/               (scripts; viram pacote ao virar T108)
+├── pyproject.toml     (deps zeradas em 2026-05-09 — bancada experimental)
+├── src/               (bancada limpa — scripts atuais; viram pacote ao virar T108)
 │   ├── stats.py
 │   ├── aggregate_stats.py
 │   ├── roundtrip.py
@@ -41,17 +42,28 @@ pdf2md/
 │   ├── optimize_images.py
 │   ├── gen_pdfs.py
 │   └── restructure.py
-├── tickets/           (sistema local — open/in_progress/blocked/research/closed/_archive)
+├── lab/               (bancada experimental — cada eNN/ é experimento autocontido)
+│   ├── README.md      (convenções)
+│   └── _template/     (esqueleto para novos experimentos)
+├── tickets/           (open/in_progress/blocked/research/closed/_archive)
+│   ├── INDEX.md       (agrupado por kind: infra/pipeline/imagens/experimento/decisao)
+│   └── README.md      (formato e convenções)
 ├── docs/
 │   ├── PHILOSOPHY.md          (hierarquia de prioridades)
+│   ├── LAB_PROTOCOL.md        (regras de bancada — ciclo, promoção, descarte)
 │   └── CLAUDE_MEMORY.md       (memórias herdadas do AulaQuantum)
-└── corpus/            (PDFs de teste — Nielsen & Chuang etc.)
-    ├── _sources/      (PDFs originais — gitignored)
-    └── nielsen_chuang/
+└── corpus/
+    ├── _sources/MANIFEST.md   (refs read-only para PDFs em outros projetos)
+    ├── _canonical/MANIFEST.md (refs para corpus público — cache em Z:\)
+    └── nielsen_chuang/        (resultado da extração baseline — versionado)
         ├── <chapter>/<chapter>.md
         ├── <chapter>/images/*.png|jpeg
         └── _stats.{md,json}
 ```
+
+PDFs binários moram fora do repo — sources canônicos em outros projetos
+(ex.: AulaQuantum) e corpus público em `Z:\caches\corpus\pdf2md\`. O repo
+guarda só refs (manifests YAML) e resultados de extração.
 
 ## Fluxo típico (após você criar o venv)
 
