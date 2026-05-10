@@ -19,12 +19,18 @@ htmlcov/
 *~
 .vscode/
 
-# corpus — PDFs originais não vão pro git (são pesados; resultados gerados sim)
-corpus/_sources/
+# corpus — PDFs originais não vão pro git (refs ficam via MANIFEST.md, PDFs não)
+corpus/_sources/*
+!corpus/_sources/MANIFEST.md
+corpus/_canonical/*
+!corpus/_canonical/MANIFEST.md
 
 # diretórios temp do pipeline
 /tmp_*/
 /temp_*/
+
+# outputs de experimentos da bancada suja (cada lab/eNN/.gitignore pode override)
+lab/*/out/
 
 # build / dist
 dist/
