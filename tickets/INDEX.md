@@ -34,6 +34,7 @@ Código que já roda e está estabilizado em `src/`.
 
 | Ticket | Status | Título |
 |---|---|---|
+| [T071](closed/T071_bloat_ratio_alucinacao_heuristica.md) | (c) | Heurística `bloat_ratio` em stats.py — detecta padrão de alucinação |
 | [T101](closed/T101_marker_pdf_extraction_com_gpu_rtx_3060.md) | (c) | Marker PDF extraction com GPU (RTX 3060) |
 | [T102](closed/T102_restructure_output_por_capitulo_indexmd.md) | (c) | Restructure output por capítulo + index.md |
 | [T103](closed/T103_round_trip_test_script.md) | (c) | Round-trip test script |
@@ -72,7 +73,7 @@ Cada um destes tem ou terá um experimento correspondente em [`../lab/eNN_/`](..
 | [T180](research/T180_reconstrucao_vetorial_imagens.md) | (r) | Reconstrução vetorial (texto + fonte + brasão residual) | futuro `lab/eXX_reconstrutor_vetorial/` | E |
 | [T410](research/T410_testar_ferramentas_alternativas_nougat_mineru_pdftotext.md) | (r) | Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling | família `lab/e1X_*` | A+B+C |
 | [T420](research/T420_fallback_low_resource_sem_gpu_sem_modelos_ml_pesados.md) | (r) | Fallback low-resource (sem GPU) | futuro `lab/eXX_low_resource/` | B |
-| [T450](open/T450_investigar_ibm_lesson_1_round_trip_critico.md) | (o) | Investigar IBM lesson 1 (round-trip 28.9%) | futuro `lab/eXX_ibm_diagnose/` | A |
+| [T450](closed/T450_investigar_ibm_lesson_1_round_trip_critico.md) | (c) | IBM lesson 1 — fechado como "categoria conhecida" (bloat 3.4× via padrão de e03) | (sem lab dedicado — entendido sistemicamente) | A |
 
 ## `decisao` — Princípios, categorias, design
 

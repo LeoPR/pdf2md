@@ -312,6 +312,13 @@ def roundtrip_metrics(md1: Path, md2: Path) -> dict:
     matcher = SequenceMatcher(None, tokens1, tokens2)
     similarity = matcher.ratio()
 
+    # T071: bloat_ratio detecta padrão de alucinação no re-OCR do PDF
+    # intermediário. Quando MD₁ é esparso (poucos tokens por página) e o
+    # roundtrip gera muito mais conteúdo no MD₂, é sinal de que o marker
+    # alucinou. Observado em IBM lesson 1 (3.4× → rt 28.9%) e Wilson 1800
+    # (7.7× → rt 13.62%). Casos normais ficam em ~1.0×.
+    bloat_ratio = len(tokens2) / len(tokens1) if tokens1 else None
+
     cats = Counter()
     examples = {}
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
@@ -336,6 +343,7 @@ def roundtrip_metrics(md1: Path, md2: Path) -> dict:
         "md1_tokens": len(tokens1),
         "md2_tokens": len(tokens2),
         "similarity": similarity,
+        "bloat_ratio": bloat_ratio,
         "divergence_categories": dict(cats),
         "divergence_examples": examples,
     }
@@ -365,6 +373,7 @@ def render_md(stats: dict) -> str:
     tokens = tot.get("tokens", 0)
     formulas = tot.get("math_display", 0) + tot.get("math_inline", 0)
     sim_label = "—"
+    bloat_summary = None
     if rt:
         sim_pct = rt["similarity"] * 100
         sim_label = f"{sim_pct:.2f}%"
@@ -374,6 +383,22 @@ def render_md(stats: dict) -> str:
             else "❌ investigar"
         )
         sim_label += f" — {verdict}"
+        # T071: bloat flag no resumo (heurística de alucinação)
+        bloat = rt.get("bloat_ratio")
+        md1_tokens = rt.get("md1_tokens", 0)
+        density = (md1_tokens / pages) if pages else None
+        if bloat is not None:
+            # Forte: bloat > 3.0 sempre, OU bloat > 2.0 com densidade pobre
+            strong_alucinacao = (
+                bloat > 3.0
+                or (bloat > 2.0 and density is not None and density < 200)
+            )
+            if strong_alucinacao:
+                bloat_summary = f"{bloat:.2f}× 🚨 padrão de alucinação"
+            elif bloat > 1.5:
+                bloat_summary = f"{bloat:.2f}× ⚠️ anormal"
+            else:
+                bloat_summary = f"{bloat:.2f}× ✓"
 
     lines = [
         "# Relatório de extração",
@@ -392,8 +417,10 @@ def render_md(stats: dict) -> str:
         f"| Imagens | {tot.get('images_count', 0)} ({fmt_bytes(tot.get('images_total_bytes', 0))}) |",
         f"| Ligaduras quebradas | {tot.get('ligature_artifacts', 0)} {'✓' if tot.get('ligature_artifacts', 0) == 0 else '⚠️'} |",
         f"| Round-trip similaridade | {sim_label} |",
-        "",
     ]
+    if bloat_summary:
+        lines.append(f"| Bloat ratio MD₂/MD₁ | {bloat_summary} |")
+    lines.append("")
 
     # ============== Método / Tooling ==============
     lines += [
@@ -533,6 +560,22 @@ def render_md(stats: dict) -> str:
     # ============== Round-trip detalhado ==============
     if rt:
         sim_pct = rt["similarity"] * 100
+        bloat = rt.get("bloat_ratio")
+        # T071: heurística de alucinação — bloat alto OU (bloat médio + densidade pobre)
+        md1_tokens = rt.get("md1_tokens", 0)
+        density = (md1_tokens / pages) if pages else None  # tokens MD₁ por página
+        strong_alucinacao = bloat is not None and (
+            bloat > 3.0
+            or (bloat > 2.0 and density is not None and density < 200)
+        )
+        if strong_alucinacao:
+            bloat_flag = " 🚨 **PADRÃO DE ALUCINAÇÃO**"
+        elif bloat is not None and bloat > 1.5:
+            bloat_flag = " ⚠️ bloat anormal"
+        else:
+            bloat_flag = " ✓"
+        bloat_str = f"{bloat:.2f}×{bloat_flag}" if bloat is not None else "—"
+
         lines += [
             "## Round-trip MD₁ → PDF → MD₂",
             "",
@@ -540,9 +583,20 @@ def render_md(stats: dict) -> str:
             "",
             f"- Tokens MD₁: **{rt['md1_tokens']:,}**",
             f"- Tokens MD₂: **{rt['md2_tokens']:,}**",
+            f"- **Bloat ratio (MD₂/MD₁): {bloat_str}**",
             f"- **Similaridade: {sim_pct:.2f}%**",
             "",
         ]
+        if "🚨" in bloat_flag:
+            lines += [
+                "> 🚨 **Bloat ≥ 2.0× com densidade < 200 tokens/página**: padrão "
+                "característico de **alucinação** do re-OCR no PDF intermediário. "
+                "MD₁ tem pouco conteúdo → marker re-OCR-iza o PDF reconstruído e "
+                "inventa fórmulas/texto. Observado em IBM lesson 1 (3.4×, rt 28.9%) "
+                "e Wilson 1800 (7.7×, rt 13.6%). Não é mau extract — é descompasso "
+                "entre input pobre e re-OCR sem âncora. Ver `lab/e03_atkins_wilson_scan/`.",
+                "",
+            ]
         cats = rt.get("divergence_categories", {})
         if cats:
             total_div = sum(cats.values())
