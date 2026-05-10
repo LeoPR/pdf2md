@@ -78,6 +78,13 @@ JPEG/PNG de KB-MB. Mas é trabalho complexo e nicho — só vale para
 elementos repetitivos como logos de editora que aparecem em muitos
 livros.
 
+> **Atualização 2026-05-10**: este Nível 3 foi **promovido a ticket
+> próprio [T180](T180_reconstrucao_vetorial_imagens.md)** (Frente E
+> da hierarquia, [PHILOSOPHY eixo de representação](../../docs/PHILOSOPHY.md#eixo-de-representação)
+> Nível 4). T137 mantém o foco em **denoising** (níveis 1-2 — filtros
+> clássicos e ML JPEG-specific). A reconstrução vetorial é tratada
+> em T180.
+
 ## Plano de prototipagem (quando ativar)
 
 1. **Sample**: pegar 5-10 imagens problemáticas representativas

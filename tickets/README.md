@@ -85,14 +85,21 @@ Mensagens curtas com a métrica/decisão chave no fim.
 
 | Faixa | Tema |
 |---|---|
-| T020-T099 | Infra do projeto pdf2md (bancada, manifests, lab protocol, corpus, baseline) |
-| T100-T199 | Pipeline de extração (marker, restructure, round-trip, stats) |
-| T130-T139 | Otimização adaptativa de imagens (família T130) |
+| T020-T059 | Infra do projeto pdf2md (bancada, manifests, lab protocol, corpus, baseline) |
+| T060-T099 | Validação (Frente A) — GT humano, mini-corpus, métricas de fidelidade |
+| T100-T129 | Pipeline de extração principal (marker, restructure, round-trip, stats) |
+| T130-T159 | Otimização adaptativa de imagens (família T130) |
+| T160-T179 | Extração semântica de imagens-com-texto (Frente B — OCR generalizado, fórmulas, captions) |
+| T180-T199 | Reconstrução vetorial (Frente E — texto + fonte + geometria + bitmap residual) |
 | T400-T499 | Projeto autônomo (testes alternativos, corpus livre, fallback low-resource, design philosophy) |
 | T900+ | Reservados para emergências/hotfix sem categorização |
 
 T001-T019 (infra do AulaQuantum), T200-T299 (disciplina) e T300-T399
 (pesquisa complementar) **não se aplicam aqui** — pertencem ao AulaQuantum.
+
+As **Frentes de cobertura** (A-E) descritas no [`ROADMAP.md`](../ROADMAP.md) são um recorte
+ortogonal: cada faixa numérica acima cruza com 1-2 Frentes (ex.: T130-T159 cobre
+principalmente Frente D — otimização de representação).
 
 ## Faixa `kind:` (separação infra ↔ ciência)
 
