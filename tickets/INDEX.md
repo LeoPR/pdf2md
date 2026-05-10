@@ -22,7 +22,7 @@ trabalhados sem se preocupar com setup.
 | [T023](closed/T023_convencao_venv_por_experimento.md) | (c) | Convenção de venv por experimento |
 | [T024](closed/T024_reorganizacao_tickets_em_faixas.md) | (c) | Reorganização tickets em faixas (`kind:`) |
 | [T030](closed/T030_revisao_literatura.md) | (c) | Revisão de literatura inicial — `docs/LITERATURA.md` |
-| [T040](in_progress/T040_corpus_canonico_inicial.md) | (p) | Corpus canônico (7/8-12 entradas; 1 pendente download manual) |
+| [T040](closed/T040_corpus_canonico_inicial.md) | (c) | Corpus canônico (8/8-12 entradas; 5/9 categorias; PMC pendente) |
 | [T105](closed/T105_substituir_extracao_antiga_eliminar_v2_anti_padra.md) | (c) | Substituir extração antiga (eliminar `_v2`) |
 | [T430](open/T430_corpus_livre_para_testes_urls_licencas.md) | (o) | Corpus livre — URLs + licenças (substituído por T040 + manifests; manter como histórico ou fechar) |
 
@@ -54,7 +54,7 @@ Cada um destes tem ou terá um experimento correspondente em [`../lab/eNN_/`](..
 
 | Ticket | Status | Título | Experimento sugerido |
 |---|---|---|---|
-| [T050](in_progress/T050_baseline_marker_reproduzivel.md) | (p) | Baseline marker reproduzível (estrutura criada, falta executar) | `lab/e00_baseline_marker/` |
+| [T050](closed/T050_baseline_marker_reproduzivel.md) | (c) | Baseline marker reproduzível — round-trip 95.09% (bate histórico) | `lab/e00_baseline_marker/` (.frozen) |
 | [T106](closed/T106_extra_extraction_study.md) | (c) | Estudo extração com DPI alternativo | (rodado ad-hoc, sem lab/) |
 | [T137](research/T137_denoising_jpeg_pre_compressao.md) | (r) | Denoising JPEG antes da compressão | futuro `lab/eXX_jpeg_denoise/` |
 | [T410](research/T410_testar_ferramentas_alternativas_nougat_mineru_pdftotext.md) | (r) | Testar ferramentas alternativas (Nougat, MinerU, pdftotext) | família `lab/e1X_*` |
@@ -76,9 +76,9 @@ Discussões arquiteturais que orientam outros tickets. Vivem aqui, não em `lab/
 
 ---
 
-## Fase 0 — montar a bancada
+## Fase 0 — montar a bancada ✓ COMPLETA
 
-Estado em **2026-05-10**:
+Estado em **2026-05-10**: 9 macro-tickets fechados.
 
 | ID | Ticket | Estado | Saída |
 |---|---|---|---|
@@ -89,14 +89,12 @@ Estado em **2026-05-10**:
 | T024 | Reorganização tickets em faixas | ✓ closed | `kind:` + `INDEX.md` |
 | T030 | Revisão de literatura | ✓ closed | `docs/LITERATURA.md` |
 | T031 | Definição de métricas | ✓ closed | `docs/METRICS.md` |
-| T040 | Corpus canônico inicial | ⏳ in_progress | 7 entradas no MANIFEST (6 baixadas + 1 pendente). Cobre 4/9 categorias. |
-| T050 | Baseline marker reproduzível | ⏳ in_progress | `lab/e00_baseline_marker/` (estrutura pronta; falta executar — venv + run) |
+| T040 | Corpus canônico inicial | ✓ closed | 8 entradas (7 baixadas + 1 PMC pendente). 5/9 categorias. |
+| T050 | Baseline marker reproduzível | ✓ closed | `lab/e00_baseline_marker/` (.frozen). Round-trip **95.09%** — bate histórico exato. |
 
-Para fechar a Fase 0:
+Próximas famílias de experimentos:
 
-- **T040**: alcançar 8-12 entradas (faltam categorias livro_image_heavy, livro_classical_typography, multilingual_pt; baixar manualmente o PMC)
-- **T050**: rodar o experimento (instalar deps no venv `pdf2md_lab_e00`, executar `run.ps1`, preencher `RESULT.md`)
+- **`lab/e1X_*`** (T410): comparação Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling no mesmo cap. 4 do N&C, com painel de métricas definido em [`docs/METRICS.md`](../docs/METRICS.md).
+- **T060 futuro**: mini-corpus de GT humano (5-10 páginas curadas) para validar se round-trip 95% bate com WER < 5% contra GT real, conforme recomendação da literatura.
 
-Depois da Fase 0, abrir família `lab/e1X_*` para comparação de
-ferramentas (T410): Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling
-(decisão informada pela literatura — ver [`docs/LITERATURA.md`](../docs/LITERATURA.md) §3).
+Decisões de packaging (T108) e refatoração de paths hard-coded em `src/` ficam pendentes — não bloquearam Fase 0 (baseline foi reproduzido usando venv legado `Z:\venvs\marker\` como fornecedor do marker, sem tocar em `src/`).
