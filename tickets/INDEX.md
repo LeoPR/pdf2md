@@ -65,7 +65,7 @@ Cada um destes tem ou terá um experimento correspondente em [`../lab/eNN_/`](..
 | (sem ticket) | — | **Atkins vs Wilson scan**: Atkins 92.11% (com text-layer), Wilson 13.62% (sem) — text-layer **ajuda**; bloat 7.7× revela padrão de alucinação | `lab/e03_atkins_wilson_scan/` (.frozen) | A |
 | (sem ticket) | — | **T131 validado em 7 PDFs**: 45-55% em line art, 0% em fotos | `lab/e04_t131_validation_corpus/` (.frozen) | D |
 | (sem ticket) | — | **AcroForm gate (Q11)**: IRS f1040 46.16% → 73.36% (normalizado); achado: rt atual penaliza escapes markdown | `lab/e05_acroform_gate/` (.frozen) | B+C |
-| (sem ticket) | — | **MinerU2.5-Pro (Q15)**: pip install em loop (uvicorn 0.14.0 metadata inválida); 3 caminhos de fix mapeados | `lab/e06_mineru25_pro/` (.blocked) | Alt-tools |
+| (sem ticket) | — | **MinerU2.5-Pro (Q15)**: 3 tentativas; uv install OK, server FastAPI crasha silenciosamente em Win+RTX3060; mover para Q16 (Granite-Docling) | `lab/e06_mineru25_pro/` (.blocked) | Alt-tools |
 | [T106](closed/T106_extra_extraction_study.md) | (c) | Estudo extração com DPI alternativo | (rodado ad-hoc, sem lab/) | C |
 | [T132](research/T132_potrace_svg_line_art.md) | (r) | potrace para line art → SVG | futuro `lab/eXX_potrace/` | C+D |
 | [T133](research/T133_detector_de_formula.md) | (r) | Detector de fórmula heurístico | futuro `lab/eXX_formula_detect/` | C |
