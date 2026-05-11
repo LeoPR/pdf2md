@@ -25,6 +25,11 @@ corpus/_sources/*
 corpus/_canonical/*
 !corpus/_canonical/MANIFEST.md
 
+# Material derivado de fontes proprietary (Nielsen & Chuang QCQI — copyright Cambridge).
+# Já versionado no init (commit be19f01); ver docs/LICENSING.md para opções de purge se
+# o repo for empurrado público. A regra abaixo evita NOVOS adds desse dir.
+corpus/nielsen_chuang/
+
 # diretórios temp do pipeline
 /tmp_*/
 /temp_*/
