@@ -1,5 +1,7 @@
 # Literatura v2 — alucinação, métricas novas, atualizações (2026-05-10+)
 
+> **Compilado histórico (snapshot 2026-05-10+).** Para consulta atualizada, ver [`biblioteca/`](biblioteca/INDEX.md) — fichas catalográficas por tema. As atualizações desta v2 (rebaixamento de CDM, releases 2025–2026 de Marker/MinerU/olmOCR/Docling, padrão de alucinação amplification, AcroForm) já foram incorporadas nas fichas, com cross-reference aos tickets/experimentos relevantes.
+
 *Complementa [`LITERATURA.md`](LITERATURA.md) (v1, 2026-05-10) com tópicos descobertos via experimentos `lab/eXX_*` e atualizações desde a v1.*
 
 ---

@@ -1,5 +1,7 @@
 # Literatura — conversão PDF → texto/MD (v1)
 
+> **Compilado histórico (snapshot 2026-05-10).** Para consulta atualizada, ver [`biblioteca/`](biblioteca/INDEX.md) — fichas catalográficas por tema (ferramentas, benchmarks, métricas, papers, glossário). Conflitos entre este v1 e v2 estão resolvidos nas fichas, com nota explícita em cada entrada afetada (especialmente CDM, rebaixada em v2).
+
 *Compilado em 2026-05-10 para informar T031 (definição de métricas) e T040/T050 (corpus e baseline).*
 
 > **Atualização**: ver também [`LITERATURA_v2.md`](LITERATURA_v2.md) (2026-05-10+) com:
