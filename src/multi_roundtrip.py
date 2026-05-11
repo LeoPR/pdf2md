@@ -76,18 +76,14 @@ def pdf_to_md(pdf_path: Path, output_dir: Path) -> Path:
     return md_files[0]
 
 
-def normalize(text: str) -> str:
-    text = re.sub(r"\{\d+\}", "", text)
-    text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)",
-                  lambda m: f"![{m.group(1)}]({Path(m.group(2)).name})", text)
-    text = re.sub(r"[ \t]+", " ", text)
-    return text.strip()
+sys.path.insert(0, str(Path(__file__).parent))
+from pdf2md.normalize import normalize_md  # noqa: E402
 
 
 def similarity(md_a: Path, md_b: Path) -> tuple[float, int, int]:
     """Token similarity entre dois MDs. Retorna (sim, tokens_a, tokens_b)."""
-    a = normalize(md_a.read_text(encoding="utf-8"))
-    b = normalize(md_b.read_text(encoding="utf-8"))
+    a = normalize_md(md_a.read_text(encoding="utf-8"))
+    b = normalize_md(md_b.read_text(encoding="utf-8"))
     ta = re.findall(r"\S+", a)
     tb = re.findall(r"\S+", b)
     return SequenceMatcher(None, ta, tb).ratio(), len(ta), len(tb)

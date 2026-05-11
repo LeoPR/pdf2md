@@ -14,35 +14,13 @@ import subprocess
 from pathlib import Path
 from difflib import SequenceMatcher
 
+# Adiciona src/ ao path quando script é executado standalone (`python src/roundtrip.py`)
+sys.path.insert(0, str(Path(__file__).parent))
+from pdf2md.normalize import normalize_md  # noqa: E402
+
 PANDOC = "pandoc"
 CHROME = r"C:/Program Files/Google/Chrome/Application/chrome.exe"
 MARKER = r"Z:/venvs/marker/Scripts/marker_single.exe"
-
-
-def normalize_md(text: str) -> str:
-    """Normaliza MD para comparação semântica.
-
-    Remove diferenças que não importam para fidelidade de conteúdo:
-    - Marcadores de página
-    - Whitespace múltiplo
-    - Caminhos de imagem (mantém só o filename)
-    - Quebras de linha dentro de parágrafos
-    """
-    # Remove page markers (formato {N} do marker, ou <!-- page N -->)
-    text = re.sub(r"\{\d+\}", "", text)
-    text = re.sub(r"<!--\s*page\s*\d+\s*-->", "", text, flags=re.IGNORECASE)
-
-    # Normaliza paths de imagem (só basename)
-    text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)",
-                  lambda m: f"![{m.group(1)}]({Path(m.group(2)).name})", text)
-
-    # Colapsa whitespace
-    text = re.sub(r"[ \t]+", " ", text)
-    text = re.sub(r"\n{3,}", "\n\n", text)
-
-    # Remove leading/trailing
-    text = text.strip()
-    return text
 
 
 def extract_tokens(text: str) -> list:

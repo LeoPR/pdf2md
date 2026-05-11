@@ -262,12 +262,8 @@ def folder_metrics(folder: Path) -> dict:
 # Round-trip + categorized divergences
 # ============================================================================
 
-def normalize_md(text: str) -> str:
-    text = re.sub(r"\{\d+\}", "", text)
-    text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)",
-                  lambda m: f"![{m.group(1)}]({Path(m.group(2)).name})", text)
-    text = re.sub(r"[ \t]+", " ", text)
-    return text.strip()
+sys.path.insert(0, str(Path(__file__).parent))
+from pdf2md.normalize import normalize_md  # noqa: E402
 
 
 _LATEX_CMD_RE = re.compile(r"\\[a-zA-Z]+")
@@ -305,12 +301,26 @@ def categorize_divergence(a_str: str, b_str: str) -> str:
 
 
 def roundtrip_metrics(md1: Path, md2: Path) -> dict:
-    t1 = normalize_md(md1.read_text(encoding="utf-8"))
-    t2 = normalize_md(md2.read_text(encoding="utf-8"))
+    raw_md1 = md1.read_text(encoding="utf-8")
+    raw_md2 = md2.read_text(encoding="utf-8")
+
+    # Similaridade primária (histórica): comparável com baseline T050
+    t1 = normalize_md(raw_md1)
+    t2 = normalize_md(raw_md2)
     tokens1 = re.findall(r"\S+", t1)
     tokens2 = re.findall(r"\S+", t2)
     matcher = SequenceMatcher(None, tokens1, tokens2)
     similarity = matcher.ratio()
+
+    # Q11.b: similaridade sem escapes markdown — justa para markup denso
+    # (forms, listas). marker escapa `_` → `\_` etc. automaticamente, o que
+    # explode a token-similarity sem afetar conteúdo. Descoberto em e05
+    # (AcroForm gate: 2.19% raw → 73.36% sem escapes, +71pp).
+    t1_strip = normalize_md(raw_md1, strip_md_escapes=True)
+    t2_strip = normalize_md(raw_md2, strip_md_escapes=True)
+    t1s = re.findall(r"\S+", t1_strip)
+    t2s = re.findall(r"\S+", t2_strip)
+    similarity_no_escapes = SequenceMatcher(None, t1s, t2s).ratio()
 
     # T071: bloat_ratio detecta padrão de alucinação no re-OCR do PDF
     # intermediário. Quando MD₁ é esparso (poucos tokens por página) e o
@@ -343,6 +353,7 @@ def roundtrip_metrics(md1: Path, md2: Path) -> dict:
         "md1_tokens": len(tokens1),
         "md2_tokens": len(tokens2),
         "similarity": similarity,
+        "similarity_no_escapes": similarity_no_escapes,
         "bloat_ratio": bloat_ratio,
         "divergence_categories": dict(cats),
         "divergence_examples": examples,
@@ -576,6 +587,19 @@ def render_md(stats: dict) -> str:
             bloat_flag = " ✓"
         bloat_str = f"{bloat:.2f}×{bloat_flag}" if bloat is not None else "—"
 
+        sim_no_esc = rt.get("similarity_no_escapes")
+        sim_no_esc_line = None
+        if sim_no_esc is not None:
+            sim_no_esc_pct = sim_no_esc * 100
+            delta = sim_no_esc_pct - sim_pct
+            # Só destaca se delta > 1pp (senão escapes não impactaram)
+            if abs(delta) > 1.0:
+                marker = " ⚠️ markup denso" if delta > 5.0 else ""
+                sim_no_esc_line = (
+                    f"- **Similaridade sem md-escapes:** {sim_no_esc_pct:.2f}% "
+                    f"(Δ {delta:+.2f}pp){marker}"
+                )
+
         lines += [
             "## Round-trip MD₁ → PDF → MD₂",
             "",
@@ -585,8 +609,10 @@ def render_md(stats: dict) -> str:
             f"- Tokens MD₂: **{rt['md2_tokens']:,}**",
             f"- **Bloat ratio (MD₂/MD₁): {bloat_str}**",
             f"- **Similaridade: {sim_pct:.2f}%**",
-            "",
         ]
+        if sim_no_esc_line:
+            lines.append(sim_no_esc_line)
+        lines.append("")
         if "🚨" in bloat_flag:
             lines += [
                 "> 🚨 **Bloat ≥ 2.0× com densidade < 200 tokens/página**: padrão "
