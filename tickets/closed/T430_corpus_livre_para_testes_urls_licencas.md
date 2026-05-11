@@ -1,14 +1,27 @@
 ---
 id: T430
 titulo: Corpus livre para testes (URLs + licenças)
-status: open
+status: closed
 criado_em: 2026-05-07
-fechado_em:
+fechado_em: 2026-05-11
 fase: 1
 depende_de: [T400]
 blocks: []
 tags: [corpus, free, test-data, licenses]
 kind: infra
+resolucao: substituído por T040 + corpus/_sources/MANIFEST.md
+---
+
+## Resolução
+
+Fechado como **substituído** em 2026-05-11. A intenção original (lista de PDFs com URLs/licenças/categoria/tamanho/layout/math-density) foi cumprida com mais rigor por:
+
+- **T040** (closed): corpus canônico inicial com 8 entradas + 9 PDFs "sujos" (orientou e02)
+- **`corpus/_sources/MANIFEST.md`**: paths absolutos, SHA-256, tamanho, licença por entrada
+- **`docs/_archive/PDFS_SUJOS_CANDIDATOS.md`**: pesquisa histórica que orientou a expansão dos "sujos"
+
+Conteúdo original preservado abaixo como referência.
+
 ---
 
 ## Contexto

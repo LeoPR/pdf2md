@@ -175,7 +175,7 @@ Próximos candidatos a virar experimento:
 - T160 (Frente B, OCR semântico generalizado)
 - T410 (alt-tools — Marker × Nougat × MinerU × olmOCR × Docling)
 - Expansão do e01 para PDFs scanned (Newton, Wilson — categoria scanned_image_only)
-- PDFs "sujos" (categoria a ser definida — ver [`PDFS_SUJOS_CANDIDATOS.md`](PDFS_SUJOS_CANDIDATOS.md) quando criado)
+- PDFs "sujos" (categoria definida em e02; pesquisa histórica em [`_archive/PDFS_SUJOS_CANDIDATOS.md`](_archive/PDFS_SUJOS_CANDIDATOS.md))
 
 ---
 
@@ -194,7 +194,10 @@ docs/
 ├── LITERATURA.md             Revisão de papers (métricas, benchmarks, ferramentas)
 ├── METRICS.md                Painel de métricas adotado
 ├── LAB_PROTOCOL.md           Regras da bancada experimental
-└── PDFS_SUJOS_CANDIDATOS.md  Corpus de PDFs problemáticos (quando criado)
+├── LICENSING.md              Matriz de licenças do corpus (preparo para push público)
+├── biblioteca/               Catálogo (ferramentas/métricas/papers/benchmarks/glossário)
+├── arquitetura/              Sub-docs por camada (01-05)
+└── _archive/                 Documentos históricos (PDFS_SUJOS_CANDIDATOS, etc.)
 ```
 
 E os planos de execução estão em [`../ROADMAP.md`](../ROADMAP.md).

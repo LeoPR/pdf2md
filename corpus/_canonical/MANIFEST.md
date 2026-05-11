@@ -36,7 +36,7 @@ taxonomia foi expandida em 2026-05-10 com categorias "sujas" — ver
 | paper_bio_med | 2 | 0 (PMC bloqueia scrapers; ambos pendentes) |
 
 Gaps: `mobile_capture_scan` e `photo_collage_overlay` (sem fonte com
-licença redistribuível clara — documentado em [`../../docs/PDFS_SUJOS_CANDIDATOS.md`](../../docs/PDFS_SUJOS_CANDIDATOS.md)).
+licença redistribuível clara — documentado em [`../../docs/_archive/PDFS_SUJOS_CANDIDATOS.md`](../../docs/_archive/PDFS_SUJOS_CANDIDATOS.md)).
 
 Total em `Z:\caches\corpus\pdf2md\`: **12 PDFs, ~119 MB**.
 
@@ -319,7 +319,7 @@ notes: |
 
 ## Entradas — categoria "sujos" (2026-05-10)
 
-Documentos que **degradam o pipeline** intencionalmente. Origem da pesquisa em [`../../docs/PDFS_SUJOS_CANDIDATOS.md`](../../docs/PDFS_SUJOS_CANDIDATOS.md).
+Documentos que **degradam o pipeline** intencionalmente. Origem da pesquisa em [`../../docs/_archive/PDFS_SUJOS_CANDIDATOS.md`](../../docs/_archive/PDFS_SUJOS_CANDIDATOS.md).
 
 ### ocw_mit_6_0002_lec1 — MIT OCW 6.0002 Lecture 1
 

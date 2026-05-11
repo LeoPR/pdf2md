@@ -26,7 +26,7 @@ trabalhados sem se preocupar com setup.
 | [T040](closed/T040_corpus_canonico_inicial.md) | (c) | Corpus canônico (8/8-12 entradas; 5/9 categorias; PMC pendente) |
 | [T060](open/T060_mini_corpus_gt_humano.md) | (o) | Mini-corpus de GT humano (5-10 págs) — Frente A |
 | [T105](closed/T105_substituir_extracao_antiga_eliminar_v2_anti_padra.md) | (c) | Substituir extração antiga (eliminar `_v2`) |
-| [T430](open/T430_corpus_livre_para_testes_urls_licencas.md) | (o) | Corpus livre — URLs + licenças (substituído por T040 + manifests; manter como histórico ou fechar) |
+| [T430](closed/T430_corpus_livre_para_testes_urls_licencas.md) | (c) | Corpus livre — URLs + licenças (fechado 2026-05-11; substituído por T040 + MANIFEST) |
 
 ## `pipeline` — Pipeline de extração estável
 
