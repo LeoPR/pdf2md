@@ -416,9 +416,23 @@ def convert(
     typer.echo(f"  Preset: {'quick' if quick else ('best' if best else 'default')}")
 
     # 1. Extract
-    marker_out = out / "_marker_raw"
+    # IMPORTANTE: marker_raw fica em pasta IRMÃ do out/, não dentro. Porque
+    # restructure.py faz rmtree(target_dir) e apagaria o _marker_raw junto.
+    marker_raw_root = out.with_name(out.name + "_marker_raw")
+    if marker_raw_root.exists():
+        shutil.rmtree(marker_raw_root)
     typer.secho("\n[1/5] extract (marker_single)...", bold=True)
-    extract(pdf, marker_out, page_range=None)  # type: ignore
+    typer.echo(f"  marker_raw → {marker_raw_root}")
+    extract(pdf, marker_raw_root, page_range=None)  # type: ignore
+
+    # Marker cria subpasta com nome do PDF (sem extensão). Localiza-a robustamente.
+    marker_out = marker_raw_root / pdf.stem
+    if not marker_out.exists() or not list(marker_out.glob("*.md")):
+        md_files = list(marker_raw_root.rglob("*.md"))
+        if not md_files:
+            typer.secho(f"Marker não produziu MD em {marker_raw_root}", fg=typer.colors.RED)
+            raise typer.Exit(1)
+        marker_out = md_files[0].parent
 
     # 2. Restructure (só se book)
     if is_book:

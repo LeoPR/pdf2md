@@ -243,6 +243,19 @@ def main():
         print(f"[ERRO] Pasta marker não encontrada: {marker_dir}")
         sys.exit(1)
 
+    # Defensiva: se marker_dir está dentro de target_dir, o rmtree(target_dir)
+    # abaixo apagaria o próprio input. Bug pego em 2026-05-12 — perdemos 1h54m
+    # de marker antes de detectar. Falhar cedo, não silencioso.
+    try:
+        marker_abs = marker_dir.resolve()
+        target_abs = target_dir.resolve()
+        if marker_abs == target_abs or target_abs in marker_abs.parents:
+            print(f"[ERRO] marker_dir ({marker_dir}) está dentro de target_dir ({target_dir}).")
+            print(f"       O rmtree(target_dir) deletaria o próprio input. Aborte.")
+            sys.exit(1)
+    except (OSError, ValueError):
+        pass  # resolve() pode falhar em pathologic cases — não bloqueia
+
     md_candidates = list(marker_dir.glob("*.md"))
     if not md_candidates:
         print(f"[ERRO] Nenhum .md em {marker_dir}")
