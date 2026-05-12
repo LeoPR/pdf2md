@@ -180,13 +180,49 @@ O que ficou no AulaQuantum:
 - Tickets T200+ (disciplina) e T300+ (pesquisa complementar)
 - Setup geral (T001-T015)
 
+## 2026-05-11/12 — Bancada-suja → bancada-limpa, ablações e T108
+
+Sessão longa (dois dias). Três grandes blocos:
+
+1. **Provenance** (`pdf2md.provenance`): marcador idempotente por arquivo
+   (versão + commit + data + fonte + sha256 + extractor). Aplicado ao N&C
+   completo no AulaQuantum (22 arquivos, commit 0431464).
+
+2. **Ablação extratores** (e07 + e08): testamos Marker `--use_llm` com
+   `llama3.2-vision:11b` via Ollama e Granite-Docling-258M via docling
+   2.93.0. Ambos descartados para N&C — 40-50× mais lentos sem ganho
+   qualitativo. Lição metodológica: não generalizar de N=1; conclusões
+   nomear modelo+tool+corpus (salva em memory).
+   Achado positivo de e08: `docling` instala limpo via `uv pip` (resolve
+   o problema OPERACIONAL que bloqueou Q15 MinerU). Marker baseline 95.09%
+   é teto operacional testado.
+
+3. **T108 fechado**: pacote pdf2md instalável (`pip install -e .`) com
+   CLI unificado — macro `pdf2md convert FILE.pdf` (auto-detect via TOC)
+   + 10 subcomandos finos + `doctor`/`version`. Validação em produção
+   re-extraindo N&C completo (1h54min) revelou um bug: `_marker_raw/`
+   filho de `out/` é apagado pelo `rmtree(target_dir)` do restructure.
+   Fix em duas camadas (cli.py usa pasta irmã + defensiva no restructure
+   para falhar cedo). Após fix, 21/21 capítulos com SHA-256 bit-for-bit
+   idêntico ao histórico — determinismo confirmado.
+
+Decisão sobre N&C no AulaQuantum: **manter versão atual** (`_stats.md`
+histórico tem mais info — round-trip 95.09%, versões marker/torch/CUDA
+— que o novo gerado pelo venv do pdf2md, que regrediu para "n/a").
+Conteúdo MD é idêntico de qualquer forma. Próximo passo natural seria
+fix do `stats.py` para propagar metadados via flags (v0.4 cleanup).
+
 ## Próximos passos planejados
 
 Ver [`ROADMAP.md`](ROADMAP.md) para o quadro completo. Curto prazo:
-- T108: empacotar como `pip install pdf2md`
-- T132: integrar potrace para vetorização SVG
-- T410: comparar com Nougat/MinerU em corpus livre
-- T450: investigar IBM lesson 1 (token bloat 3.4×)
+- v0.4 cleanup: scripts em `src/*.py` viram módulos importáveis sob
+  `pdf2md/`, eliminam subprocess. `tests/` (smoke + unit). stats.py
+  recebe metadados via flags (fix regressão "n/a").
+- T060: mini-corpus GT humano (4-6h humanas) — destrava validação
+  não-circular do round-trip.
+- T132: integrar potrace para vetorização SVG.
+- Q11 AcroForm pipeline: integrar `pypdf.get_fields()` em `src/` para
+  PDFs de formulário (achado de e05).
 
 ---
 
