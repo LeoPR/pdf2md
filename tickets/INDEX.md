@@ -40,7 +40,7 @@ Código que já roda e está estabilizado em `src/`.
 | [T103](closed/T103_round_trip_test_script.md) | (c) | Round-trip test script |
 | [T104](closed/T104_round_trip_test_em_1_capitulo_baseline.md) | (c) | Round-trip baseline (cap. 4 → 95.1%) |
 | [T107](open/T107_md_to_pdf_per_chapter.md) | (o) | MD → PDF por capítulo via Chrome |
-| [T108](open/T108_pacote_conversor_readme.md) | (o) | Pacote `pip install pdf2md` |
+| [T108](closed/T108_pacote_conversor_readme.md) | (c) | Pacote `pip install pdf2md` + CLI (macro + 10 subcomandos finos) — fechado 2026-05-11 |
 
 ## `imagens` — Otimização adaptativa de imagens
 
@@ -118,4 +118,6 @@ Próximas famílias de experimentos (alinhadas com [Frentes do ROADMAP](../ROADM
 - **Família `lab/e1X_*`** (T410): comparação Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling
 - **Frente E — ambição**: [T180](research/T180_reconstrucao_vetorial_imagens.md) (reconstrução vetorial)
 
-Decisões de packaging (T108) e refatoração de paths hard-coded em `src/` ficam pendentes — não bloquearam Fase 0 (baseline foi reproduzido usando venv legado `Z:\venvs\marker\` como fornecedor do marker, sem tocar em `src/`).
+Packaging (T108) **fechado** em 2026-05-11 com MVP: pacote pip + CLI unificado
+(macro `pdf2md convert` + 10 subcomandos finos + `doctor`/`version`).
+Refatoração de scripts standalone para módulos importáveis fica para v0.4.

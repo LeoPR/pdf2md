@@ -1,0 +1,496 @@
+"""CLI unificado do pdf2md.
+
+Filosofia:
+- **Macro** (`pdf2md FILE.pdf`): one-shot inteligente — extrai, organiza,
+  otimiza, gera stats e marca proveniência. Decide via auto-detect (TOC do PDF).
+- **Subcomandos finos** (`pdf2md extract`, `restruct`, `optimize`, ...): cada
+  etapa isolada, para controle granular ou recuperar de pipeline parcial.
+- **Meta** (`doctor`, `version`): diagnóstico do ambiente.
+
+Ferramentas externas (marker, pandoc, chrome) **não** são instaladas pelo pip
+deste pacote — conflito histórico de `pillow<11` (marker-pdf 1.10) vs `pillow>=11`
+(otimização adaptativa). Cada uma vive no seu venv/PATH; `pdf2md doctor` valida.
+
+Para uso, ver `pdf2md --help` ou `pdf2md help <subcmd>`.
+"""
+from __future__ import annotations
+
+import os
+import shutil
+import subprocess
+import sys
+from datetime import date
+from pathlib import Path
+
+# Reconfigurar stdout/stderr para UTF-8 em Windows (default cp1252 quebra com
+# acentos e setas no Rich/Typer help). Idempotente — se já estiver em utf-8, no-op.
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
+        sys.stderr.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
+    except Exception:
+        pass
+
+import typer
+
+from pdf2md.normalize import normalize_md
+from pdf2md.provenance import (
+    Provenance,
+    apply_to_dir as _apply_provenance_dir,
+    detect_current_commit,
+)
+
+# ---------------------------------------------------------------------------
+# Defaults e descoberta de ferramentas externas
+# ---------------------------------------------------------------------------
+
+# Ferramentas externas: PATH primeiro, depois fallbacks históricos do projeto
+DEFAULT_MARKER = os.environ.get("PDF2MD_MARKER") or shutil.which("marker_single") or r"Z:\venvs\marker\Scripts\marker_single.exe"
+DEFAULT_PANDOC = os.environ.get("PDF2MD_PANDOC") or shutil.which("pandoc") or "pandoc"
+DEFAULT_CHROME = os.environ.get("PDF2MD_CHROME") or shutil.which("chrome") or r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+
+# Path do diretório `src/` para invocar scripts standalone via subprocess.
+# Quando `pdf2md` for instalado via `pip`, esses scripts serão movidos para
+# módulos importáveis em v0.4. Por enquanto delegamos.
+_SRC_DIR = Path(__file__).resolve().parent.parent  # src/
+_REPO_ROOT = _SRC_DIR.parent
+
+# ---------------------------------------------------------------------------
+# App typer
+# ---------------------------------------------------------------------------
+
+app = typer.Typer(
+    name="pdf2md",
+    no_args_is_help=True,
+    pretty_exceptions_show_locals=False,
+    help="Conversor PDF↔MD com round-trip mensurável.",
+    rich_markup_mode="rich",
+)
+
+
+def _run(cmd: list[str], *, check: bool = True, cwd: Path | None = None) -> subprocess.CompletedProcess:
+    """Roda comando externo e ecoa stderr."""
+    typer.echo(f"$ {' '.join(str(c) for c in cmd)}", err=True)
+    return subprocess.run([str(c) for c in cmd], check=check, cwd=cwd)
+
+
+def _python() -> str:
+    return sys.executable
+
+
+def _detect_book(pdf_path: Path) -> bool:
+    """True se PDF tem TOC nivel >= 2 (sugere livro com capítulos)."""
+    try:
+        import fitz
+        toc = fitz.open(pdf_path).get_toc()
+        return any(level >= 2 for level, _, _ in toc) and len(toc) >= 3
+    except Exception:
+        return False
+
+
+def _sha256_short(path: Path) -> str | None:
+    try:
+        import hashlib
+        h = hashlib.sha256()
+        with path.open("rb") as f:
+            for chunk in iter(lambda: f.read(1 << 16), b""):
+                h.update(chunk)
+        return h.hexdigest()
+    except Exception:
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Meta: doctor e version
+# ---------------------------------------------------------------------------
+
+@app.command()
+def doctor():
+    """Diagnostica o ambiente: ferramentas externas e GPU.
+
+    Verifica marker_single, pandoc, Chrome, PyMuPDF e CUDA. Não modifica nada.
+    """
+    typer.secho("pdf2md doctor — diagnóstico do ambiente", bold=True)
+    typer.echo("")
+
+    rows: list[tuple[str, str, str]] = []
+
+    # Marker
+    if Path(DEFAULT_MARKER).exists() or shutil.which(DEFAULT_MARKER):
+        rows.append(("marker_single", "OK", DEFAULT_MARKER))
+    else:
+        rows.append(("marker_single", "MISSING", "instalar marker-pdf (veja install em https://github.com/datalab-to/marker)"))
+
+    # Pandoc
+    if shutil.which(DEFAULT_PANDOC):
+        try:
+            v = subprocess.run([DEFAULT_PANDOC, "--version"], capture_output=True, text=True, timeout=5)
+            ver = v.stdout.splitlines()[0] if v.stdout else "?"
+            rows.append(("pandoc", "OK", ver))
+        except Exception:
+            rows.append(("pandoc", "OK", DEFAULT_PANDOC))
+    else:
+        rows.append(("pandoc", "MISSING", "https://pandoc.org/installing.html"))
+
+    # Chrome
+    if Path(DEFAULT_CHROME).exists() or shutil.which(DEFAULT_CHROME):
+        rows.append(("chrome (headless)", "OK", DEFAULT_CHROME))
+    else:
+        rows.append(("chrome (headless)", "MISSING", "Chrome necessário para MD→PDF (renderiza KaTeX)"))
+
+    # PyMuPDF
+    try:
+        import fitz  # noqa: F401
+        rows.append(("PyMuPDF (fitz)", "OK", f"{__import__('fitz').__doc__.splitlines()[0] if __import__('fitz').__doc__ else 'instalado'}"))
+    except ImportError:
+        rows.append(("PyMuPDF", "MISSING", "pip install pymupdf"))
+
+    # Pillow
+    try:
+        from PIL import Image as _img  # noqa: F401
+        rows.append(("Pillow (PIL)", "OK", f"v{__import__('PIL').__version__}"))
+    except ImportError:
+        rows.append(("Pillow", "MISSING", "pip install pillow"))
+
+    # CUDA (opcional)
+    try:
+        import torch
+        if torch.cuda.is_available():
+            rows.append(("CUDA torch", "OK", f"{torch.cuda.get_device_name(0)} (torch {torch.__version__})"))
+        else:
+            rows.append(("CUDA torch", "CPU-only", f"torch {torch.__version__} sem GPU"))
+    except ImportError:
+        rows.append(("CUDA torch", "MISSING", "(opcional) sem torch — marker rodará só em CPU se tiver acelerador próprio"))
+
+    # Print table
+    w = max(len(r[0]) for r in rows)
+    for name, status, detail in rows:
+        color = typer.colors.GREEN if status == "OK" else (typer.colors.YELLOW if status == "CPU-only" else typer.colors.RED)
+        typer.echo(f"  {name:<{w}}  ", nl=False)
+        typer.secho(f"{status:<9}", fg=color, nl=False)
+        typer.echo(f"  {detail}")
+
+
+@app.command()
+def version():
+    """Versão do pacote + commit git (se aplicável)."""
+    try:
+        from importlib.metadata import version as _v
+        pkg_ver = _v("pdf2md")
+    except Exception:
+        pkg_ver = "0.3.0-dev (uninstalled)"
+
+    commit = detect_current_commit() or "—"
+    typer.echo(f"pdf2md {pkg_ver}  (commit {commit})")
+
+
+# ---------------------------------------------------------------------------
+# Subcomandos: utilitários puros (não precisam de tools externas)
+# ---------------------------------------------------------------------------
+
+@app.command("norm")
+def norm(
+    md_path: Path = typer.Argument(..., exists=True, dir_okay=False, help="Arquivo MD a normalizar"),
+    strip_escapes: bool = typer.Option(False, "--strip-escapes/--keep-escapes", help="Remove \\X markdown escapes (Q11.b)"),
+    in_place: bool = typer.Option(False, "-i", "--in-place", help="Sobrescreve o arquivo"),
+):
+    """Normalização canônica do MD (page markers, image paths, escapes).
+
+    Mesma função usada internamente pelo `roundtrip` para comparação semântica.
+    Sem `-i`, imprime para stdout.
+    """
+    text = md_path.read_text(encoding="utf-8")
+    out = normalize_md(text, strip_md_escapes=strip_escapes)
+    if in_place:
+        md_path.write_text(out, encoding="utf-8")
+        typer.echo(f"[OK] {md_path}", err=True)
+    else:
+        typer.echo(out)
+
+
+@app.command("prov")
+def prov(
+    target_dir: Path = typer.Argument(..., exists=True, file_okay=False, help="Diretório com MDs a marcar"),
+    pkg_version: str = typer.Option(None, "--version", help="Versão do conversor (default: git describe)"),
+    source: str = typer.Option(None, "--source", help="Nome do PDF fonte"),
+    sha256: str = typer.Option(None, "--sha256", help="SHA-256 do PDF fonte (ou caminho — auto-calcula)"),
+    extractor: str = typer.Option(None, "--extractor", help="Ex: 'marker-pdf 1.10.2'"),
+    when: str = typer.Option(None, "--date", help="Data ISO (default: hoje)"),
+):
+    """Aplica marcador de proveniência idempotente em cada MD do diretório.
+
+    Insere após primeiro heading. Re-aplicar substitui em vez de duplicar.
+    """
+    if not pkg_version:
+        try:
+            v = subprocess.run(["git", "describe", "--tags", "--always"],
+                               capture_output=True, text=True, check=True, timeout=5)
+            pkg_version = v.stdout.strip() or "unknown"
+        except Exception:
+            pkg_version = "unknown"
+
+    # Se --sha256 for caminho, calcula
+    if sha256 and Path(sha256).exists():
+        sha256 = _sha256_short(Path(sha256))
+
+    prov_obj = Provenance(
+        version=pkg_version,
+        date=when or date.today().isoformat(),
+        commit=detect_current_commit(),
+        source=source,
+        source_sha256=sha256,
+        extractor=extractor,
+    )
+    results = _apply_provenance_dir(target_dir, prov_obj)
+    changed = sum(1 for _, c in results if c)
+    typer.echo(f"{len(results)} arquivos visitados, {changed} alterados")
+
+
+# ---------------------------------------------------------------------------
+# Subcomandos: pipeline (delegam para scripts em src/ via subprocess)
+# ---------------------------------------------------------------------------
+
+@app.command()
+def extract(
+    pdf: Path = typer.Argument(..., exists=True, dir_okay=False, help="PDF a extrair"),
+    out: Path = typer.Option(..., "--out", "-o", help="Diretório de saída"),
+    page_range: str = typer.Option(None, "--pages", help="Faixa de páginas (ex: '0-29' ou '0,5,10')"),
+):
+    """Extração base: marker_single PDF → MD.
+
+    Wrapper sobre `marker_single` (datalab-to/marker). Para flags avançadas
+    (--use_llm, --llm_service, etc.) chame marker_single direto.
+    """
+    if not (Path(DEFAULT_MARKER).exists() or shutil.which(DEFAULT_MARKER)):
+        typer.secho(f"marker_single não encontrado em {DEFAULT_MARKER}. Rode `pdf2md doctor`.", fg=typer.colors.RED)
+        raise typer.Exit(1)
+
+    cmd = [DEFAULT_MARKER, str(pdf), "--output_dir", str(out), "--output_format", "markdown"]
+    if page_range:
+        cmd.extend(["--page_range", page_range])
+    _run(cmd)
+
+
+@app.command("restruct")
+def restruct(
+    target_dir: Path = typer.Argument(..., help="Diretório final (será criado)"),
+    pdf: Path = typer.Option(..., "--pdf", exists=True, dir_okay=False, help="PDF original (para extrair TOC)"),
+    marker_out: Path = typer.Option(..., "--marker-out", exists=True, file_okay=False, help="Saída do marker_single"),
+):
+    """Reorganiza saída do marker em capítulos via TOC do PDF.
+
+    Cria estrutura: target/01_titulo/01_titulo.md + images/ + index.md.
+    """
+    _run([_python(), str(_SRC_DIR / "restructure.py"), str(pdf), str(marker_out), str(target_dir)])
+
+
+@app.command()
+def optimize(
+    target_dir: Path = typer.Argument(..., exists=True, file_okay=False, help="Diretório com MDs e imagens"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Não modifica, só relata"),
+):
+    """Otimização adaptativa de imagens (PNG paleta lossy / JPEG / B&W 1-bit).
+
+    Classificador defensivo: continuous tone fica como JPEG, line art vira PNG paleta.
+    Gera `_image_optimization.{md,json}` por subdiretório.
+    """
+    cmd = [_python(), str(_SRC_DIR / "optimize_images.py"), str(target_dir)]
+    if dry_run:
+        cmd.append("--dry-run")
+    _run(cmd)
+
+
+@app.command()
+def stats(
+    target_dir: Path = typer.Argument(..., exists=True, file_okay=False, help="Diretório de MDs"),
+    source_pdf: Path = typer.Option(None, "--source-pdf", exists=True, dir_okay=False, help="PDF original para métricas extras"),
+    roundtrip_md1: Path = typer.Option(None, "--rt-md1", help="MD inicial para round-trip"),
+    roundtrip_md2: Path = typer.Option(None, "--rt-md2", help="MD pós-roundtrip"),
+):
+    """Telemetria: tokens, fórmulas, imagens, headers + round-trip categorizado.
+
+    Gera `_stats.{md,json}` no diretório.
+    """
+    cmd = [_python(), str(_SRC_DIR / "stats.py"), str(target_dir)]
+    if source_pdf:
+        cmd.extend(["--source-pdf", str(source_pdf)])
+    if roundtrip_md1 and roundtrip_md2:
+        cmd.extend(["--roundtrip", str(roundtrip_md1), str(roundtrip_md2)])
+    _run(cmd)
+
+
+@app.command("rt")
+def rt(
+    md_path: Path = typer.Argument(..., exists=True, dir_okay=False, help="MD inicial"),
+    work_dir: Path = typer.Option(..., "--work", "-w", help="Diretório de trabalho (pdf, md2 temporários)"),
+):
+    """Round-trip single: MD → PDF → MD'. Mede similaridade de tokens.
+
+    Reporta similaridade total + primeiras 5 divergências.
+    """
+    _run([_python(), str(_SRC_DIR / "roundtrip.py"), str(md_path), str(work_dir)])
+
+
+@app.command("rt-multi")
+def rt_multi(
+    md_path: Path = typer.Argument(..., exists=True, dir_okay=False, help="MD inicial"),
+    work_dir: Path = typer.Option(..., "--work", "-w", help="Diretório de trabalho"),
+    iterations: int = typer.Option(3, "-n", "--iterations", help="Quantas iterações"),
+):
+    """Round-trip iterativo (N×): detecta convergência / drift / blow-up."""
+    _run([
+        _python(), str(_SRC_DIR / "multi_roundtrip.py"),
+        str(md_path), str(work_dir),
+        "--iterations", str(iterations),
+    ])
+
+
+@app.command()
+def aggr(
+    root_dir: Path = typer.Argument(..., exists=True, file_okay=False, help="Raiz com vários _stats.json recursivos"),
+    out: Path = typer.Option(None, "--out", help="Diretório do OVERVIEW (default: <root>)"),
+):
+    """Agrega múltiplos `_stats.json` em OVERVIEW consolidado.
+
+    Detecta distribuição de round-trip, outliers, comparativo entre extrações.
+    """
+    cmd = [_python(), str(_SRC_DIR / "aggregate_stats.py"), str(root_dir)]
+    if out:
+        cmd.extend(["--out", str(out)])
+    _run(cmd)
+
+
+@app.command()
+def pdfs(
+    target_dir: Path = typer.Argument(..., exists=True, file_okay=False, help="Diretório com capítulos MD"),
+):
+    """Renderiza cada capítulo MD em PDF via pandoc + Chrome + KaTeX.
+
+    Útil para validar visualmente o resultado antes de distribuir.
+    """
+    _run([_python(), str(_SRC_DIR / "gen_pdfs.py"), str(target_dir)])
+
+
+# ---------------------------------------------------------------------------
+# Macro: convert (one-shot inteligente)
+# ---------------------------------------------------------------------------
+
+@app.command()
+def convert(
+    pdf: Path = typer.Argument(..., exists=True, dir_okay=False, help="PDF a converter"),
+    out: Path = typer.Option(None, "--out", "-o", help="Diretório de saída (default: ./<pdf-basename>/)"),
+    book: bool = typer.Option(False, "--book", help="Força split por capítulo (default: auto via TOC)"),
+    paper: bool = typer.Option(False, "--paper", help="Força flat (sem restructure)"),
+    quick: bool = typer.Option(False, "--quick", "-q", help="Pula otimização + round-trip"),
+    best: bool = typer.Option(False, "--best", help="Otimização total + multi-roundtrip 3 iter"),
+    no_optimize: bool = typer.Option(False, "--no-optimize", help="Não otimiza imagens"),
+    no_stats: bool = typer.Option(False, "--no-stats", help="Não gera _stats.md"),
+    no_provenance: bool = typer.Option(False, "--no-provenance", help="Não marca proveniência"),
+):
+    """[MACRO] Pipeline completo: extract + restructure + optimize + stats + provenance.
+
+    Decide via auto-detect:
+    - Se PDF tem TOC nivel >= 2 ⇒ livro (restructure por capítulo)
+    - Senão ⇒ paper (flat)
+    Use --book / --paper para forçar.
+
+    Presets:
+    - --quick: pula otimize + skip rt
+    - --best: --no-optimize=false + rt-multi 3 iter
+
+    Cada etapa pode ser desligada com --no-*.
+    """
+    if book and paper:
+        typer.secho("--book e --paper são exclusivos", fg=typer.colors.RED)
+        raise typer.Exit(2)
+    if quick and best:
+        typer.secho("--quick e --best são exclusivos", fg=typer.colors.RED)
+        raise typer.Exit(2)
+
+    out = out or Path.cwd() / pdf.stem
+    out.mkdir(parents=True, exist_ok=True)
+
+    is_book = book or (not paper and _detect_book(pdf))
+    typer.secho(f"[pdf2md] convert {pdf.name} → {out}", bold=True)
+    typer.echo(f"  Layout: {'book (restructure por TOC)' if is_book else 'paper (flat)'}")
+    typer.echo(f"  Preset: {'quick' if quick else ('best' if best else 'default')}")
+
+    # 1. Extract
+    marker_out = out / "_marker_raw"
+    typer.secho("\n[1/5] extract (marker_single)...", bold=True)
+    extract(pdf, marker_out, page_range=None)  # type: ignore
+
+    # 2. Restructure (só se book)
+    if is_book:
+        typer.secho("\n[2/5] restruct...", bold=True)
+        restruct(out, pdf=pdf, marker_out=marker_out)  # type: ignore
+    else:
+        typer.echo("\n[2/5] restruct ⏭ (paper layout)")
+        # Move marker output direto para out/
+        for f in marker_out.rglob("*"):
+            if f.is_file():
+                tgt = out / f.relative_to(marker_out)
+                tgt.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(f, tgt)
+
+    # 3. Optimize
+    if not no_optimize and not quick:
+        typer.secho("\n[3/5] optimize (imagens)...", bold=True)
+        optimize(out, dry_run=False)  # type: ignore
+    else:
+        typer.echo("\n[3/5] optimize ⏭")
+
+    # 4. Stats
+    if not no_stats:
+        typer.secho("\n[4/5] stats...", bold=True)
+        stats(out, source_pdf=pdf, roundtrip_md1=None, roundtrip_md2=None)  # type: ignore
+    else:
+        typer.echo("\n[4/5] stats ⏭")
+
+    # 5. Provenance
+    if not no_provenance:
+        typer.secho("\n[5/5] provenance...", bold=True)
+        prov(
+            out,
+            pkg_version=None,
+            source=pdf.name,
+            sha256=str(pdf),  # calcula automaticamente via prov()
+            extractor="marker-pdf 1.10.2",
+            when=None,
+        )
+    else:
+        typer.echo("\n[5/5] provenance ⏭")
+
+    # Best mode: multi-roundtrip extra
+    if best:
+        typer.secho("\n[+] rt-multi (best mode, 3 iter)...", bold=True)
+        # Roda no primeiro MD encontrado (chapter 1 ou paper único)
+        first_md = next(out.rglob("*.md"), None)
+        if first_md:
+            work = out / "_roundtrip_work"
+            rt_multi(first_md, work_dir=work, iterations=3)  # type: ignore
+
+    typer.secho(f"\n✓ Pronto. Saída em {out}", bold=True, fg=typer.colors.GREEN)
+
+
+# ---------------------------------------------------------------------------
+# Help longo
+# ---------------------------------------------------------------------------
+
+@app.command("help")
+def help_cmd(
+    subcommand: str = typer.Argument(None, help="Nome do subcomando (omita para listar todos)"),
+):
+    """Mostra ajuda detalhada de um subcomando.
+
+    Exemplo: `pdf2md help convert`
+    """
+    if not subcommand:
+        # Mostra help geral
+        os.execvp(sys.argv[0], [sys.argv[0], "--help"])
+    else:
+        os.execvp(sys.argv[0], [sys.argv[0], subcommand, "--help"])
+
+
+if __name__ == "__main__":
+    app()

@@ -93,7 +93,8 @@ def apply_to_text(text: str, prov: Provenance) -> str:
 
     m = _HEADING_RE.search(text)
     if not m:
-        return text
+        # Sem heading explícito (ex.: MD começa com imagem ou prosa): prepend no topo.
+        return block + "\n" + text
     head_end = m.end()
     return text[:head_end] + "\n" + block + text[head_end:]
 
