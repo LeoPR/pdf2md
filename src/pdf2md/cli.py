@@ -68,14 +68,105 @@ app = typer.Typer(
 )
 
 
-def _run(cmd: list[str], *, check: bool = True, cwd: Path | None = None) -> subprocess.CompletedProcess:
-    """Roda comando externo e ecoa stderr."""
+def _run(
+    cmd: list[str],
+    *,
+    check: bool = True,
+    cwd: Path | None = None,
+    extra_env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess:
+    """Roda comando externo e ecoa stderr. `extra_env` é mesclado em os.environ."""
     typer.echo(f"$ {' '.join(str(c) for c in cmd)}", err=True)
-    return subprocess.run([str(c) for c in cmd], check=check, cwd=cwd)
+    env = None
+    if extra_env:
+        env = {**os.environ, **extra_env}
+    return subprocess.run([str(c) for c in cmd], check=check, cwd=cwd, env=env)
 
 
 def _python() -> str:
     return sys.executable
+
+
+def _detect_marker_version() -> str | None:
+    """Lê versão do marker-pdf no venv de DEFAULT_MARKER (via dist-info)."""
+    try:
+        marker_exe = Path(DEFAULT_MARKER)
+        if not marker_exe.exists():
+            return None
+        # Z:\venvs\marker\Scripts\marker_single.exe → Z:\venvs\marker\Lib\site-packages
+        venv = marker_exe.parent.parent
+        site_pkgs = venv / "Lib" / "site-packages"
+        for d in site_pkgs.glob("marker_pdf-*.dist-info"):
+            # marker_pdf-1.10.2.dist-info → "1.10.2"
+            name = d.name
+            return name.replace("marker_pdf-", "").replace(".dist-info", "")
+    except Exception:
+        pass
+    return None
+
+
+def _detect_torch_cuda_in_marker_venv() -> tuple[str | None, str | None, float | None]:
+    """Inspeciona torch+cuda no venv do marker (sem importar — só metadata)."""
+    try:
+        marker_exe = Path(DEFAULT_MARKER)
+        if not marker_exe.exists():
+            return None, None, None
+        venv_python = marker_exe.parent / "python.exe"
+        if not venv_python.exists():
+            return None, None, None
+        # Pergunta direto ao Python do venv do marker
+        result = subprocess.run(
+            [str(venv_python), "-c",
+             "import torch,json; "
+             "d=torch.cuda.get_device_name(0) if torch.cuda.is_available() else None; "
+             "m=round(torch.cuda.get_device_properties(0).total_memory/(1024**3),1) if torch.cuda.is_available() else None; "
+             "print(json.dumps({'torch':torch.__version__,'cuda':d,'mem':m}))"],
+            capture_output=True, text=True, timeout=15,
+        )
+        if result.returncode == 0:
+            import json as _json
+            data = _json.loads(result.stdout.strip())
+            return data.get("torch"), data.get("cuda"), data.get("mem")
+    except Exception:
+        pass
+    return None, None, None
+
+
+def _detect_pandoc_version() -> str | None:
+    """Versão do pandoc disponível no PATH."""
+    try:
+        result = subprocess.run(
+            [DEFAULT_PANDOC, "--version"], capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode == 0 and result.stdout:
+            line = result.stdout.splitlines()[0]
+            return line.replace("pandoc ", "").replace("pandoc.exe ", "").strip()
+    except Exception:
+        pass
+    return None
+
+
+def _build_external_env() -> dict[str, str]:
+    """Monta dict de env vars com versões reais das ferramentas externas.
+
+    Repassa para subprocess de stats.py (e similares) que rodam no venv do
+    pdf2md sem ter torch/marker importáveis localmente.
+    """
+    env: dict[str, str] = {}
+    mv = _detect_marker_version()
+    if mv:
+        env["PDF2MD_MARKER_VERSION"] = mv
+    tv, cuda, mem = _detect_torch_cuda_in_marker_venv()
+    if tv:
+        env["PDF2MD_TORCH_VERSION"] = tv
+    if cuda:
+        env["PDF2MD_CUDA_DEVICE"] = cuda
+    if mem is not None:
+        env["PDF2MD_CUDA_MEMORY_GB"] = str(mem)
+    pv = _detect_pandoc_version()
+    if pv:
+        env["PDF2MD_PANDOC_VERSION"] = pv
+    return env
 
 
 def _detect_book(pdf_path: Path) -> bool:
@@ -309,14 +400,17 @@ def stats(
 ):
     """Telemetria: tokens, fórmulas, imagens, headers + round-trip categorizado.
 
-    Gera `_stats.{md,json}` no diretório.
+    Gera `_stats.{md,json}` no diretório. As versões marker/torch/CUDA/pandoc
+    são auto-detectadas (do venv do marker via inspect, do pandoc no PATH) e
+    propagadas via env vars `PDF2MD_*` para que stats.py reporte versões reais
+    em vez de "n/a"/"CPU only" (regressão pegada em 2026-05-12).
     """
     cmd = [_python(), str(_SRC_DIR / "stats.py"), str(target_dir)]
     if source_pdf:
         cmd.extend(["--source-pdf", str(source_pdf)])
     if roundtrip_md1 and roundtrip_md2:
         cmd.extend(["--roundtrip", str(roundtrip_md1), str(roundtrip_md2)])
-    _run(cmd)
+    _run(cmd, extra_env=_build_external_env())
 
 
 @app.command("rt")

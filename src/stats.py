@@ -18,6 +18,7 @@ Uso:
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -47,33 +48,56 @@ def _run_safe(cmd, default="?"):
 
 
 def detect_tools() -> dict:
-    """Coleta versões dos tools usados no pipeline."""
+    """Coleta versões dos tools usados no pipeline.
+
+    Cada campo pode ser sobrescrito via env var `PDF2MD_<TOOL>_VERSION` ou
+    `PDF2MD_CUDA_DEVICE` — necessário quando stats.py roda num venv que não
+    tem marker/torch instalados (caso do venv principal do pdf2md, vs venv
+    dedicado do marker). `cli.py` popula essas vars antes de invocar stats.py.
+    """
     info = {
         "python": sys.version.split()[0],
         "platform": sys.platform,
     }
-    # marker (pacote chama-se marker-pdf no PyPI)
-    try:
-        from importlib.metadata import version as _v
-        info["marker"] = _v("marker-pdf")
-    except Exception:
+    # marker (pacote chama-se marker-pdf no PyPI). Override via env tem precedência.
+    if os.environ.get("PDF2MD_MARKER_VERSION"):
+        info["marker"] = os.environ["PDF2MD_MARKER_VERSION"]
+    else:
         try:
-            import marker
-            info["marker"] = getattr(marker, "__version__", "?")
-        except ImportError:
-            info["marker"] = "n/a"
+            from importlib.metadata import version as _v
+            info["marker"] = _v("marker-pdf")
+        except Exception:
+            try:
+                import marker
+                info["marker"] = getattr(marker, "__version__", "?")
+            except ImportError:
+                info["marker"] = "n/a"
     # torch + cuda
-    try:
-        import torch
-        info["torch"] = torch.__version__
-        info["cuda_available"] = torch.cuda.is_available()
-        if torch.cuda.is_available():
-            info["cuda_device"] = torch.cuda.get_device_name(0)
-            info["cuda_memory_gb"] = round(torch.cuda.get_device_properties(0).total_memory / (1024**3), 1)
-    except ImportError:
-        info["torch"] = "n/a"
+    if os.environ.get("PDF2MD_TORCH_VERSION"):
+        info["torch"] = os.environ["PDF2MD_TORCH_VERSION"]
+        cuda_dev = os.environ.get("PDF2MD_CUDA_DEVICE")
+        if cuda_dev:
+            info["cuda_available"] = True
+            info["cuda_device"] = cuda_dev
+            cuda_mem = os.environ.get("PDF2MD_CUDA_MEMORY_GB")
+            if cuda_mem:
+                info["cuda_memory_gb"] = float(cuda_mem)
+        else:
+            info["cuda_available"] = False
+    else:
+        try:
+            import torch
+            info["torch"] = torch.__version__
+            info["cuda_available"] = torch.cuda.is_available()
+            if torch.cuda.is_available():
+                info["cuda_device"] = torch.cuda.get_device_name(0)
+                info["cuda_memory_gb"] = round(torch.cuda.get_device_properties(0).total_memory / (1024**3), 1)
+        except ImportError:
+            info["torch"] = "n/a"
     # pandoc
-    if shutil.which("pandoc"):
+    if os.environ.get("PDF2MD_PANDOC_VERSION"):
+        info["pandoc"] = os.environ["PDF2MD_PANDOC_VERSION"]
+    elif shutil.which("pandoc"):
         v = _run_safe(["pandoc", "--version"])
         info["pandoc"] = v.replace("pandoc ", "") if v.startswith("pandoc ") else v
     else:
