@@ -165,6 +165,12 @@ def run_roundtrip(
 def _cli() -> int:
     """CLI standalone (compat com `python src/roundtrip.py md work`)."""
     import sys
+    # Windows default cp1252 quebra com subscripts unicode (MD₁/MD₂) no docstring.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
     if len(sys.argv) < 3:
         print(__doc__)
         return 1

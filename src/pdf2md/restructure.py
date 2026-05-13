@@ -308,6 +308,11 @@ def restructure(
 def _cli() -> int:
     """CLI standalone (compat com `python src/restructure.py PDF MARKER TARGET`)."""
     import sys
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
     if len(sys.argv) < 4:
         print(__doc__)
         return 1
