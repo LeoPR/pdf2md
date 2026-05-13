@@ -371,8 +371,25 @@ def restruct(
     """Reorganiza saída do marker em capítulos via TOC do PDF.
 
     Cria estrutura: target/01_titulo/01_titulo.md + images/ + index.md.
+    Usa pdf2md.restructure (importação direta, sem subprocess).
     """
-    _run([_python(), str(_SRC_DIR / "restructure.py"), str(pdf), str(marker_out), str(target_dir)])
+    from pdf2md.restructure import restructure as _restructure
+
+    typer.echo(f"[pdf2md restruct] {pdf.name} + {marker_out} → {target_dir}")
+
+    def _report(cid: str, chars: int, imgs: int, error: str | None) -> None:
+        if error:
+            typer.echo(f"  [pulo] {cid}: {error}")
+        else:
+            typer.echo(f"  [{cid}] {chars:,} chars, {imgs} imagens")
+
+    try:
+        counts = _restructure(pdf, marker_out, target_dir, on_chapter=_report)
+    except (ValueError, RuntimeError) as e:
+        typer.secho(f"[ERRO] {e}", fg=typer.colors.RED)
+        raise typer.Exit(1)
+
+    typer.echo(f"\n[OK] {len(counts)} capítulos em {target_dir}")
 
 
 @app.command()
@@ -474,11 +491,14 @@ def aggr(
     """Agrega múltiplos `_stats.json` em OVERVIEW consolidado.
 
     Detecta distribuição de round-trip, outliers, comparativo entre extrações.
+    Usa pdf2md.aggregate (importação direta, sem subprocess).
     """
-    cmd = [_python(), str(_SRC_DIR / "aggregate_stats.py"), str(root_dir)]
-    if out:
-        cmd.extend(["--out", str(out)])
-    _run(cmd)
+    from pdf2md.aggregate import aggregate, collect_docs
+    docs = collect_docs(root_dir)
+    typer.echo(f"[pdf2md aggr] {len(docs)} doc(s) com _stats.json em {root_dir}")
+    md_path, json_path = aggregate(root_dir, out)
+    typer.echo(f"[OK] {md_path}")
+    typer.echo(f"[OK] {json_path}")
 
 
 @app.command()
