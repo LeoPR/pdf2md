@@ -402,12 +402,25 @@ def optimize(
     """Otimização adaptativa de imagens (PNG paleta lossy / JPEG / B&W 1-bit).
 
     Classificador defensivo: continuous tone fica como JPEG, line art vira PNG paleta.
-    Gera `_image_optimization.{md,json}` por subdiretório.
+    Gera `_image_optimization.{md,json}` na raiz.
+    Usa pdf2md.optimize (importação direta, sem subprocess).
     """
-    cmd = [_python(), str(_SRC_DIR / "optimize_images.py"), str(target_dir)]
-    if dry_run:
-        cmd.append("--dry-run")
-    _run(cmd)
+    from pdf2md.optimize import fmt_bytes, optimize_dir
+    typer.echo(f"[pdf2md optimize] {target_dir}" + (" (dry-run)" if dry_run else ""))
+
+    def _progress(i: int, total: int, rec: dict) -> None:
+        if i % 20 == 0 or i == total:
+            typer.echo(f"  [{i}/{total}]")
+
+    json_path, md_path, summary = optimize_dir(
+        target_dir, dry_run=dry_run, on_progress=_progress,
+    )
+    typer.echo(f"[OK] {json_path}")
+    typer.echo(f"[OK] {md_path}")
+    typer.echo(
+        f"[RESUMO] {summary['changed']}/{summary['total_images']} convertidas, "
+        f"{fmt_bytes(summary['bytes_saved'])} ({summary['savings_pct']:.1f}%)"
+    )
 
 
 @app.command()
