@@ -146,27 +146,29 @@ def _detect_pandoc_version() -> str | None:
     return None
 
 
-def _build_external_env() -> dict[str, str]:
-    """Monta dict de env vars com versões reais das ferramentas externas.
+def _detect_external_tools() -> dict[str, str | float]:
+    """Monta dict de versões reais das ferramentas externas (kwargs para `pdf2md.stats`).
 
-    Repassa para subprocess de stats.py (e similares) que rodam no venv do
-    pdf2md sem ter torch/marker importáveis localmente.
+    Necessário porque pdf2md roda num venv distinto do marker (conflito histórico
+    pillow<11 vs pillow>=11). Detectamos versões inspecionando metadata do venv
+    do marker em vez de importar — assim stats reporta versões reais em vez de
+    `n/a`/`CPU only` (regressão pegada em 2026-05-12).
     """
-    env: dict[str, str] = {}
+    overrides: dict[str, str | float] = {}
     mv = _detect_marker_version()
     if mv:
-        env["PDF2MD_MARKER_VERSION"] = mv
+        overrides["marker_version"] = mv
     tv, cuda, mem = _detect_torch_cuda_in_marker_venv()
     if tv:
-        env["PDF2MD_TORCH_VERSION"] = tv
+        overrides["torch_version"] = tv
     if cuda:
-        env["PDF2MD_CUDA_DEVICE"] = cuda
+        overrides["cuda_device"] = cuda
     if mem is not None:
-        env["PDF2MD_CUDA_MEMORY_GB"] = str(mem)
+        overrides["cuda_memory_gb"] = mem
     pv = _detect_pandoc_version()
     if pv:
-        env["PDF2MD_PANDOC_VERSION"] = pv
-    return env
+        overrides["pandoc_version"] = pv
+    return overrides
 
 
 def _detect_book(pdf_path: Path) -> bool:
@@ -419,15 +421,20 @@ def stats(
 
     Gera `_stats.{md,json}` no diretório. As versões marker/torch/CUDA/pandoc
     são auto-detectadas (do venv do marker via inspect, do pandoc no PATH) e
-    propagadas via env vars `PDF2MD_*` para que stats.py reporte versões reais
-    em vez de "n/a"/"CPU only" (regressão pegada em 2026-05-12).
+    passadas como kwargs para `pdf2md.stats.compute_stats` — assim o relatório
+    mostra versões reais em vez de "n/a"/"CPU only" (regressão de 2026-05-12).
     """
-    cmd = [_python(), str(_SRC_DIR / "stats.py"), str(target_dir)]
-    if source_pdf:
-        cmd.extend(["--source-pdf", str(source_pdf)])
-    if roundtrip_md1 and roundtrip_md2:
-        cmd.extend(["--roundtrip", str(roundtrip_md1), str(roundtrip_md2)])
-    _run(cmd, extra_env=_build_external_env())
+    from pdf2md.stats import compute_stats
+    typer.echo(f"[pdf2md stats] {target_dir}")
+    json_path, md_path = compute_stats(
+        target_dir,
+        source_pdf=source_pdf,
+        roundtrip_md1=roundtrip_md1,
+        roundtrip_md2=roundtrip_md2,
+        tool_overrides=_detect_external_tools(),
+    )
+    typer.echo(f"[OK] {json_path}")
+    typer.echo(f"[OK] {md_path}")
 
 
 @app.command("rt")
