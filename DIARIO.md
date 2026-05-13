@@ -212,12 +212,57 @@ histórico tem mais info — round-trip 95.09%, versões marker/torch/CUDA
 Conteúdo MD é idêntico de qualquer forma. Próximo passo natural seria
 fix do `stats.py` para propagar metadados via flags (v0.4 cleanup).
 
+## 2026-05-13 — v0.4: scripts → módulos, env vars → kwargs
+
+Limpeza arquitetural em 5 batches, todos com tests/ acompanhando.
+
+Antes da v0.4 o `cli.py` delegava todo subcomando via `subprocess.run`
+chamando scripts em `src/*.py`. Funcionava mas tinha custos: cada chamada
+fork+spawn (lento no Windows), erros viravam stderr-eco em vez de
+exceções tratáveis, e a passagem de metadados (versões marker/torch/CUDA)
+exigia env vars `PDF2MD_*_VERSION` — um workaround para o fato do
+`stats.py` rodar num venv sem torch/marker importáveis (conflito histórico
+pillow<11 do marker vs pillow>=11 da otimização).
+
+A v0.4 inverte o fluxo. Cada script vira módulo importável em
+`pdf2md/<nome>.py` com:
+- Função top-level pública (`compute_stats`, `run_roundtrip`,
+  `optimize_dir`, etc.) recebendo paths + callbacks de progresso.
+- `_cli()` interno para compat com chamada standalone (preservada via
+  shims de ~13 linhas em `src/`).
+
+Os 5 batches (em ordem):
+1. `provenance` + `tests/` inicial (49 tests).
+2. `roundtrip`, `gen_pdfs`, `multi_roundtrip` migrados.
+3. `restructure`, `aggregate_stats` migrados. Bug de generalização achado
+   no test_restructure: assertion `chapters[0].id == "00_front_matter"`
+   era literal demais; trocado por `header_re is None`.
+4. `stats.py` (737 linhas, o maior). Trocou env var override por kwargs
+   em `detect_tools()` — precedência kwargs > env vars > auto-detect. CLI
+   agora passa metadados direto via `tool_overrides=...`. Env var
+   fallback preservado para compat com chamada standalone antiga.
+5. `optimize_images.py` (397 linhas, o último). Adicionou ProgressCb
+   `(i, total, record)` para o CLI renderizar progresso a cada 20 imagens.
+
+Estado final:
+- 79 testes em 7.01s (cobrindo todas as funções puras dos 7 módulos).
+- `cli.py` sem subprocess para subcomandos próprios — só ainda chama
+  `marker_single` externo (que vive em outro venv por design).
+- `src/` agora: 6 shims de 13 linhas + pacote `pdf2md/` com 9 módulos.
+
+Decisão de escopo: nenhuma feature nova nesta release. Só refactor +
+tests. Mas a base agora permite features impossíveis antes — por
+exemplo, `pdf2md aggr` pode passar dicts em memória entre módulos sem
+rodar `_stats.json` round-trip em disco. Próximas releases ganham
+velocidade de iteração.
+
+Tag `v0.4.0`. Próxima frente prevista: pesquisa (Frentes A-E) ou
+mini-corpus GT humano (T060) destravando validação não-circular do
+round-trip.
+
 ## Próximos passos planejados
 
 Ver [`ROADMAP.md`](ROADMAP.md) para o quadro completo. Curto prazo:
-- v0.4 cleanup: scripts em `src/*.py` viram módulos importáveis sob
-  `pdf2md/`, eliminam subprocess. `tests/` (smoke + unit). stats.py
-  recebe metadados via flags (fix regressão "n/a").
 - T060: mini-corpus GT humano (4-6h humanas) — destrava validação
   não-circular do round-trip.
 - T132: integrar potrace para vetorização SVG.

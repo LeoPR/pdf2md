@@ -17,8 +17,8 @@ amadureceu além do escopo daquela disciplina. Mora em
 | Multi-iteration round-trip (convergência) | Estável (97.4% após 5 iter no paper de teste) |
 | Telemetria por extração + agregada | Estável |
 | Compressão adaptativa de imagens | Nível 1-2 (PNG paleta lossy gated) |
-| Marcador de proveniência por arquivo | Estável (v0.3 — `pdf2md prov`) |
-| **CLI unificado `pdf2md` (T108)** | **MVP** — macro + 10 subcomandos finos |
+| Marcador de proveniência por arquivo | Estável (`pdf2md prov`) |
+| **CLI unificado `pdf2md`** | Estável (v0.4 — macro + 10 subcomandos sem subprocess) |
 | Restauração de artefatos JPEG | Roadmap (T137) |
 | Vetorização SVG (potrace) | Roadmap (T132) |
 | Detecção fórmula → LaTeX (pix2tex) | Roadmap (T133/T134) |
@@ -177,17 +177,18 @@ pdf2md/
 ├── ROADMAP.md         (frentes A-E + fases)
 ├── pyproject.toml     (deps mínimas: typer, pymupdf, pillow)
 ├── src/
-│   ├── pdf2md/        (pacote — ponto de entrada)
-│   │   ├── cli.py     (Typer app)
-│   │   ├── normalize.py
-│   │   └── provenance.py
-│   ├── stats.py       (scripts standalone que o cli.py delega via subprocess)
-│   ├── aggregate_stats.py
-│   ├── roundtrip.py
-│   ├── multi_roundtrip.py
-│   ├── optimize_images.py
-│   ├── gen_pdfs.py
-│   └── restructure.py
+│   ├── pdf2md/        (pacote — toda a lógica)
+│   │   ├── cli.py            (Typer app — macro convert + subcomandos)
+│   │   ├── normalize.py      (token-stream canônico p/ comparação)
+│   │   ├── provenance.py     (marcador idempotente)
+│   │   ├── stats.py          (compute_stats + telemetria)
+│   │   ├── aggregate.py      (overview multi-doc)
+│   │   ├── roundtrip.py      (MD→PDF→MD' single)
+│   │   ├── multi_roundtrip.py (N iterações + report)
+│   │   ├── pdfs.py           (md_to_pdf via pandoc+chrome)
+│   │   ├── restructure.py    (split por TOC + organize)
+│   │   └── optimize.py       (PNG paleta / JPEG / 1-bit)
+│   └── *.py           (shims de compat — re-exportam _cli do pacote)
 ├── lab/               (bancada experimental — eNN/ por experimento)
 ├── tickets/           (open/closed/research/blocked — agrupados em INDEX.md)
 ├── docs/
