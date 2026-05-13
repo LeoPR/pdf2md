@@ -421,8 +421,15 @@ def rt(
     """Round-trip single: MD → PDF → MD'. Mede similaridade de tokens.
 
     Reporta similaridade total + primeiras 5 divergências.
+    Usa o módulo pdf2md.roundtrip (importação direta, sem subprocess).
     """
-    _run([_python(), str(_SRC_DIR / "roundtrip.py"), str(md_path), str(work_dir)])
+    from pdf2md.roundtrip import run_roundtrip
+    typer.echo(f"[pdf2md rt] {md_path.name} → {work_dir}")
+    result = run_roundtrip(
+        md_path, work_dir,
+        pandoc=DEFAULT_PANDOC, chrome=DEFAULT_CHROME, marker=DEFAULT_MARKER,
+    )
+    typer.echo(result.render_text())
 
 
 @app.command("rt-multi")
@@ -431,12 +438,32 @@ def rt_multi(
     work_dir: Path = typer.Option(..., "--work", "-w", help="Diretório de trabalho"),
     iterations: int = typer.Option(3, "-n", "--iterations", help="Quantas iterações"),
 ):
-    """Round-trip iterativo (N×): detecta convergência / drift / blow-up."""
-    _run([
-        _python(), str(_SRC_DIR / "multi_roundtrip.py"),
-        str(md_path), str(work_dir),
-        "--iterations", str(iterations),
-    ])
+    """Round-trip iterativo (N×): detecta convergência / drift / blow-up.
+
+    Usa pdf2md.multi_roundtrip (importação direta, sem subprocess).
+    """
+    from pdf2md.multi_roundtrip import (
+        IterationResult,
+        run_multi_roundtrip,
+        write_report,
+    )
+    typer.echo(f"[pdf2md rt-multi] {md_path.name}, {iterations} iter → {work_dir}")
+
+    def _end(r: IterationResult) -> None:
+        if r.error:
+            typer.echo(f"  iter {r.i}: FALHA — {r.error}")
+        else:
+            typer.echo(f"  iter {r.i}: sim(MD₀) {r.sim_to_md0*100:.2f}%, {r.seconds:.0f}s")
+
+    report = run_multi_roundtrip(
+        md_path, work_dir,
+        iterations=iterations,
+        pandoc=DEFAULT_PANDOC, chrome=DEFAULT_CHROME, marker=DEFAULT_MARKER,
+        on_iter_end=_end,
+    )
+    json_path, md_out = write_report(report, work_dir)
+    typer.echo(f"\n[OK] {json_path}")
+    typer.echo(f"[OK] {md_out}")
 
 
 @app.command()
@@ -461,8 +488,22 @@ def pdfs(
     """Renderiza cada capítulo MD em PDF via pandoc + Chrome + KaTeX.
 
     Útil para validar visualmente o resultado antes de distribuir.
+    Usa pdf2md.pdfs (importação direta, sem subprocess).
     """
-    _run([_python(), str(_SRC_DIR / "gen_pdfs.py"), str(target_dir)])
+    from pdf2md.pdfs import find_chapter_mds, generate_all
+    targets = find_chapter_mds(target_dir)
+    typer.echo(f"[pdf2md pdfs] {len(targets)} capítulos em {target_dir}")
+
+    def _report(md: Path, pdf: Path | None, kb: float, err: Exception | None) -> None:
+        if err:
+            typer.echo(f"  {md.parent.name}/ FALHOU ({type(err).__name__}: {err})")
+        else:
+            typer.echo(f"  {md.parent.name}/ {kb:>6.0f} KB ✓")
+
+    ok, fail = generate_all(target_dir, on_progress=_report)
+    typer.echo(f"\n[OK] {ok}/{len(targets)}" + (f" — {fail} falhas" if fail else ""))
+    if fail:
+        raise typer.Exit(1)
 
 
 # ---------------------------------------------------------------------------
