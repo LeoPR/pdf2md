@@ -16,6 +16,8 @@ amadureceu além do escopo daquela disciplina. Mora em
 | Round-trip MD → PDF → MD' com similaridade | Estável |
 | Multi-iteration round-trip (convergência) | Estável (97.4% após 5 iter no paper de teste) |
 | Telemetria por extração + agregada | Estável |
+| Telemetria por step (wall/cpu/mem/gpu/io) | Estável (v0.5 — `pdf2md.telemetry`) |
+| Pixel-roundtrip visual (align + SSIM + WER) | Estável (v0.6 — `pdf2md rt-pixel`) |
 | Compressão adaptativa de imagens | Nível 1-2 (PNG paleta lossy gated) |
 | Marcador de proveniência por arquivo | Estável (`pdf2md prov`) |
 | **CLI unificado `pdf2md`** | Estável (v0.4 — macro + 10 subcomandos sem subprocess) |
@@ -189,7 +191,8 @@ pdf2md/
 │   │   ├── pdfs.py           (md_to_pdf via pandoc+chrome)
 │   │   ├── restructure.py    (split por TOC + organize)
 │   │   ├── optimize.py       (PNG paleta / JPEG / 1-bit)
-│   │   └── telemetry.py      (wall/cpu/mem/gpu/io por step — T085)
+│   │   ├── telemetry.py      (wall/cpu/mem/gpu/io por step — T085)
+│   │   └── pixel_roundtrip.py (validador visual L0.5 — align + SSIM + WER — T070)
 │   └── *.py           (shims de compat — re-exportam _cli do pacote)
 ├── lab/               (bancada experimental — eNN/ por experimento)
 ├── tickets/           (open/closed/research/blocked — agrupados em INDEX.md)

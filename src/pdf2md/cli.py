@@ -271,7 +271,7 @@ def version():
         from importlib.metadata import version as _v
         pkg_ver = _v("pdf2md")
     except Exception:
-        pkg_ver = "0.5.0 (uninstalled)"
+        pkg_ver = "0.6.0 (uninstalled)"
 
     commit = detect_current_commit() or "—"
     typer.echo(f"pdf2md {pkg_ver}  (commit {commit})")
@@ -467,6 +467,39 @@ def rt(
         pandoc=DEFAULT_PANDOC, chrome=DEFAULT_CHROME, marker=DEFAULT_MARKER,
     )
     typer.echo(result.render_text())
+
+
+@app.command("rt-pixel")
+def rt_pixel(
+    pdf_orig: Path = typer.Argument(..., exists=True, dir_okay=False, help="PDF original (source)"),
+    pdf_render: Path = typer.Argument(..., exists=True, dir_okay=False, help="PDF reconstruído (render do pdf2md)"),
+    align: str = typer.Option("hungarian", "--align", help="Alinhamento: hungarian | dtw"),
+    dpi: int = typer.Option(150, "--dpi", help="Resolução do render para SSIM"),
+    skip_ssim: bool = typer.Option(False, "--skip-ssim", help="Pula SSIM (modo rápido — só WER textual)"),
+    out: Path = typer.Option(None, "--out", help="Salvar JSON em path (default: stdout-only)"),
+):
+    """Pixel-roundtrip visual L0.5: alinha páginas + macro SSIM + médio WER.
+
+    Compara PDF original vs PDF reconstruído. Saída inclui mediana SSIM/WER,
+    flags de páginas problemáticas. Skip-SSIM ~7× mais rápido (só textual).
+    """
+    from pdf2md.pixel_roundtrip import run_pixel_roundtrip
+    typer.echo(f"[pdf2md rt-pixel] {pdf_orig.name} ↔ {pdf_render.name}")
+
+    def _progress(cur: int, total: int) -> None:
+        if cur == 1 or cur % 10 == 0 or cur == total:
+            typer.echo(f"  SSIM {cur}/{total}")
+
+    result = run_pixel_roundtrip(
+        pdf_orig, pdf_render,
+        align_method=align, dpi=dpi, skip_ssim=skip_ssim,
+        on_progress=None if skip_ssim else _progress,
+    )
+    typer.echo("")
+    typer.echo(result.render_text())
+    if out:
+        result.save_json(out)
+        typer.echo(f"\n[OK] {out}")
 
 
 @app.command("rt-multi")

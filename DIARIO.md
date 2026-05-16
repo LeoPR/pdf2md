@@ -290,6 +290,55 @@ Default agora levanta `FileExistsError` quando destino existe.
 `generate_all` passa `overwrite=True` explicitamente (re-runs são uso
 esperado). 81 tests passando (2 novos cobrindo o guard).
 
+## 2026-05-16 — v0.5.0 telemetria + v0.6.0 pixel-roundtrip
+
+Sessão de descoberta arquitetural seguida de duas releases.
+
+**Articulação meta** (memória `arquitetura-instrumento-mapa-roteador`):
+três camadas que orientam o desenvolvimento — instrumento (telemetria
+por step) → mapa (perfis dos algoritmos) → roteador (macro-intent
+profile-aware). Tickets T085 (telemetria) e T090 (roteador) abertos.
+
+**v0.5.0 — `pdf2md.telemetry` (T085 fechado)**
+Promovido de `lab/e10/telemetry.py` (validado overhead < 1% do wall-time).
+Captura wall/cpu/cpu%/rss/py-heap/gpu-vram/gpu-util/io/threads por step
+via context manager aninhado. Sampling em thread separada. Funciona sem
+GPU (degrada graceful). Auto-save JSON. Dep nova: `psutil`. 9 tests.
+
+**Cinco labs encadeados (e09-e13) para construir o pixel-roundtrip:**
+- e09: macro SSIM promove; bbox-IoU geom = 0 (coords absolutas incomparáveis)
+- e10: pareamento ingênuo block-a-block falha; primeira validação da
+  telemetria — `md_to_pdf` quase destruiu PDF original durante o lab
+  (achado T076)
+- e11: pareamento refinado (char 3-gram + top-K) também falha;
+  fragmentação fundamental entre PDFs com reflow é incompatível
+- e12: métricas globais per-page degeneram após acúmulo de reflow —
+  achado-bomba: pgs i vs i desalinham progressivamente (livro 45pg vs
+  render 49pg = 4pg deslocamento)
+- e13: alinhamento via Hungarian/DTW destrava — WER med vai de 0.96
+  (baseline) → 0.376 (Hungarian); cobertura "tolerável" (WER<0.60) vai
+  de 16% → 91%
+
+**v0.6.0 — `pdf2md.pixel_roundtrip` (T070 promovido parcial)**
+Pipeline consolidado: alinhamento Hungarian (default) ou DTW sobre WER
+per-page + macro SSIM por par alinhado + médio WER. Decisão arquitetural:
+**triângulo reduzido a 2 vértices** efetivos (macro + médio); micro
+(block-a-block) dropado porque e10/e11 mostraram que não é o caminho.
+CLI `pdf2md rt-pixel` com flag `--skip-ssim` (~7× mais rápido). 20 tests
+end-to-end com PDFs sintéticos.
+
+Deps novas: numpy, scipy, scikit-image (todas standard ML/sci stack).
+110 tests passing.
+
+**Bug colateral fixado em v0.4.1 (T076):** `md_to_pdf(md)` sobrescrevia
+silenciosamente PDF co-irmão com mesmo basename. Adicionado `out_pdf`
+opcional + `overwrite=False` default; raise `FileExistsError` quando
+destino existe.
+
+**Insight reaproveitável para T090 (roteador):** alinhamento textual
+~3s, macro SSIM ~22s para o mesmo dataset (45pgs). Preset `--rapido` pode
+skip-SSIM mantendo só alinhamento+WER (>7× mais rápido).
+
 ## Próximos passos planejados
 
 Ver [`ROADMAP.md`](ROADMAP.md) para o quadro completo. Curto prazo:
