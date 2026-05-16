@@ -275,6 +275,44 @@ WER pareado). Em "qualidade": macro + medio.
 e14 (ou direto em `src/pdf2md/pixel_roundtrip.py`): pipeline integrado
 alinhamento + macro + medio.
 
+## Achados do lab e14 (2026-05-16) — cross-PDF validation
+
+Pipeline `pdf2md.pixel_roundtrip` (v0.6.0) validado em 3 categorias
+distintas usando o módulo promovido (não cópia do lab):
+
+| Doc | Categoria | Pages | WER med | %<0.60 | SSIM med |
+|---|---|---:|---:|---:|---:|
+| arxiv_1706 | paper 2-col | 15/15 | **0.258** | 86.7% | 0.639 |
+| preskill_ph219 | notes 1-col | 54/46 | 0.395 | 87.0% | 0.610 |
+| cdc_mmwr | gov multi-col | 5/9 | 0.421 | 80.0% | 0.533 |
+| cap4 N&C (e13) | livro 1-col | 45/49 | 0.376 | 91.1% | — |
+
+**Todos passam critérios de promoção** (WER<0.70, SSIM>0.30, tempo<60s).
+Cap 4 N&C é **caso médio** — não favorável, confirma calibração.
+
+### Padrão emergente: monotonicidade
+
+- N == M (mesmo nº pgs): Hungarian tende a inversões locais (ainda OK,
+  é otimização global legítima)
+- N ≠ M significativo: Hungarian fica monotônico porque drift é caminho
+  mais barato
+
+### Limites identificados (sugestões para refinamento futuro)
+
+- Quando `bloat > 1.5×` (n_render/n_orig): DTW provavelmente melhor
+  que Hungarian (DTW many-to-one modela reflow naturalmente)
+- Flagear não-monotonicidade como info, não como rejeição
+
+### Pronto para integração em produção
+
+Próximos passos práticos:
+1. Adicionar como step opcional no `pdf2md convert --rt-pixel`
+2. Incluir agregados de pixel-roundtrip no `_stats.json`
+3. Heurística de algoritmo automática (Hungarian vs DTW)
+
+T070 pode ser **dividido em sub-tickets** ou marcado parcialmente
+fechado (módulo + CLI prontos; integração no convert macro pendente).
+
 ### Bônus
 
 - Telemetria (instrumentação local em `lab/e10/telemetry.py`) validou
