@@ -19,7 +19,7 @@ Decisão (memória `feedback_lab_workflow`): cada experimento tem seu próprio v
 
 ## Objetivo
 
-Documentar a convenção em `lab/README.md` e `docs/LAB_PROTOCOL.md` com comandos copiáveis para criar / ativar / descartar venv de experimento.
+Documentar a convenção em `lab/README.md` e `docs/how-to/criar_novo_lab.md` com comandos copiáveis para criar / ativar / descartar venv de experimento.
 
 ## Critérios de aceitação
 

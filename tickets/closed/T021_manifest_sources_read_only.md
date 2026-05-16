@@ -20,7 +20,7 @@ PDFs originais não devem morar dentro de `pdf2md/` — são pesados, não devem
 
 ## Objetivo
 
-Criar `corpus/_sources/MANIFEST.md` com schema YAML (bloco por entrada) e a primeira entrada concreta: N&C QCQI apontando para o path no AulaQuantum.
+Criar `docs/reference/corpus/manifest_sources.md` com schema YAML (bloco por entrada) e a primeira entrada concreta: N&C QCQI apontando para o path no AulaQuantum.
 
 ## Schema (resumo)
 
@@ -39,7 +39,7 @@ Hash sha256 detecta drift entre origin e local_copy quando ambos existem.
 
 ## Resultado
 
-`corpus/_sources/MANIFEST.md` criado. N&C registrado:
+`docs/reference/corpus/manifest_sources.md` criado. N&C registrado:
 
 - path: `C:/Users/leona/OneDrive/Documents/Projects/Acadêmicos/AulaQuantum/pesquisa_geral/_sources/livros/Nielsen_Chuang_QCQI.pdf`
 - sha256: `4090c88c294fbe428114256185118b6862d8716a14f9ebf2c7df258f28eb640e`

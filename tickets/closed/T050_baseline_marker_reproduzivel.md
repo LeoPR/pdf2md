@@ -72,6 +72,6 @@ A consequência: `stats.py` reportou `marker-pdf: n/a` e `torch: n/a` no output 
 
 ## Notas
 
-- N&C source vem do `corpus/_sources/MANIFEST.md` (path no AulaQuantum, read-only)
+- N&C source vem do `docs/reference/corpus/manifest_sources.md` (path no AulaQuantum, read-only)
 - Cap. 4 já tem MD extraído em `corpus/nielsen_chuang/04_quantum_circuits/` — pode ser usado como ground-truth do MD₁
 - Métrica primária ainda é token-similarity (T031 vai expandir, mas baseline pode usar a antiga para comparar com histórico)

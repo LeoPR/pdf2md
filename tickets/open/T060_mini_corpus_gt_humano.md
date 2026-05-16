@@ -13,7 +13,7 @@ kind: infra
 
 ## Contexto
 
-[`docs/LITERATURA.md`](../../docs/LITERATURA.md) §4 e [`docs/METRICS.md`](../../docs/METRICS.md) reconhecem que **round-trip não substitui GT humano** para validar fidelidade real do pipeline. Round-trip captura estabilidade (idempotência), mas erros silenciosos por simetria entre extrator e reconstrutor passam despercebidos.
+[`docs/explanation/literatura.md`](../../docs/explanation/literatura.md) §4 e [`docs/reference/metricas.md`](../../docs/reference/metricas.md) reconhecem que **round-trip não substitui GT humano** para validar fidelidade real do pipeline. Round-trip captura estabilidade (idempotência), mas erros silenciosos por simetria entre extrator e reconstrutor passam despercebidos.
 
 Para a **Frente A (Validação)** ficar completa, precisa de mini-corpus pequeno com MD canônico transcrito manualmente.
 
@@ -47,8 +47,8 @@ Cada página GT acompanhada de:
 
 ## Não-objetivo
 
-- Curar livro inteiro — 8-10 páginas representativas é suficiente para responder a Q1 da [LITERATURA.md §6](../../docs/LITERATURA.md)
-- Validar todas as métricas de [METRICS.md](../../docs/METRICS.md) — apenas WER-prosa + count-diffs nesta passagem
+- Curar livro inteiro — 8-10 páginas representativas é suficiente para responder a Q1 da [LITERATURA.md §6](../../docs/explanation/literatura.md)
+- Validar todas as métricas de [METRICS.md](../../docs/reference/metricas.md) — apenas WER-prosa + count-diffs nesta passagem
 - Automatizar a curadoria — é trabalho humano consciente, ~4-6h
 
 ## Esforço estimado

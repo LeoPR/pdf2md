@@ -1,11 +1,11 @@
 # MD canônico — schema do output do `pdf2md`
 
 > *Schema do MD + acessórios produzido pelo `pdf2md`. Qualquer conversor
-> futuro da família [transmutos](META_TRANSMUTOS.md) deve produzir
+> futuro da família [transmutos](../explanation/transmutos.md) deve produzir
 > output compatível com este schema para que MD seja pivot universal,
 > não dialeto.*
 
-Pré-condição "independência de subobjetos" do [META_TRANSMUTOS](META_TRANSMUTOS.md):
+Pré-condição "independência de subobjetos" do [META_TRANSMUTOS](../explanation/transmutos.md):
 uma fórmula extraída de PDF deve ser **indistinguível** de uma extraída
 de DOCX no MD canônico.
 
@@ -212,7 +212,7 @@ Sinais inequívocos no metadata:
 
 **Source original** do PDF (livro, paper) mora **fora do `corpus/`** —
 ou em `corpus/_sources/` (gitignored, referenciado em
-`corpus/_sources/MANIFEST.md` via path absoluto), ou em outro projeto
+`docs/reference/corpus/manifest_sources.md` via path absoluto), ou em outro projeto
 read-only (caso N&C → AulaQuantum).
 
 **Como confirmar antes de comparar PDFs**:

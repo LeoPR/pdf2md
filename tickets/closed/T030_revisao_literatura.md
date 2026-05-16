@@ -17,7 +17,7 @@ Antes de inventar métricas e comparar ferramentas, vale conhecer o que já foi 
 
 ## Objetivo
 
-Produzir `docs/LITERATURA.md` com revisão concisa cobrindo:
+Produzir `docs/explanation/literatura.md` com revisão concisa cobrindo:
 
 1. **Métricas estabelecidas** para conversão PDF→texto/MD:
    - WER (Word Error Rate) para texto
@@ -31,7 +31,7 @@ Produzir `docs/LITERATURA.md` com revisão concisa cobrindo:
 
 ## Critérios de aceitação
 
-- [ ] `docs/LITERATURA.md` existe, ~3-5 páginas
+- [ ] `docs/explanation/literatura.md` existe, ~3-5 páginas
 - [ ] Cada referência com link + 1-2 frases de relevância
 - [ ] Decisões iniciais informadas: que métricas adotar como base
 - [ ] Lista de questões abertas (que precisam de experimento real para responder)

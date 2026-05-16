@@ -21,7 +21,7 @@ Métrica atual (`SequenceMatcher` de tokens normalizados) reconhecidamente captu
 
 ## Objetivo
 
-Decidir, baseado na revisão de literatura (T030) e nas necessidades reais do projeto, **quais métricas adotar** e por quê. Documentar em `docs/METRICS.md`.
+Decidir, baseado na revisão de literatura (T030) e nas necessidades reais do projeto, **quais métricas adotar** e por quê. Documentar em `docs/reference/metricas.md`.
 
 Métricas candidatas (a discutir):
 
@@ -38,7 +38,7 @@ Métricas candidatas (a discutir):
 
 ## Critérios de aceitação
 
-- [ ] `docs/METRICS.md` existe com a lista escolhida
+- [ ] `docs/reference/metricas.md` existe com a lista escolhida
 - [ ] Cada métrica tem: definição, fórmula, threshold de "ok / atenção / falha"
 - [ ] Mapeamento métrica → categoria de PHILOSOPHY (conteúdo / estrutura / etc.)
 - [ ] Plano de implementação progressiva (começar por 2-3, expandir)

@@ -13,7 +13,7 @@ kind: infra
 
 ## Contexto
 
-`corpus/_canonical/MANIFEST.md` foi criado vazio (T021 + T022). Para validar o pipeline em casos reais e comparar com ferramentas alternativas (T410+), precisa de 8-12 PDFs públicos categorizados.
+`docs/reference/corpus/manifest_canonical.md` foi criado vazio (T021 + T022). Para validar o pipeline em casos reais e comparar com ferramentas alternativas (T410+), precisa de 8-12 PDFs públicos categorizados.
 
 ## Objetivo
 
@@ -33,7 +33,7 @@ Popular o manifest com PDFs livres (CC, public domain, arXiv) cobrindo as catego
 
 ## Critérios de aceitação
 
-- [x] 8-12 entradas no `corpus/_canonical/MANIFEST.md` — **8 entradas**
+- [x] 8-12 entradas no `docs/reference/corpus/manifest_canonical.md` — **8 entradas**
 - [x] Cada entrada com schema completo
 - [~] Pelo menos 1 PDF por categoria meta — **5/9 cobertas** (paper_math_heavy×2, multi_col_dense, livro_math_heavy×2, livro_classical_typography, scanned_image_only, paper_bio_med pendente)
 - [x] PDFs baixados em `Z:\caches\corpus\pdf2md\` — **7/8 baixados** (~84 MB total)

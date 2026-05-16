@@ -92,7 +92,7 @@ Quando publicarmos, os exemplos do `corpus/_canonical/` (sem N&C) cobrem o pipel
 
 ## Convenção para futuros sources proprietary
 
-Adicionados a `corpus/_sources/MANIFEST.md` (refs, não PDFs):
+Adicionados a `docs/reference/corpus/manifest_sources.md` (refs, não PDFs):
 - `license: proprietary` → automaticamente sinaliza "não redistribuir extração derivada"
 - Manter PDFs sempre fora do repo (`Z:\caches\corpus\` ou caminho absoluto em outro projeto)
 - Extrações ficam **fora** do versionado se a licença for proprietary

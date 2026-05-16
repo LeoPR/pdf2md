@@ -83,7 +83,7 @@ arxiv 2106           1.00   280.9   [OK]    normal      98.58  ✓
 
 - Origem: `lab/e03_atkins_wilson_scan/` (e194ad5)
 - Fecha implicitamente uma sub-investigação do [T450](T450_investigar_ibm_lesson_1_round_trip_critico.md): IBM lesson 1 agora tem categorização sistêmica, não é mais "outlier".
-- Complementa [`docs/METRICS.md`](../../docs/METRICS.md) — bloat_ratio é métrica de detecção, não de qualidade.
+- Complementa [`docs/reference/metricas.md`](../../docs/reference/metricas.md) — bloat_ratio é métrica de detecção, não de qualidade.
 
 ## Esforço final
 

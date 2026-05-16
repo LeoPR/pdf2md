@@ -9,7 +9,7 @@ depende_de: [T400]
 blocks: []
 tags: [corpus, free, test-data, licenses]
 kind: infra
-resolucao: substituído por T040 + corpus/_sources/MANIFEST.md
+resolucao: substituído por T040 + docs/reference/corpus/manifest_sources.md
 ---
 
 ## Resolução
@@ -17,7 +17,7 @@ resolucao: substituído por T040 + corpus/_sources/MANIFEST.md
 Fechado como **substituído** em 2026-05-11. A intenção original (lista de PDFs com URLs/licenças/categoria/tamanho/layout/math-density) foi cumprida com mais rigor por:
 
 - **T040** (closed): corpus canônico inicial com 8 entradas + 9 PDFs "sujos" (orientou e02)
-- **`corpus/_sources/MANIFEST.md`**: paths absolutos, SHA-256, tamanho, licença por entrada
+- **`docs/reference/corpus/manifest_sources.md`**: paths absolutos, SHA-256, tamanho, licença por entrada
 - **`docs/_archive/PDFS_SUJOS_CANDIDATOS.md`**: pesquisa histórica que orientou a expansão dos "sujos"
 
 Conteúdo original preservado abaixo como referência.

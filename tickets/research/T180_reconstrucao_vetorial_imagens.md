@@ -15,7 +15,7 @@ kind: experimento
 
 A imagem da logo Cambridge University Press em `corpus/nielsen_chuang/00_front_matter/images/_page_0_Picture_3.png` foi observação inicial ([T137](T137_denoising_jpeg_pre_compressao.md) nível 3): **se soubéssemos a fonte, o texto e a geometria, poderíamos re-renderizar perfeitamente, deixando só o brasão como bitmap pequeno**.
 
-Isso é o **Nível 4 do eixo de representação** ([PHILOSOPHY](../../docs/PHILOSOPHY.md)): texto vetorial + brasão residual.
+Isso é o **Nível 4 do eixo de representação** ([PHILOSOPHY](../../docs/explanation/philosophy.md)): texto vetorial + brasão residual.
 
 T160 cobre a etapa de extração ("imagem → texto + bitmap residual"); T180 trata a etapa de reconstrução ("dado texto + bitmap residual, render para imagem original").
 

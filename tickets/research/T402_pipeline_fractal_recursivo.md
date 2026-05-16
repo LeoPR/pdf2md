@@ -44,7 +44,7 @@ individuais desse padrão sem nomear que **são instâncias do mesmo
 template recursivo**. Sem articulação, viram features cosméticas; com
 articulação, viram peças composicionais de uma arquitetura coerente.
 
-Articulado em [PHILOSOPHY §"Validação por fechamento recursivo"](../../docs/PHILOSOPHY.md#validação-por-fechamento-recursivo-de-ciclos)
+Articulado em [PHILOSOPHY §"Validação por fechamento recursivo"](../../docs/explanation/philosophy.md#validação-por-fechamento-recursivo-de-ciclos)
 como L0→L5. Este ticket é o **meta** que organiza as instâncias.
 
 ## Decisão de arquitetura
@@ -64,7 +64,7 @@ measure(artefato_raw, artefato_render) -> métrica de fechamento
 - L3 (tabela→MD/HTML): TEDS ≥ 0.90
 - L4 (logo→texto+brasão): SSIM ≥ 0.95 + texto WER ≤ 5%
 
-Falhar critério ⇒ **descer um nível** ([PHILOSOPHY §"Eixo de representação"](../../docs/PHILOSOPHY.md#eixo-de-representação)).
+Falhar critério ⇒ **descer um nível** ([PHILOSOPHY §"Eixo de representação"](../../docs/explanation/philosophy.md#eixo-de-representação)).
 
 (D3) Reusar **mesma calibração** ([T072](T072_calibracao_reconstrutor.md))
 em cada nível: medir ruído base do reconstrutor naquele nível antes de
@@ -72,7 +72,7 @@ atribuir erro à extração.
 
 (D4) Compor erro globalmente: erro do documento = composição (não soma)
 dos erros locais por bbox/artefato. Triângulo macro/médio/micro
-([PHILOSOPHY §"Triângulo"](../../docs/PHILOSOPHY.md#triângulo-de-métricas-macro--médio--micro))
+([PHILOSOPHY §"Triângulo"](../../docs/explanation/philosophy.md#triângulo-de-métricas-macro--médio--micro))
 é a função de composição.
 
 ## Implicações práticas
@@ -85,7 +85,7 @@ dos erros locais por bbox/artefato. Triângulo macro/médio/micro
 
 ## Critérios de aceitação
 
-- [ ] Documentar o template recursivo em `docs/ARQUITETURA.md` (seção nova "Pipeline fractal por artefato")
+- [ ] Documentar o template recursivo em `docs/explanation/arquitetura.md` (seção nova "Pipeline fractal por artefato")
 - [ ] Atualizar T132, T133, T134, T180: cada um declara explicitamente
       sua tripla `(extract, reconstruct, measure)` no front matter ou
       seção "Método"
@@ -98,7 +98,7 @@ dos erros locais por bbox/artefato. Triângulo macro/médio/micro
 
 - Pelo menos 2 dos 4 tickets de artefato (T132, T133, T134, T180)
   alinhados ao template — então o padrão é demonstrado, não só descrito
-- Adicionar caso explícito em [META_TRANSMUTOS](../../docs/META_TRANSMUTOS.md):
+- Adicionar caso explícito em [META_TRANSMUTOS](../../docs/explanation/transmutos.md):
   "o padrão escala para a 2ª instância da família — pptx2md teria
   L0 (slide→MD), L1 (shape→SVG), L2 (fórmula embed→LaTeX), etc."
 
@@ -113,8 +113,8 @@ dos erros locais por bbox/artefato. Triângulo macro/médio/micro
 ## Conexão
 
 - Meta-design (kind: decisao)
-- Articula [PHILOSOPHY §"Validação por fechamento"](../../docs/PHILOSOPHY.md#validação-por-fechamento-recursivo-de-ciclos)
-- Articula [META_TRANSMUTOS §"Pré-condições estruturais"](../../docs/META_TRANSMUTOS.md#pré-condições-estruturais)
+- Articula [PHILOSOPHY §"Validação por fechamento"](../../docs/explanation/philosophy.md#validação-por-fechamento-recursivo-de-ciclos)
+- Articula [META_TRANSMUTOS §"Pré-condições estruturais"](../../docs/explanation/transmutos.md#pré-condições-estruturais)
 - Organiza [T132](T132_potrace_svg_line_art.md), [T133](T133_detector_de_formula.md),
   [T134](T134_pix2tex_formulas.md), [T180](T180_reconstrucao_vetorial_imagens.md)
 - Depende de [T401](../open/T401_documentar_hierarquia_de_prioridades.md) (já documentado em PHILOSOPHY)

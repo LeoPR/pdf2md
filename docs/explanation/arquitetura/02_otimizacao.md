@@ -1,6 +1,6 @@
 # Camada 2 — Otimização de representação
 
-*Imagens raw → representação mais semântica que não viola a 1ª prioridade (conteúdo). Ver [`../ARQUITETURA.md`](../ARQUITETURA.md) para o contexto e [`../PHILOSOPHY.md`](../PHILOSOPHY.md#eixo-de-representação) para os níveis de representação.*
+*Imagens raw → representação mais semântica que não viola a 1ª prioridade (conteúdo). Ver [`../ARQUITETURA.md`](../ARQUITETURA.md) para o contexto e [`../PHILOSOPHY.md`](../philosophy.md#eixo-de-representação) para os níveis de representação.*
 
 ---
 
@@ -142,8 +142,8 @@ Validado pelo experimento `lab/e01_baseline_corpus_categorias` (3 PDFs, 100% JPE
 
 ## Referências
 
-- T131: [`tickets/closed/T131_classificador_e_compressao_imagens_nc.md`](../../tickets/closed/T131_classificador_e_compressao_imagens_nc.md)
-- T130 meta: [`tickets/research/T130_image_optimization.md`](../../tickets/research/T130_image_optimization.md)
+- T131: [`tickets/closed/T131_classificador_e_compressao_imagens_nc.md`](../../../tickets/closed/T131_classificador_e_compressao_imagens_nc.md)
+- T130 meta: [`tickets/research/T130_image_optimization.md`](../../../tickets/research/T130_image_optimization.md)
 - potrace: [potrace.sourceforge.net](http://potrace.sourceforge.net/)
 - pix2tex: [lukas-blecher/LaTeX-OCR](https://github.com/lukas-blecher/LaTeX-OCR)
 - SSIM: Wang et al., *Image Quality Assessment* (2004); implementação em `scikit-image.metrics.structural_similarity`

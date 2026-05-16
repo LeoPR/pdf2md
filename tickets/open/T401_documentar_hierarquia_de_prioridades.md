@@ -18,7 +18,7 @@ Filosofia de design do conversor — qual prioridade quando há conflito.
 
 ### v1 (2026-05-07)
 
-Documentado em `docs/PHILOSOPHY.md` (originalmente `tools/pdf_md_converter/PHILOSOPHY.md`). 4 níveis:
+Documentado em `docs/explanation/philosophy.md` (originalmente `tools/pdf_md_converter/PHILOSOPHY.md`). 4 níveis:
 1. Conteúdo (palavras, fórmulas, números)
 2. Estrutura útil (headers, tabelas, imagens com semântica)
 3. Otimização intermediária (formato adaptativo, links externos)

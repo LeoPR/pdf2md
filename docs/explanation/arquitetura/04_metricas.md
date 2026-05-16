@@ -1,6 +1,6 @@
 # Camada 4 — Métrica e validação
 
-*MD₁ vs MD₂ → similarity, divergência categorizada. Decisão de métricas em [`../METRICS.md`](../METRICS.md); contexto em [`../ARQUITETURA.md`](../ARQUITETURA.md).*
+*MD₁ vs MD₂ → similarity, divergência categorizada. Decisão de métricas em [`../METRICS.md`](../../reference/metricas.md); contexto em [`../ARQUITETURA.md`](../ARQUITETURA.md).*
 
 ---
 
@@ -69,7 +69,7 @@
 
 4. **Por que 8 categorias e não mais?** Empírico — cobrem 95%+ dos deltas observados. `other` agrupa o resto (pontuação inesperada, unicode minus, etc.). Adicionar mais categorias adicionaria ruído.
 
-5. **Round-trip rebaixado a health-check em METRICS.md** — a literatura ([`LITERATURA.md §4`](../LITERATURA.md)) é unânime: round-trip captura estabilidade, não fidelidade. Erros silenciosos por simetria entre extrator e reconstrutor passam despercebidos. **Métrica primária real exige GT humano** (T060).
+5. **Round-trip rebaixado a health-check em METRICS.md** — a literatura ([`LITERATURA.md §4`](../literatura.md)) é unânime: round-trip captura estabilidade, não fidelidade. Erros silenciosos por simetria entre extrator e reconstrutor passam despercebidos. **Métrica primária real exige GT humano** (T060).
 
 ---
 
@@ -139,8 +139,8 @@ Refatorar para `src/pdf2md/normalize.py` quando T108 (packaging) for ativado.
 
 ## Referências
 
-- METRICS.md (decisão de painel): [`../METRICS.md`](../METRICS.md)
-- LITERATURA.md (limitação do round-trip): [`../LITERATURA.md §4`](../LITERATURA.md)
+- METRICS.md (decisão de painel): [`../METRICS.md`](../../reference/metricas.md)
+- LITERATURA.md (limitação do round-trip): [`../LITERATURA.md §4`](../literatura.md)
 - difflib SequenceMatcher: [docs.python.org](https://docs.python.org/3/library/difflib.html#difflib.SequenceMatcher)
 - TEDS: Zhong et al., [arXiv 1911.10683](https://arxiv.org/abs/1911.10683)
 - CDM: Wang et al., [arXiv 2409.03643](https://arxiv.org/abs/2409.03643)

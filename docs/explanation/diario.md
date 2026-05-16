@@ -2,7 +2,7 @@
 
 Timeline narrativa do projeto. Captura **por que** as decisões foram
 tomadas, em ordem cronológica. Para o estado atual, ver
-[`README.md`](README.md). Para roadmap, ver [`ROADMAP.md`](ROADMAP.md).
+[`README.md`](../../README.md). Para roadmap, ver [`ROADMAP.md`](../../ROADMAP.md).
 
 ---
 
@@ -61,7 +61,7 @@ qualquer livro/paper.
 4. **Formatação idêntica** (compactação como transporte)
 
 Quando há conflito, segue-se a hierarquia. Tudo isso fica em
-[`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md).
+[`philosophy.md`](philosophy.md).
 
 ### Telemetria virou relatório
 
@@ -172,7 +172,7 @@ O que veio do AulaQuantum:
 - `pesquisa_geral/livros/Quantum_..._Information/` → `pdf2md/corpus/nielsen_chuang/`
 - `pesquisa_geral/_sources/livros/Nielsen_Chuang_QCQI.pdf` → `pdf2md/corpus/_sources/` (gitignored)
 - Tickets T100-T199, T130-T137, T400-T499 → `pdf2md/tickets/`
-- `tools/pdf_md_converter/PHILOSOPHY.md` → `pdf2md/docs/PHILOSOPHY.md`
+- `tools/pdf_md_converter/PHILOSOPHY.md` → `pdf2md/docs/explanation/philosophy.md`
 
 O que ficou no AulaQuantum:
 - `pesquisa_geral/material_aulas/` (input dos slides da disciplina)
@@ -351,20 +351,20 @@ em `out/_pixel_roundtrip.json`. 110 tests passing.
 
 **Bloco de docs maturando a articulação:**
 
-- `docs/TECNOLOGIAS.md` (novo, ~250 linhas) — perfis cross-recursos.
+- `docs/reference/tecnologias.md` (novo, ~250 linhas) — perfis cross-recursos.
   Quatro categorias (GPU-bound ML, CPU-bound paralelo, CPU-bound single,
   I/O-bound subprocess) com dados empíricos dos labs e09-e14. Tabela de
   alternativas testadas (e07, e08, e06) com status nominal. Sugestão
   inicial de macro-intents (`--rapido` ~6min, `--qualidade` ~12min).
-- `docs/ANALISE_CRITICA.md` (novo, ~450 linhas) — revisão honesta do
+- `docs/explanation/analise_critica.md` (novo, ~450 linhas) — revisão honesta do
   curso. Decisões certas (bancada-suja, escopo nominal, triângulo,
   feedback memories), decisões erradas (paths hardcoded, docs > features,
   CSS hardcoded), surpresas técnicas (Hungarian > DTW na maioria,
   marker frágil em scans, SSIM nunca 0.95), backlog Q11-17 status,
   próximos passos por ROI estimado.
-- `docs/ARQUITETURA.md` atualizado — Camada 4 ganhou seção textual +
+- `docs/explanation/arquitetura.md` atualizado — Camada 4 ganhou seção textual +
   visual + instrumento; tabela de 15 labs com estado.
-- `docs/LITERATURA_v2.md` ganhou §7 atualizando Q15/Q16/Q11 status,
+- `docs/explanation/literatura.md` ganhou §7 atualizando Q15/Q16/Q11 status,
   registrando que pixel-roundtrip não tem precedente claro encontrado
   na literatura.
 - `ROADMAP.md` atualizado — frente A "avançada"; tabela alt-tools com
@@ -383,7 +383,7 @@ destrava T072, T410, Q13, Q14. 4-6h humanas resolvem; valor permanente.
 
 ## Próximos passos planejados
 
-Ver [`ROADMAP.md`](ROADMAP.md) para o quadro completo. Curto prazo:
+Ver [`ROADMAP.md`](../../ROADMAP.md) para o quadro completo. Curto prazo:
 - T060: mini-corpus GT humano (4-6h humanas) — destrava validação
   não-circular do round-trip.
 - T132: integrar potrace para vetorização SVG.
@@ -392,4 +392,4 @@ Ver [`ROADMAP.md`](ROADMAP.md) para o quadro completo. Curto prazo:
 
 ---
 
-*Este diário é apêndice histórico. Estado atual mora em [`README.md`](README.md).*
+*Este diário é apêndice histórico. Estado atual mora em [`README.md`](../../README.md).*

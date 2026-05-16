@@ -22,7 +22,7 @@ trabalhados sem se preocupar com setup.
 | [T022](closed/T022_cache_corpus_em_z.md) | (c) | Cache de corpus em `Z:\caches\corpus\pdf2md\` |
 | [T023](closed/T023_convencao_venv_por_experimento.md) | (c) | Convenção de venv por experimento |
 | [T024](closed/T024_reorganizacao_tickets_em_faixas.md) | (c) | Reorganização tickets em faixas (`kind:`) |
-| [T030](closed/T030_revisao_literatura.md) | (c) | Revisão de literatura inicial — `docs/LITERATURA.md` |
+| [T030](closed/T030_revisao_literatura.md) | (c) | Revisão de literatura inicial — `docs/explanation/literatura.md` |
 | [T040](closed/T040_corpus_canonico_inicial.md) | (c) | Corpus canônico (8/8-12 entradas; 5/9 categorias; PMC pendente) |
 | [T060](open/T060_mini_corpus_gt_humano.md) | (o) | Mini-corpus de GT humano (5-10 págs) — Frente A |
 | [T105](closed/T105_substituir_extracao_antiga_eliminar_v2_anti_padra.md) | (c) | Substituir extração antiga (eliminar `_v2`) |
@@ -88,7 +88,7 @@ Discussões arquiteturais que orientam outros tickets. Vivem aqui, não em `lab/
 
 | Ticket | Status | Título |
 |---|---|---|
-| [T031](closed/T031_definicao_de_metricas.md) | (c) | Definir métricas — `docs/METRICS.md` |
+| [T031](closed/T031_definicao_de_metricas.md) | (c) | Definir métricas — `docs/reference/metricas.md` |
 | [T100](research/T100_roadmap_conversor_pdf_md_bidirecional.md) | (r) | Roadmap conversor (meta original) |
 | [T400](research/T400_conversor_projeto_autonomo.md) | (r) | Conversor como projeto autônomo (meta) |
 | [T401](open/T401_documentar_hierarquia_de_prioridades.md) | (o) | Hierarquia de prioridades (PHILOSOPHY.md) |
@@ -104,13 +104,13 @@ Estado em **2026-05-10**: 9 macro-tickets fechados.
 
 | ID | Ticket | Estado | Saída |
 |---|---|---|---|
-| T020 | Estrutura `lab/` + protocolo | ✓ closed | `lab/`, `docs/LAB_PROTOCOL.md` |
-| T021 | Manifest sources read-only | ✓ closed | `corpus/_sources/MANIFEST.md` |
+| T020 | Estrutura `lab/` + protocolo | ✓ closed | `lab/`, `docs/how-to/criar_novo_lab.md` |
+| T021 | Manifest sources read-only | ✓ closed | `docs/reference/corpus/manifest_sources.md` |
 | T022 | Cache em `Z:\` | ✓ closed | `Z:\caches\corpus\pdf2md\` |
 | T023 | Convenção de venv por experimento | ✓ closed | docs em LAB_PROTOCOL |
 | T024 | Reorganização tickets em faixas | ✓ closed | `kind:` + `INDEX.md` |
-| T030 | Revisão de literatura | ✓ closed | `docs/LITERATURA.md` |
-| T031 | Definição de métricas | ✓ closed | `docs/METRICS.md` |
+| T030 | Revisão de literatura | ✓ closed | `docs/explanation/literatura.md` |
+| T031 | Definição de métricas | ✓ closed | `docs/reference/metricas.md` |
 | T040 | Corpus canônico inicial | ✓ closed | 8 entradas (7 baixadas + 1 PMC pendente). 5/9 categorias. |
 | T050 | Baseline marker reproduzível | ✓ closed | `lab/e00_baseline_marker/` (.frozen). Round-trip **95.09%** — bate histórico exato. |
 

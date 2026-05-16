@@ -2,7 +2,7 @@
 
 *Visão consolidada do conceito, das camadas e das ferramentas (v0.7.0, 2026-05-16).
 Para detalhes por camada, ver [`arquitetura/`](arquitetura/). Perfis cross-recursos
-em [`TECNOLOGIAS.md`](TECNOLOGIAS.md).*
+em [`TECNOLOGIAS.md`](../reference/tecnologias.md).*
 
 ---
 
@@ -42,7 +42,7 @@ como **validador permanente**:
 
 ### Por que round-trip
 
-Round-trip captura uma propriedade **mensurável** sem precisar de ground-truth: se MD → PDF → MD' converge, o pipeline preserva informação. Não é prova de fidelidade (literatura ressalta — ver [`LITERATURA.md §4`](LITERATURA.md)), mas é health-check excelente. Para fidelidade real, complementar com GT humano (T060 futuro).
+Round-trip captura uma propriedade **mensurável** sem precisar de ground-truth: se MD → PDF → MD' converge, o pipeline preserva informação. Não é prova de fidelidade (literatura ressalta — ver [`LITERATURA.md §4`](literatura.md)), mas é health-check excelente. Para fidelidade real, complementar com GT humano (T060 futuro).
 
 ---
 
@@ -115,7 +115,7 @@ Round-trip captura uma propriedade **mensurável** sem precisar de ground-truth:
 
 ## 3. Eixo de representação (transversal)
 
-Em paralelo às 4 camadas acima, cada elemento extraído pode subir/descer na escala de representação (definida em [`PHILOSOPHY.md`](PHILOSOPHY.md)):
+Em paralelo às 4 camadas acima, cada elemento extraído pode subir/descer na escala de representação (definida em [`PHILOSOPHY.md`](philosophy.md)):
 
 ```
 Nível 1 ──────────────────────────────────────────────────▶ Nível 5
@@ -150,13 +150,13 @@ arbitrário     lossless        (line art)       brasão residual     MD
 | **Alt-tools** (T410) | Nougat · MinerU · olmOCR · Docling | — | — | — |
 | **Empacotamento** | — | — | T107 · T108 | — |
 
-Símbolos: ✓ closed; sem símbolo = research/open. Lista completa de tickets em [`../tickets/INDEX.md`](../tickets/INDEX.md).
+Símbolos: ✓ closed; sem símbolo = research/open. Lista completa de tickets em [`../../tickets/INDEX.md`](../../tickets/INDEX.md).
 
 ---
 
 ## 5. Pipeline atual (orquestração)
 
-Pacote `pdf2md/` em [`../src/pdf2md/`](../src/pdf2md/) com 10 módulos:
+Pacote `pdf2md/` em [`../../src/pdf2md/`](../../src/pdf2md/) com 10 módulos:
 
 ```
 src/pdf2md/
@@ -260,4 +260,4 @@ Documentos novos desde a v0.4 (2026-05):
 - **ANALISE_CRITICA.md** (novo) — trajetória e revisão crítica
 - **LITERATURA_v2.md** — atualizações pós-experimentos lab/
 
-E os planos de execução estão em [`../ROADMAP.md`](../ROADMAP.md).
+E os planos de execução estão em [`../../ROADMAP.md`](../../ROADMAP.md).

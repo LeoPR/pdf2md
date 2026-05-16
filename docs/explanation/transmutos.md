@@ -31,7 +31,7 @@ MD → publicar como ODT).
 Para um conjunto suficientemente amplo de documentos textuais (livros,
 papers, slides, formulários, manuais), **MD + acessórios estruturados
 é representação canônica viável**. A 1ª-3ª prioridades da
-[PHILOSOPHY](PHILOSOPHY.md) (conteúdo + estrutura + otimização semântica)
+[PHILOSOPHY](philosophy.md) (conteúdo + estrutura + otimização semântica)
 fica preservada; a 4ª (layout idêntico) é deliberadamente abandonada.
 
 Acessórios cobrem o que MD puro não expressa:
@@ -55,7 +55,7 @@ seu próprio pipeline `extract → reconstruct → measure`. O conversor não
 trata o documento como blob; trata como composição de mini-pipelines.
 
 No `pdf2md` isso aparece como os níveis L0-L5 da
-[PHILOSOPHY §"Validação por fechamento recursivo"](PHILOSOPHY.md#validação-por-fechamento-recursivo-de-ciclos).
+[PHILOSOPHY §"Validação por fechamento recursivo"](philosophy.md#validação-por-fechamento-recursivo-de-ciclos).
 
 ### 2. Independência de subobjetos
 
@@ -82,7 +82,7 @@ estica MD para cobrir tudo.
 
 | Propriedade transmutos | Onde aparece no pdf2md |
 |---|---|
-| Modularidade por artefato | L0-L5 em [PHILOSOPHY](PHILOSOPHY.md); módulos `pdf2md/{stats,roundtrip,optimize,...}` |
+| Modularidade por artefato | L0-L5 em [PHILOSOPHY](philosophy.md); módulos `pdf2md/{stats,roundtrip,optimize,...}` |
 | Independência de subobjetos | MD output usa GFM padrão + KaTeX `$..$`; imagens em pasta `images/`; provenance em block separado |
 | MD como pivot expressivo | 4ª prioridade abandonada (formato idêntico); 1ª-3ª preservadas |
 | Validação por fechamento | round-trip MD↔PDF + (futuro) pixel-roundtrip; multi-iteration |
@@ -97,7 +97,7 @@ trabalho perdido — é investimento em arquitetura.
 Quando `pptx2md` (ou outro) começar, terá baixo custo se:
 
 - O MD canônico produzido pelo `pdf2md` for **bem documentado** (schema
-  + convenções de acessórios). [TODO: criar `docs/MD_CANONICAL.md`]
+  + convenções de acessórios). [TODO: criar `docs/reference/md_canonical.md`]
 - As métricas de validação forem **independentes do conversor de
   origem**. WER-prosa, TEDS, CDM, count-diffs são todas formato-agnósticas.
 - O reconstrutor MD → formato_destino for **modular** (pandoc + Chrome

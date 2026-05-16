@@ -108,4 +108,4 @@ Round-trip atinge **95.09% no N&C cap. 4** (controle). Em 3 PDFs do corpus canô
 - Tectonic: [tectonic-typesetting/tectonic](https://github.com/tectonic-typesetting/tectonic)
 - Typst: [typst.app](https://typst.app/)
 - WeasyPrint: [weasyprint.org](https://weasyprint.org/)
-- Comparação detalhada: [`../LITERATURA.md §5`](../LITERATURA.md)
+- Comparação detalhada: [`../LITERATURA.md §5`](../literatura.md)

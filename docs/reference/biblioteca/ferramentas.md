@@ -15,7 +15,7 @@
 - **Refs**: [repo](https://github.com/datalab-to/marker) · [benchmarks](https://github.com/datalab-to/marker/tree/master/benchmarks) · [releases](https://github.com/datalab-to/marker/releases)
 - **Sumário**: pipeline modular Surya (OCR + layout + table + equation) com opção `--use_llm`. Throughput alto. Math em LaTeX. Block-level OCR é default a partir de v1.10.x.
 - **Status no projeto**: **adotado** (extrator atual)
-- **Relação com**: backend é [Surya](#surya); foi o baseline em T050 (round-trip 95.09% no N&C cap. 4); `--use_llm` recomendado para AcroForm (ver [`papers.md` § forms](papers.md#formnet)); aparece em [`../ARQUITETURA.md`](../ARQUITETURA.md).
+- **Relação com**: backend é [Surya](#surya); foi o baseline em T050 (round-trip 95.09% no N&C cap. 4); `--use_llm` recomendado para AcroForm (ver [`papers.md` § forms](papers.md#formnet)); aparece em [`../ARQUITETURA.md`](../../explanation/arquitetura.md).
 - **Conflito v1×v2**: v1 mencionava 1.10.x genérico; v2 fixa v1.10.2 (31-jan-2026) com Surya 0.17.1.
 
 ### MinerU 2.5
@@ -27,7 +27,7 @@
 - **Refs**: [repo](https://github.com/opendatalab/MinerU)
 - **Sumário**: SOTA OmniDocBench v1.6 ~90.67 em 2025; excelente em CJK, tabelas truncadas, gráficos. VLM 1.2B + CPU possível com pipeline backend.
 - **Status no projeto**: **mapeado para futuro** (candidato a re-baseline em T050)
-- **Relação com**: avaliado em [OmniDocBench](benchmarks.md#omnidocbench); AGPL é o ponto chato para integração (ver [`../LICENSING.md`](../LICENSING.md)).
+- **Relação com**: avaliado em [OmniDocBench](benchmarks.md#omnidocbench); AGPL é o ponto chato para integração (ver [`../LICENSING.md`](../corpus/licensing.md)).
 
 ### MinerU 2.5-Pro
 
@@ -277,7 +277,7 @@
 - **Refs**: poppler.freedesktop.org
 - **Sumário**: Extrai texto puro de PDFs digitais. Não emite Markdown nem preserva estrutura.
 - **Status no projeto**: **referência apenas** (fallback minimal)
-- **Relação com**: mencionado em [v1 §3](../LITERATURA.md).
+- **Relação com**: mencionado em [v1 §3](../../explanation/literatura.md).
 
 ### PyMuPDF
 
@@ -325,7 +325,7 @@
 - **Refs**: [pandoc.org](https://pandoc.org/MANUAL.html) · [katex.org](https://katex.org/)
 - **Sumário**: Robusto, 95.09% round-trip no N&C cap. 4 (T050). KaTeX é subset do LaTeX, suficiente para 99% do que aparece em livros de QC. HTML/CSS, sem "look" LaTeX mas fiel.
 - **Status no projeto**: **adotado** (reconstrutor atual)
-- **Relação com**: usado no pipeline ([`../ARQUITETURA.md`](../ARQUITETURA.md)); falha em `\xymatrix` ou `tikz`; potencial substituição por [Tectonic](#tectonic) em Q8.
+- **Relação com**: usado no pipeline ([`../ARQUITETURA.md`](../../explanation/arquitetura.md)); falha em `\xymatrix` ou `tikz`; potencial substituição por [Tectonic](#tectonic) em Q8.
 
 ### Pandoc + pdflatex / lualatex
 
@@ -335,7 +335,7 @@
 - **Licença**: GPL-2.0 (Pandoc), LPPL (TeX Live)
 - **Refs**: [pandoc.org](https://pandoc.org/MANUAL.html)
 - **Sumário**: Maior fidelidade math/tipografia. Falha em pacotes não-canônicos. TeX Live ~5GB. Debugging chato. Lento.
-- **Status no projeto**: **avaliado e descartado** (peso de TeX Live, fidelidade tipográfica não é prioridade — ver [PHILOSOPHY 4ª prioridade](../PHILOSOPHY.md))
+- **Status no projeto**: **avaliado e descartado** (peso de TeX Live, fidelidade tipográfica não é prioridade — ver [PHILOSOPHY 4ª prioridade](../../explanation/philosophy.md))
 - **Relação com**: alternativa a [Pandoc + Chrome + KaTeX](#pandoc--chrome--katex-atual).
 
 ### Tectonic

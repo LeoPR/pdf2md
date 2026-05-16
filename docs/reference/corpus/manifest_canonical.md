@@ -2,7 +2,7 @@
 
 PDFs livres / open-access / public domain usados para benchmark e ablação. Cada entrada é re-baixável via URL — a cópia local em `Z:\caches\corpus\pdf2md\` é por comodidade.
 
-Para schema completo, ver [`../_sources/MANIFEST.md`](../_sources/MANIFEST.md). Aqui o `origin.type` será sempre `url`, e `license` sempre uma licença redistribuível.
+Para schema completo, ver [`manifest_sources.md`](manifest_sources.md). Aqui o `origin.type` será sempre `url`, e `license` sempre uma licença redistribuível.
 
 ## Cobertura desejada
 
@@ -21,7 +21,7 @@ Objetivo: corpus pequeno mas representativo das categorias problemáticas do con
 
 **17 entradas, 12 baixadas + 5 pendentes.** Cobre **9 das 11 categorias** (a
 taxonomia foi expandida em 2026-05-10 com categorias "sujas" — ver
-[`../_sources/MANIFEST.md`](../_sources/MANIFEST.md)).
+[`manifest_sources.md`](manifest_sources.md)).
 
 | categoria | entradas | baixadas |
 |---|---|---|
@@ -36,7 +36,7 @@ taxonomia foi expandida em 2026-05-10 com categorias "sujas" — ver
 | paper_bio_med | 2 | 0 (PMC bloqueia scrapers; ambos pendentes) |
 
 Gaps: `mobile_capture_scan` e `photo_collage_overlay` (sem fonte com
-licença redistribuível clara — documentado em [`../../docs/_archive/PDFS_SUJOS_CANDIDATOS.md`](../../docs/_archive/PDFS_SUJOS_CANDIDATOS.md)).
+licença redistribuível clara — documentado em [`../../_archive/PDFS_SUJOS_CANDIDATOS.md`](../../_archive/PDFS_SUJOS_CANDIDATOS.md)).
 
 Total em `Z:\caches\corpus\pdf2md\`: **12 PDFs, ~119 MB**.
 
@@ -319,7 +319,7 @@ notes: |
 
 ## Entradas — categoria "sujos" (2026-05-10)
 
-Documentos que **degradam o pipeline** intencionalmente. Origem da pesquisa em [`../../docs/_archive/PDFS_SUJOS_CANDIDATOS.md`](../../docs/_archive/PDFS_SUJOS_CANDIDATOS.md).
+Documentos que **degradam o pipeline** intencionalmente. Origem da pesquisa em [`../../_archive/PDFS_SUJOS_CANDIDATOS.md`](../../_archive/PDFS_SUJOS_CANDIDATOS.md).
 
 ### ocw_mit_6_0002_lec1 — MIT OCW 6.0002 Lecture 1
 

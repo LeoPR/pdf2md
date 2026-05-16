@@ -95,10 +95,10 @@ Glossário completo em [`glossario.md`](glossario.md).
 
 | Documento | Papel | Linka biblioteca |
 |---|---|---|
-| [`../METRICS.md`](../METRICS.md) | Painel de métricas adotado | `metricas.md` (M1, M2, M3, M4) |
-| [`../PHILOSOPHY.md`](../PHILOSOPHY.md) | Hierarquia conteúdo > estrutura > otimização > formato | — |
-| [`../ARQUITETURA.md`](../ARQUITETURA.md) | Pipeline atual (Marker + Pandoc + Chrome + KaTeX) | `ferramentas.md` |
-| [`../LICENSING.md`](../LICENSING.md) | GPL / AGPL / MIT / Apache implicações | `ferramentas.md` |
+| [`../METRICS.md`](../metricas.md) | Painel de métricas adotado | `metricas.md` (M1, M2, M3, M4) |
+| [`../PHILOSOPHY.md`](../../explanation/philosophy.md) | Hierarquia conteúdo > estrutura > otimização > formato | — |
+| [`../ARQUITETURA.md`](../../explanation/arquitetura.md) | Pipeline atual (Marker + Pandoc + Chrome + KaTeX) | `ferramentas.md` |
+| [`../LICENSING.md`](../corpus/licensing.md) | GPL / AGPL / MIT / Apache implicações | `ferramentas.md` |
 | `../../tickets/closed/T030_*` | Compilação literatura v1 | gera `LITERATURA.md` |
 | `../../tickets/closed/T031_*` | Definição de métricas | gera `../METRICS.md` |
 | `../../tickets/closed/T040_*` | Corpus canônico | usa `benchmarks.md` |
@@ -110,8 +110,8 @@ Glossário completo em [`glossario.md`](glossario.md).
 
 ## Compilados históricos (snapshots de pesquisa)
 
-- [`../LITERATURA.md`](../LITERATURA.md) — v1, 2026-05-10 (T030). Primeira compilação narrativa.
-- [`../LITERATURA_v2.md`](../LITERATURA_v2.md) — v2, 2026-05-10+. Complementa v1 com alucinação, releases 2025–2026, rebaixa CDM.
+- [`../LITERATURA.md`](../../explanation/literatura.md) — v1, 2026-05-10 (T030). Primeira compilação narrativa.
+- [`../LITERATURA_v2.md`](../../explanation/literatura.md) — v2, 2026-05-10+. Complementa v1 com alucinação, releases 2025–2026, rebaixa CDM.
 
 Para consulta atualizada, **usar esta biblioteca**. Os compilados ficam como referência para reconstruir o raciocínio em datas específicas.
 

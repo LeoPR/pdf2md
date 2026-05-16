@@ -1,6 +1,6 @@
 # Métricas — `pdf2md`
 
-*Decisão derivada de [`LITERATURA.md`](LITERATURA.md) (T030) e da hierarquia de [`PHILOSOPHY.md`](PHILOSOPHY.md). Ticket: [T031](../tickets/open/T031_definicao_de_metricas.md).*
+*Decisão derivada de [`LITERATURA.md`](../explanation/literatura.md) (T030) e da hierarquia de [`PHILOSOPHY.md`](../explanation/philosophy.md). Ticket: [T031](../../tickets/closed/T031_definicao_de_metricas.md).*
 
 Este documento define **quais métricas o `pdf2md` reporta** em cada extração e em cada experimento da bancada (`lab/`). A escolha é informada pela literatura de Document AI / OCR (2024–2026) e pela hierarquia de prioridades do projeto: **conteúdo > estrutura > otimização > formato**.
 
@@ -10,7 +10,7 @@ Este documento define **quais métricas o `pdf2md` reporta** em cada extração 
 
 Uma métrica só entra no painel se cumpre dois critérios:
 
-1. **Mapeia inequivocamente para uma camada da [PHILOSOPHY](PHILOSOPHY.md)** (1ª, 2ª, 3ª ou 4ª prioridade).
+1. **Mapeia inequivocamente para uma camada da [PHILOSOPHY](../explanation/philosophy.md)** (1ª, 2ª, 3ª ou 4ª prioridade).
 2. **É computável sem GT humano** OU **com GT humano em mini-corpus** já viável (5-10 páginas curadas).
 
 Métricas que misturam camadas (e.g. round-trip token similarity, que junta conteúdo + estrutura + formatação) são úteis como *health check* mas não como métrica primária — não dão para decidir o que melhorar.
@@ -32,7 +32,7 @@ Aplicado a toda extração via `stats.py` e a todo experimento `lab/eNN_*`. Thre
 
 ### M2. ~~CDM~~ → **LLM-as-judge** para fórmulas
 
-> **Atualização 2026-05-10 (via [LITERATURA_v2.md §5.2](LITERATURA_v2.md))**: CDM foi **rebaixada** a métrica secundária após Horn & Keuper ([arXiv 2512.09874](https://arxiv.org/abs/2512.09874), dez/2025) mostrarem que **LLM-as-judge correlaciona 2× melhor com julgamento humano** (Pearson r=0.78 vs CDM r=0.34) em fórmulas. CDM tem falsos positivos em erros estruturais e falsos negativos em símbolos Unicode (`\alpha` vs `α`).
+> **Atualização 2026-05-10 (via [LITERATURA_v2.md §5.2](../explanation/literatura.md))**: CDM foi **rebaixada** a métrica secundária após Horn & Keuper ([arXiv 2512.09874](https://arxiv.org/abs/2512.09874), dez/2025) mostrarem que **LLM-as-judge correlaciona 2× melhor com julgamento humano** (Pearson r=0.78 vs CDM r=0.34) em fórmulas. CDM tem falsos positivos em erros estruturais e falsos negativos em símbolos Unicode (`\alpha` vs `α`).
 >
 > **Recomendação atualizada**: M2 primária = LLM-as-judge (Gemini-2.0-flash ou GPT-4o); CDM mantém-se como secondary check (continua útil para *count* de fórmulas idênticas, falha em ranking fino).
 > Backlog Q13 (em LITERATURA_v2 §6.3) propõe validação concreta no nosso corpus.
@@ -173,7 +173,7 @@ Vira ticket dedicado (`T060` futuro): "Mini-corpus de GT humano para validação
 
 ## Referências chave
 
-Lista mínima — para revisão completa ver [`LITERATURA.md`](LITERATURA.md).
+Lista mínima — para revisão completa ver [`LITERATURA.md`](../explanation/literatura.md).
 
 - WER/CER em OCR: [OCR-D Quality Assurance spec](https://ocr-d.de/en/spec/ocrd_eval.html)
 - TEDS: Zhong et al., [arXiv 1911.10683](https://arxiv.org/abs/1911.10683)

@@ -23,7 +23,7 @@ Criar a estrutura física da bancada suja, com template para futuros experimento
 
 - [x] `lab/README.md` com convenções (naming, ciclo, venv, limpeza)
 - [x] `lab/_template/` com 4 arquivos: README.md, requirements.txt, run.ps1, RESULT.md
-- [x] `docs/LAB_PROTOCOL.md` com regras de promoção/descarte/congelamento
+- [x] `docs/how-to/criar_novo_lab.md` com regras de promoção/descarte/congelamento
 - [x] Status de experimento (sufixos `.live`/`.frozen`/`.discarded`) documentado
 - [x] Relação com tickets explícita (hipótese ↔ lab; infra/decisão ↔ ticket)
 

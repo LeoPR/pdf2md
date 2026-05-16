@@ -24,7 +24,7 @@ próprias** mesmo dado MD perfeito:
 Sem **calibração**, não dá pra distinguir "extração ruim" de
 "reconstrutor limitado". Métrica visual (T070) mistura os dois.
 
-Formulação em [PHILOSOPHY §"Calibração do reconstrutor"](../../docs/PHILOSOPHY.md#calibração-do-reconstrutor-como-instrumento):
+Formulação em [PHILOSOPHY §"Calibração do reconstrutor"](../../docs/explanation/philosophy.md#calibração-do-reconstrutor-como-instrumento):
 medir o ruído base da cadeia subtrai a perda fixa do reconstrutor.
 
 ## Hipótese
@@ -93,7 +93,7 @@ representação.
 - Depende de [T060](../open/T060_mini_corpus_gt_humano.md) (GT humano) — sem MD com
   garantia "tem toda a info", não dá pra medir o ruído base
 - Depende de [T070](T070_pixel_roundtrip_validador_visual.md) (pixel-roundtrip)
-- Vincula a [PHILOSOPHY §"Calibração"](../../docs/PHILOSOPHY.md#calibração-do-reconstrutor-como-instrumento)
+- Vincula a [PHILOSOPHY §"Calibração"](../../docs/explanation/philosophy.md#calibração-do-reconstrutor-como-instrumento)
 - Habilita [T402](T402_pipeline_fractal_recursivo.md) — calibração é a mesma ideia
   recursivamente em outros níveis (calibrar pix2tex contra LaTeX, calibrar
   potrace contra SVG vetorial puro, etc.)

@@ -1,6 +1,6 @@
 # Pipeline — orquestração
 
-*Como os scripts em [`../../src/`](../../src/) se compõem nas 4 camadas. Ver [`../ARQUITETURA.md`](../ARQUITETURA.md).*
+*Como os scripts em [`../../src/`](../../../src/) se compõem nas 4 camadas. Ver [`../ARQUITETURA.md`](../ARQUITETURA.md).*
 
 ---
 
@@ -166,7 +166,7 @@ CLI unificado com mesmo conjunto de flags. Refator de paths hard-coded acompanha
 | pandoc | 3.9 | sistema (`winget install pandoc` no Windows) |
 | Chrome | qualquer | sistema |
 
-Para a bancada experimental, cada `lab/eNN_*/requirements.txt` lista o que aquele experimento precisa em **seu próprio venv** (ver [`../LAB_PROTOCOL.md`](../LAB_PROTOCOL.md)).
+Para a bancada experimental, cada `lab/eNN_*/requirements.txt` lista o que aquele experimento precisa em **seu próprio venv** (ver [`../LAB_PROTOCOL.md`](../../how-to/criar_novo_lab.md)).
 
 ---
 

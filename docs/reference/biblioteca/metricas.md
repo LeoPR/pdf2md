@@ -1,6 +1,6 @@
 # Métricas — fichas catalográficas
 
-*Métricas de qualidade para PDF→MD: prosa, fórmulas, tabelas, estrutura, citações, imagens, hallucination. Painel adotado pelo projeto está em [`../METRICS.md`](../METRICS.md).*
+*Métricas de qualidade para PDF→MD: prosa, fórmulas, tabelas, estrutura, citações, imagens, hallucination. Painel adotado pelo projeto está em [`../METRICS.md`](../metricas.md).*
 
 ---
 
@@ -14,7 +14,7 @@
 - **Refs**: [OCR-D spec](https://ocr-d.de/en/spec/ocrd_eval.html) · [reading-order metrics arXiv 2404.18664](https://arxiv.org/html/2404.18664v1)
 - **Sumário**: `WER = (S+D+I)/N` sobre corpo de prosa após mascarar fórmulas (`$..$`, `$$..$$`), tabelas, code fences e callouts. Deriva de Levenshtein. Limitações: não distingue tokens de markup, sensível a reading order, ignora estrutura matemática.
 - **Status no projeto**: **adotado** (M1 primária; threshold ok ≤ 5%, atenção 5–10%, falha > 10%)
-- **Relação com**: camada 1ª (conteúdo) em [`../PHILOSOPHY.md`](../PHILOSOPHY.md); ver [`../METRICS.md` M1](../METRICS.md); complemento [WER-bag / BoW-WER](#bow-wer-bag-of-words-wer) para isolar erro de ordem.
+- **Relação com**: camada 1ª (conteúdo) em [`../PHILOSOPHY.md`](../../explanation/philosophy.md); ver [`../METRICS.md` M1](../metricas.md); complemento [WER-bag / BoW-WER](#bow-wer-bag-of-words-wer) para isolar erro de ordem.
 
 ### M2. LLM-as-judge (para fórmulas) — primária
 
@@ -24,7 +24,7 @@
 - **Refs**: [arXiv 2512.09874](https://arxiv.org/abs/2512.09874)
 - **Sumário**: LLM (Gemini-2.0-flash, GPT-4o) avalia pares (predicted, GT) de fórmulas. Pearson **r=0.78** com humanos em 100 PDFs sintéticos + 2.000 fórmulas + 750 ratings sobre 250 pares. **~2× melhor que [CDM](#cdm-character-detection-matching) (r=0.34)**.
 - **Status no projeto**: **adotado** (M2 primária; substitui CDM após v2 update)
-- **Relação com**: ver [`../METRICS.md` M2](../METRICS.md); top performers no paper: [Qwen3-VL](ferramentas.md#qwen3-vl--qwen36-plus) (9.76/10), Gemini 3 Pro (9.75), [PaddleOCR-VL](ferramentas.md#paddleocr-vl) (9.65), [Mathpix](ferramentas.md#mathpix) (9.64); Marker/Nougat/Docling não avaliados → gap T050; falha geral em métricas single-shot documentada em [Mirage of Hallucination Detection EMNLP 2025](papers.md#mirage-of-hallucination-detection-emnlp-2025).
+- **Relação com**: ver [`../METRICS.md` M2](../metricas.md); top performers no paper: [Qwen3-VL](ferramentas.md#qwen3-vl--qwen36-plus) (9.76/10), Gemini 3 Pro (9.75), [PaddleOCR-VL](ferramentas.md#paddleocr-vl) (9.65), [Mathpix](ferramentas.md#mathpix) (9.64); Marker/Nougat/Docling não avaliados → gap T050; falha geral em métricas single-shot documentada em [Mirage of Hallucination Detection EMNLP 2025](papers.md#mirage-of-hallucination-detection-emnlp-2025).
 - **Conflito v1×v2**: v1 recomendava CDM como primária; v2 (Horn & Keuper 2512.09874, 10-dez-2025) rebaixou após mostrar correlação 2× menor com humanos.
 
 ### M3. TEDS (Tree-Edit-Distance Similarity) — para tabelas
@@ -35,7 +35,7 @@
 - **Refs**: [arXiv 1911.10683](https://arxiv.org/abs/1911.10683)
 - **Sumário**: `TEDS(T₁,T₂) = 1 − EditDistance(T₁,T₂) / max(|T₁|,|T₂|)` sobre árvores HTML normalizadas. Padrão de facto para tabelas: OmniDocBench, Marker, Docling, MinerU reportam.
 - **Status no projeto**: **adotado** (M3 primária; threshold ok ≥ 0.90, atenção 0.70–0.90, falha < 0.70)
-- **Relação com**: introduzido com [PubTabNet](benchmarks.md#pubtabnet); GFM markdown não suporta colspan/rowspan → considerar HTML inline em tabelas complexas (Q5); [Granite-Docling](ferramentas.md#granite-docling-258m) reporta TEDS-S 0.97 FinTabNet; ver [`../METRICS.md` M3](../METRICS.md).
+- **Relação com**: introduzido com [PubTabNet](benchmarks.md#pubtabnet); GFM markdown não suporta colspan/rowspan → considerar HTML inline em tabelas complexas (Q5); [Granite-Docling](ferramentas.md#granite-docling-258m) reporta TEDS-S 0.97 FinTabNet; ver [`../METRICS.md` M3](../metricas.md).
 
 ### M4. Count-diffs (painel)
 
@@ -113,7 +113,7 @@
 - **Origem**: práticas de OCR de fórmula
 - **Sumário**: % de fórmulas que compilam sem erro (LaTeX → engine). Detecta hallucination estrutural.
 - **Status no projeto**: **adotado** (secundária; suspeita de hallucination)
-- **Relação com**: em painel com [CDM](#cdm-character-detection-matching) e count-diff; ver [v1 §1.4](../LITERATURA.md).
+- **Relação com**: em painel com [CDM](#cdm-character-detection-matching) e count-diff; ver [v1 §1.4](../../explanation/literatura.md).
 
 ### Citation F1 (Levenshtein normalizado)
 
@@ -153,7 +153,7 @@
 - **Refs**: ver [Wang et al. 2409.03643](papers.md#wang-et-al-2025-cdm) que documenta falhas
 - **Sumário**: Mesma fórmula tem múltiplas representações LaTeX equivalentes (`\frac` vs `\dfrac`), penalizadas como divergentes. Erros numéricos críticos ("1"→"7") podem receber BLEU alto. Recompensa estilo de tokenização similar ao do treino. ~64% concordância humana (vs 96% de CDM em 2025).
 - **Status no projeto**: **avaliado e descartado** (BLEU correlaciona mal com humanos em fórmulas)
-- **Relação com**: descartado em [v1 §1.3](../LITERATURA.md); rebaixado conjuntamente com [CDM](#cdm-character-detection-matching) por [LLM-as-judge](#m2-llm-as-judge-para-fórmulas-primária) (Horn & Keuper r~0 para text-similarity).
+- **Relação com**: descartado em [v1 §1.3](../../explanation/literatura.md); rebaixado conjuntamente com [CDM](#cdm-character-detection-matching) por [LLM-as-judge](#m2-llm-as-judge-para-fórmulas-primária) (Horn & Keuper r~0 para text-similarity).
 
 ### TeXBLEU
 
@@ -230,7 +230,7 @@
 - **Origem**: implementação local (`stats.py`)
 - **Sumário**: Compara MD₁ vs MD₂ após `MD → PDF → MD'`. Threshold ok ≥ 90%, atenção 80–90%, falha < 80%. Mistura erros do extrator com erros do reconstrutor.
 - **Status no projeto**: **rebaixado** (era proxy de qualidade; agora health check / regressão de pipeline)
-- **Relação com**: limitação documentada em [Moon et al. 2020](papers.md#moon-et-al-2020-rtt-quality-estimation), [Allamanis et al. 2024](papers.md#allamanis-et-al-2024-round-trip-correctness); ver [`../METRICS.md` § Token similarity](../METRICS.md); ver Q1 (gap RT vs GT humano).
+- **Relação com**: limitação documentada em [Moon et al. 2020](papers.md#moon-et-al-2020-rtt-quality-estimation), [Allamanis et al. 2024](papers.md#allamanis-et-al-2024-round-trip-correctness); ver [`../METRICS.md` § Token similarity](../metricas.md); ver Q1 (gap RT vs GT humano).
 - **Conflito v1×v2**: v1 já notava limitações; v2 reforça via [Mirage 2504.18114](papers.md#mirage-of-hallucination-detection-emnlp-2025) e mantém como health check.
 
 ### Multi-iteration round-trip drift

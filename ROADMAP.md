@@ -1,8 +1,8 @@
 # Roadmap
 
 *Atualizado 2026-05-16, v0.7.0. Para perfis cross-recursos das tecnologias
-ver [`docs/TECNOLOGIAS.md`](docs/TECNOLOGIAS.md); para análise crítica da
-trajetória ver [`docs/ANALISE_CRITICA.md`](docs/ANALISE_CRITICA.md).*
+ver [`docs/reference/tecnologias.md`](docs/reference/tecnologias.md); para análise crítica da
+trajetória ver [`docs/explanation/analise_critica.md`](docs/explanation/analise_critica.md).*
 
 Dois recortes complementares do trabalho:
 
@@ -33,17 +33,17 @@ Cada item aponta para tickets concretos em [`tickets/`](tickets/) e ao [`INDEX.m
                                   (futuro: WER, TEDS, CDM, count-diff)
 ```
 
-**Detalhamento completo**: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md). Por camada:
+**Detalhamento completo**: [`docs/explanation/arquitetura.md`](docs/explanation/arquitetura.md). Por camada:
 
 | Camada | Documento | Estado atual |
 |---|---|---|
-| 1 — Extração | [`docs/arquitetura/01_extracao.md`](docs/arquitetura/01_extracao.md) | marker-pdf 1.10.2 (GPU) |
-| 2 — Otimização | [`docs/arquitetura/02_otimizacao.md`](docs/arquitetura/02_otimizacao.md) | PNG paleta lossy (T131) |
-| 3 — Reconstrução | [`docs/arquitetura/03_reconstrucao.md`](docs/arquitetura/03_reconstrucao.md) | pandoc + Chrome + KaTeX |
-| 4 — Métrica | [`docs/arquitetura/04_metricas.md`](docs/arquitetura/04_metricas.md) | round-trip 95.09% N&C, 91-99% corpus |
-| Pipeline | [`docs/arquitetura/05_pipeline.md`](docs/arquitetura/05_pipeline.md) | scripts standalone em `src/` |
+| 1 — Extração | [`docs/explanation/arquitetura/01_extracao.md`](docs/explanation/arquitetura/01_extracao.md) | marker-pdf 1.10.2 (GPU) |
+| 2 — Otimização | [`docs/explanation/arquitetura/02_otimizacao.md`](docs/explanation/arquitetura/02_otimizacao.md) | PNG paleta lossy (T131) |
+| 3 — Reconstrução | [`docs/explanation/arquitetura/03_reconstrucao.md`](docs/explanation/arquitetura/03_reconstrucao.md) | pandoc + Chrome + KaTeX |
+| 4 — Métrica | [`docs/explanation/arquitetura/04_metricas.md`](docs/explanation/arquitetura/04_metricas.md) | round-trip 95.09% N&C, 91-99% corpus |
+| Pipeline | [`docs/explanation/arquitetura/05_pipeline.md`](docs/explanation/arquitetura/05_pipeline.md) | scripts standalone em `src/` |
 
-Eixo ortogonal de **representação** (raster → texto semântico) em [`docs/PHILOSOPHY.md §"Eixo de representação"`](docs/PHILOSOPHY.md).
+Eixo ortogonal de **representação** (raster → texto semântico) em [`docs/explanation/philosophy.md §"Eixo de representação"`](docs/explanation/philosophy.md).
 
 ---
 
@@ -56,9 +56,9 @@ decrescente. Trabalho ativo segue ordem alfabética dentro do que está prioriza
 | Frente | Conteúdo | Tickets | Estado (2026-05-16) |
 |---|---|---|---|
 | **A — Validação** | round-trip textual + visual + GT humano + multi-iteration; instrumentação | [T050](tickets/closed/T050_baseline_marker_reproduzivel.md) ✓, [T060](tickets/open/T060_mini_corpus_gt_humano.md) (open), [T070](tickets/research/T070_pixel_roundtrip_validador_visual.md) (parcial v0.6), [T072](tickets/research/T072_calibracao_reconstrutor.md), [T085](tickets/closed/T085_telemetry_module.md) ✓ v0.5, [T076](tickets/closed/T076_md_to_pdf_overwrite_silencioso.md) ✓ v0.4.1 | **avançada** — pixel-roundtrip pipeline pronto (v0.6+v0.7); falta GT humano + calibração |
-| **B — Captura textual** | máximo de texto incluindo OCR de imagens-com-texto; preserva 1ª prioridade da [PHILOSOPHY](docs/PHILOSOPHY.md) | [T101](tickets/closed/T101_marker_pdf_extraction_com_gpu_rtx_3060.md) ✓, [T160](tickets/research/T160_ocr_semantico_generalizado.md) (research) | parcial; T160 generaliza |
+| **B — Captura textual** | máximo de texto incluindo OCR de imagens-com-texto; preserva 1ª prioridade da [PHILOSOPHY](docs/explanation/philosophy.md) | [T101](tickets/closed/T101_marker_pdf_extraction_com_gpu_rtx_3060.md) ✓, [T160](tickets/research/T160_ocr_semantico_generalizado.md) (research) | parcial; T160 generaliza |
 | **C — Captura estrutural** | tabelas, headers, fórmulas e imagens com semântica preservada (2ª prioridade) | [T102](tickets/closed/T102_restructure_output_por_capitulo_indexmd.md) ✓, [T132](tickets/research/T132_potrace_svg_line_art.md), [T133](tickets/research/T133_detector_de_formula.md), [T134](tickets/research/T134_pix2tex_formulas.md) | em progresso |
-| **D — Otimização de representação** | formato adaptativo, lossless, denoise; ascende no [eixo de representação](docs/PHILOSOPHY.md#eixo-de-representação) | [T131](tickets/closed/T131_classificador_e_compressao_imagens_nc.md) ✓, [T135](tickets/research/T135_ssim_gate_qualidade.md), [T136](tickets/closed/T136_breakdown_formato_stats.md) ✓, [T137](tickets/research/T137_denoising_jpeg_pre_compressao.md) | parcial |
+| **D — Otimização de representação** | formato adaptativo, lossless, denoise; ascende no [eixo de representação](docs/explanation/philosophy.md#eixo-de-representação) | [T131](tickets/closed/T131_classificador_e_compressao_imagens_nc.md) ✓, [T135](tickets/research/T135_ssim_gate_qualidade.md), [T136](tickets/closed/T136_breakdown_formato_stats.md) ✓, [T137](tickets/research/T137_denoising_jpeg_pre_compressao.md) | parcial |
 | **E — Reconstrução vetorial** | texto + fonte + geometria + brasão residual; Nível 4 do eixo de representação | [T180](tickets/research/T180_reconstrucao_vetorial_imagens.md) (research) | ambição — ainda 0% |
 | **Meta-design** | tese da família + roteamento profile-aware | [T401](tickets/open/T401_documentar_hierarquia_de_prioridades.md), [T402](tickets/research/T402_pipeline_fractal_recursivo.md), [T090](tickets/research/T090_macro_intent_routing.md) | **avançada** — PHILOSOPHY + META_TRANSMUTOS + MD_CANONICAL + TECNOLOGIAS prontos; routing pendente |
 

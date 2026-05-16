@@ -22,7 +22,7 @@ mede similaridade só no eixo **texto**: `compare(MD₁, MD₂)` via
 - Fórmulas que falham silenciosamente no KaTeX (viram pixel quando o
   rendering falha mas o `$..$` permanece "válido" como texto)
 
-A formulação de [PHILOSOPHY §"Validação por fechamento recursivo"](../../docs/PHILOSOPHY.md#validação-por-fechamento-recursivo-de-ciclos)
+A formulação de [PHILOSOPHY §"Validação por fechamento recursivo"](../../docs/explanation/philosophy.md#validação-por-fechamento-recursivo-de-ciclos)
 nomeia esse nível como **L0.5** (documento visual). Falta instrumentar.
 
 Assimetria importante: `PDF → imagem` é **operação determinística**
@@ -34,7 +34,7 @@ Diferente de `PDF → MD` que é ill-posed. Isso torna o pivot visual
 ## Hipótese
 
 Métrica visual decomposta em **triângulo macro / médio / micro**
-(definido em [PHILOSOPHY §"Triângulo de métricas"](../../docs/PHILOSOPHY.md#triângulo-de-métricas-macro--médio--micro))
+(definido em [PHILOSOPHY §"Triângulo de métricas"](../../docs/explanation/philosophy.md#triângulo-de-métricas-macro--médio--micro))
 **discrimina** erro de extração vs erro de reconstrução:
 
 - Macro cai, médio cai, micro **OK** → erro de **reconstrução** (info
@@ -118,7 +118,7 @@ empiricamente em cap 4 N&C (45 pgs livro vs 49 pgs reconstruído). Resultados:
   destruiu o PDF render em `corpus/`. Ver [T076](T076_md_to_pdf_overwrite_silencioso.md).
 - **PDF em `corpus/<doc>/<cap>/<cap>.pdf` NÃO é source** — é gerado pelo
   `md_to_pdf` (metadata: HeadlessChrome+Skia). Source verdadeiro mora
-  no AulaQuantum. Documentado em [MD_CANONICAL §"Acessórios"](../../docs/MD_CANONICAL.md#arquivos-acessórios).
+  no AulaQuantum. Documentado em [MD_CANONICAL §"Acessórios"](../../docs/reference/md_canonical.md#arquivos-acessórios).
 
 ### Replanejamento de critérios
 
@@ -329,4 +329,4 @@ fechado (módulo + CLI prontos; integração no convert macro pendente).
 - Sub-mecanismo de [T402](T402_pipeline_fractal_recursivo.md) (meta)
 - Bloqueia/bloqueado por [T076](T076_md_to_pdf_overwrite_silencioso.md) (bug do reconstrutor)
 - Validado empiricamente em `lab/e09_pixel_roundtrip_proto/`
-- Vincula a [PHILOSOPHY §"Validação por fechamento"](../../docs/PHILOSOPHY.md#validação-por-fechamento-recursivo-de-ciclos) e §"Triângulo"
+- Vincula a [PHILOSOPHY §"Validação por fechamento"](../../docs/explanation/philosophy.md#validação-por-fechamento-recursivo-de-ciclos) e §"Triângulo"

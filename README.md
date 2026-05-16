@@ -27,18 +27,18 @@ amadureceu além do escopo daquela disciplina. Mora em
 | Reconstrução vetorial de logos | Roadmap | — | T180 (texto+fonte+brasão) |
 | Macro-intent CLI (`--rapido`/`--auto`) | Roadmap | — | T090 (depende mapa de perfis) |
 | Mini-corpus GT humano | Roadmap | — | T060 (destrava T072 calibração) |
-| Alt-tools (Nougat/MinerU/olmOCR/Docling) | Pesquisa | — | T410, e06/e07/e08 descartados — ver [`docs/TECNOLOGIAS.md`](docs/TECNOLOGIAS.md) |
+| Alt-tools (Nougat/MinerU/olmOCR/Docling) | Pesquisa | — | T410, e06/e07/e08 descartados — ver [`docs/reference/tecnologias.md`](docs/reference/tecnologias.md) |
 
 **Documentação:**
-- Arquitetura completa: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
-- Filosofia de design: [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md)
-- Tese da família transmutos: [`docs/META_TRANSMUTOS.md`](docs/META_TRANSMUTOS.md)
-- Schema do MD canônico: [`docs/MD_CANONICAL.md`](docs/MD_CANONICAL.md)
-- **Perfis de tecnologias (tempo/mem/gpu)**: [`docs/TECNOLOGIAS.md`](docs/TECNOLOGIAS.md)
-- **Análise crítica do curso**: [`docs/ANALISE_CRITICA.md`](docs/ANALISE_CRITICA.md)
-- Painel de métricas: [`docs/METRICS.md`](docs/METRICS.md)
-- Revisão de literatura: [`docs/LITERATURA.md`](docs/LITERATURA.md) · [`v2`](docs/LITERATURA_v2.md)
-- Bancada experimental: [`docs/LAB_PROTOCOL.md`](docs/LAB_PROTOCOL.md)
+- Arquitetura completa: [`docs/explanation/arquitetura.md`](docs/explanation/arquitetura.md)
+- Filosofia de design: [`docs/explanation/philosophy.md`](docs/explanation/philosophy.md)
+- Tese da família transmutos: [`docs/explanation/transmutos.md`](docs/explanation/transmutos.md)
+- Schema do MD canônico: [`docs/reference/md_canonical.md`](docs/reference/md_canonical.md)
+- **Perfis de tecnologias (tempo/mem/gpu)**: [`docs/reference/tecnologias.md`](docs/reference/tecnologias.md)
+- **Análise crítica do curso**: [`docs/explanation/analise_critica.md`](docs/explanation/analise_critica.md)
+- Painel de métricas: [`docs/reference/metricas.md`](docs/reference/metricas.md)
+- Revisão de literatura: [`docs/explanation/literatura.md`](docs/explanation/literatura.md) · [`v2`](docs/explanation/literatura.md)
+- Bancada experimental: [`docs/how-to/criar_novo_lab.md`](docs/how-to/criar_novo_lab.md)
 
 ---
 
@@ -185,44 +185,33 @@ pdf2md norm file.md --strip-escapes     # Q11.b (form-fields)
 
 ```
 pdf2md/
-├── README.md          (este arquivo — manual de uso)
-├── DIARIO.md          (timeline narrativa do projeto)
-├── ROADMAP.md         (frentes A-E + fases)
-├── pyproject.toml     (deps mínimas: typer, pymupdf, pillow)
-├── src/
-│   ├── pdf2md/        (pacote — toda a lógica)
-│   │   ├── cli.py            (Typer app — macro convert + subcomandos)
-│   │   ├── normalize.py      (token-stream canônico p/ comparação)
-│   │   ├── provenance.py     (marcador idempotente)
-│   │   ├── stats.py          (compute_stats + telemetria)
-│   │   ├── aggregate.py      (overview multi-doc)
-│   │   ├── roundtrip.py      (MD→PDF→MD' single)
-│   │   ├── multi_roundtrip.py (N iterações + report)
-│   │   ├── pdfs.py           (md_to_pdf via pandoc+chrome)
-│   │   ├── restructure.py    (split por TOC + organize)
-│   │   ├── optimize.py       (PNG paleta / JPEG / 1-bit)
-│   │   ├── telemetry.py      (wall/cpu/mem/gpu/io por step — T085)
-│   │   └── pixel_roundtrip.py (validador visual L0.5 — align + SSIM + WER — T070)
-│   └── *.py           (shims de compat — re-exportam _cli do pacote)
-├── lab/               (bancada experimental — eNN/ por experimento)
-├── tickets/           (open/closed/research/blocked — agrupados em INDEX.md)
-├── docs/
-│   ├── ARQUITETURA.md         (overview 4 camadas)
-│   ├── arquitetura/           (detalhes por camada)
-│   ├── PHILOSOPHY.md          (hierarquia + eixo de representação + validação por fechamento)
-│   ├── META_TRANSMUTOS.md     (tese da família — pdf2md como instância)
-│   ├── MD_CANONICAL.md        (schema do output — MD + acessórios)
-│   ├── METRICS.md             (painel multi-métrica)
-│   ├── LITERATURA.md          (snapshot v1 — ver v2)
-│   ├── LITERATURA_v2.md       (incl. T071 alucinação + Q-list)
-│   ├── biblioteca/            (catálogo: ferramentas/métricas/papers/benchmarks)
-│   ├── LAB_PROTOCOL.md        (regras de bancada)
-│   ├── LICENSING.md           (matriz de licenças do corpus)
-│   └── _archive/              (docs históricos)
-└── corpus/
-    ├── _sources/MANIFEST.md   (refs read-only)
-    ├── _canonical/MANIFEST.md (corpus público)
-    └── nielsen_chuang/        (extração de referência — versionada)
+├── README.md          overview + uso rápido (este arquivo)
+├── ROADMAP.md         frentes A-E + fases
+├── CHANGELOG.md       releases e mudanças por versão
+├── pyproject.toml     v0.7.0; deps + entry point
+├── src/pdf2md/        (10 módulos — toda a lógica do pacote)
+│   ├── cli.py · normalize.py · provenance.py · stats.py · aggregate.py
+│   ├── roundtrip.py · multi_roundtrip.py · pdfs.py · restructure.py · optimize.py
+│   ├── telemetry.py            wall/cpu/mem/gpu/io por step (v0.5)
+│   └── pixel_roundtrip.py      validador visual L0.5 (v0.6)
+├── lab/               bancada experimental — eNN/ por experimento (15 labs)
+├── tickets/           work items: open/closed/research/blocked + INDEX.md
+├── corpus/nielsen_chuang/   extrações de referência (gitignored se push público)
+└── docs/              **organizado por Diátaxis** (Procida ~2017)
+    ├── README.md          índice + explicação do método
+    ├── tutorials/         LEARNING — passo-a-passo
+    ├── how-to/            GOAL — soluções para problemas concretos
+    ├── reference/         INFO — definições autoritativas
+    │   ├── cli.md · md_canonical.md · metricas.md · tecnologias.md · conventions.md
+    │   ├── modulos/       API por módulo
+    │   ├── corpus/        manifests + licensing
+    │   └── biblioteca/    catálogo (ferramentas/métricas/papers/benchmarks/glossário)
+    ├── explanation/       UNDERSTANDING — por quê, conceitual
+    │   ├── arquitetura.md (+ sub-arquitetura/01-05 detalhes por camada)
+    │   ├── philosophy.md · transmutos.md · analise_critica.md
+    │   ├── literatura.md  revisão de literatura (papers, ferramentas, benchmarks)
+    │   └── diario.md      timeline cronológica do projeto
+    └── _archive/          documentos históricos
 ```
 
 PDFs binários moram fora do repo — sources canônicos em outros projetos
@@ -257,5 +246,5 @@ Conclusão atual: **Marker baseline 95.09% é o teto operacional testado** para 
 
 ## Origem
 
-Ver [`DIARIO.md`](DIARIO.md) para timeline cronológica desde a primeira
+Ver [`docs/explanation/diario.md`](docs/explanation/diario.md) para timeline cronológica desde a primeira
 ideia até a separação em projeto autônomo.

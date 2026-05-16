@@ -86,7 +86,7 @@
 
 ### Input
 
-PDF (qualquer fonte: arxiv, book scan, paper PMC, slides PPTX, scanned). Path absoluto via `corpus/_sources/MANIFEST.md` ou `corpus/_canonical/MANIFEST.md`.
+PDF (qualquer fonte: arxiv, book scan, paper PMC, slides PPTX, scanned). Path absoluto via `docs/reference/corpus/manifest_sources.md` ou `docs/reference/corpus/manifest_canonical.md`.
 
 ### Output
 
@@ -131,4 +131,4 @@ Para livros (com TOC), `restructure.py` fatia por capítulo.
 - MinerU 2.5: [opendatalab/MinerU](https://github.com/opendatalab/MinerU)
 - olmOCR-2: [olmocr.allenai.org](https://olmocr.allenai.org/)
 - Docling: Auer et al., [arXiv 2501.17887](https://arxiv.org/html/2501.17887v1)
-- Detalhes adicionais: [`../LITERATURA.md §3`](../LITERATURA.md)
+- Detalhes adicionais: [`../LITERATURA.md §3`](../literatura.md)

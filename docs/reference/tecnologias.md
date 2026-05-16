@@ -4,8 +4,8 @@
 > em uso, com dados empíricos dos labs e09-e14 (RTX 3060 / i7-6850K / 128 GB
 > RAM). Valores absolutos variam por máquina; razões e complexidades não.
 > Articula o "mapa" da arquitetura `instrumento → mapa → roteador` (ver
-> [PHILOSOPHY](PHILOSOPHY.md), tickets [T085](../tickets/closed/T085_telemetry_module.md),
-> [T090](../tickets/research/T090_macro_intent_routing.md)).*
+> [PHILOSOPHY](../explanation/philosophy.md), tickets [T085](../../tickets/closed/T085_telemetry_module.md),
+> [T090](../../tickets/research/T090_macro_intent_routing.md)).*
 
 ## Sumário executivo
 
@@ -50,7 +50,7 @@ Recomendação inicial de **macro-intents** (T090):
 - 100% determinístico com seed fixo
 
 **Pontos fracos:**
-- Escapa automaticamente `_`, `*`, `[`, etc. em texto (penaliza round-trip textual; pegou Q11.b AcroForm — ver [LITERATURA_v2 §4](LITERATURA_v2.md))
+- Escapa automaticamente `_`, `*`, `[`, etc. em texto (penaliza round-trip textual; pegou Q11.b AcroForm — ver [LITERATURA_v2 §4](../explanation/literatura.md))
 - Pode alucinar em re-OCR de PDF esparso (heurística T071 detecta — bloat ratio > 2.0× + densidade < 200 tokens/pg)
 - Sem fallback CPU prático (Surya não roda decentemente sem GPU)
 
@@ -58,9 +58,9 @@ Recomendação inicial de **macro-intents** (T090):
 
 | Tool | Lab | Resultado | Por quê descartado | Recuperável? |
 |---|---|---|---|---|
-| Marker `--use_llm` + `llama3.2-vision:11b` via Ollama | [e07](../lab/e07_marker_llm/RESULT.md) | descartado | 40× mais lento, ganho zero em N&C; bugs do Ollama (servidor crasha) | Sim — outro modelo VLM via outra tool poderia render |
-| MinerU 2.5-Pro (Q15) | [e06](../lab/e06_mineru25_pro/RESULT.md) | **blocked** | uv install OK; FastAPI server crasha silenciosamente em Win+RTX 3060 | Investigação aberta — pode rodar em Linux ou via API direta |
-| Granite-Docling-258M (Q16) | [e08](../lab/e08_granite_docling/RESULT.md) | descartado | tempo 50× pior; imagens em base64 inline; LaTeX verboso | Sim para casos curtos / single-file output / sem GPU |
+| Marker `--use_llm` + `llama3.2-vision:11b` via Ollama | [e07](../../lab/e07_marker_llm/RESULT.md) | descartado | 40× mais lento, ganho zero em N&C; bugs do Ollama (servidor crasha) | Sim — outro modelo VLM via outra tool poderia render |
+| MinerU 2.5-Pro (Q15) | [e06](../../lab/e06_mineru25_pro/RESULT.md) | **blocked** | uv install OK; FastAPI server crasha silenciosamente em Win+RTX 3060 | Investigação aberta — pode rodar em Linux ou via API direta |
+| Granite-Docling-258M (Q16) | [e08](../../lab/e08_granite_docling/RESULT.md) | descartado | tempo 50× pior; imagens em base64 inline; LaTeX verboso | Sim para casos curtos / single-file output / sem GPU |
 
 **Padrão metodológico:** todos os descartes nomeiam o modelo+tool+corpus específico. "LLM em geral" não é avaliado — só `llama3.2-vision:11b` via Ollama em N&C cap 4. Ver [feedback memory escopo-de-conclusao](#).
 
@@ -68,11 +68,11 @@ Recomendação inicial de **macro-intents** (T090):
 
 | Tool | Por quê interessante | Ticket | Status |
 |---|---|---|---|
-| Nougat | math-heavy benchmark histórico | [T410](../tickets/research/T410_testar_ferramentas_alternativas_nougat_mineru_pdftotext.md) | research |
+| Nougat | math-heavy benchmark histórico | [T410](../../tickets/research/T410_testar_ferramentas_alternativas_nougat_mineru_pdftotext.md) | research |
 | olmOCR-2 | RLVR com unit tests; Apache-2.0 | T410 | research |
 | Docling (full) | F1 0.968 em equações (Granite version) | T410 | research |
-| pdftotext / PyMuPDF puro / Tesseract | fallback low-resource sem GPU/ML pesado | [T420](../tickets/research/T420_fallback_low_resource_sem_gpu_sem_modelos_ml_pesados.md) | research |
-| pix2tex | extração específica de fórmulas-imagem | [T134](../tickets/research/T134_pix2tex_formulas.md) | research |
+| pdftotext / PyMuPDF puro / Tesseract | fallback low-resource sem GPU/ML pesado | [T420](../../tickets/research/T420_fallback_low_resource_sem_gpu_sem_modelos_ml_pesados.md) | research |
+| pix2tex | extração específica de fórmulas-imagem | [T134](../../tickets/research/T134_pix2tex_formulas.md) | research |
 
 ---
 
@@ -104,11 +104,11 @@ Recomendação inicial de **macro-intents** (T090):
 
 | Capacidade | Ticket | Estado |
 |---|---|---|
-| SSIM gate antes de aceitar conversão | [T135](../tickets/research/T135_ssim_gate_qualidade.md) | research |
-| Line art → SVG via potrace | [T132](../tickets/research/T132_potrace_svg_line_art.md) | research |
-| Detector + extrator fórmula→LaTeX | [T133](../tickets/research/T133_detector_de_formula.md) + [T134](../tickets/research/T134_pix2tex_formulas.md) | research |
-| Denoise JPEG antes da compressão | [T137](../tickets/research/T137_denoising_jpeg_pre_compressao.md) | research |
-| Reconstrução vetorial logos (Nível 4) | [T180](../tickets/research/T180_reconstrucao_vetorial_imagens.md) | research |
+| SSIM gate antes de aceitar conversão | [T135](../../tickets/research/T135_ssim_gate_qualidade.md) | research |
+| Line art → SVG via potrace | [T132](../../tickets/research/T132_potrace_svg_line_art.md) | research |
+| Detector + extrator fórmula→LaTeX | [T133](../../tickets/research/T133_detector_de_formula.md) + [T134](../../tickets/research/T134_pix2tex_formulas.md) | research |
+| Denoise JPEG antes da compressão | [T137](../../tickets/research/T137_denoising_jpeg_pre_compressao.md) | research |
+| Reconstrução vetorial logos (Nível 4) | [T180](../../tickets/research/T180_reconstrucao_vetorial_imagens.md) | research |
 
 ---
 
@@ -167,11 +167,11 @@ Triângulo final: **macro SSIM + médio WER (após align)**. Micro descartado.
 
 | Métrica | Ticket | Por quê |
 |---|---|---|
-| WER-prosa M1 (com mascaramento markup) | [METRICS.md M1](METRICS.md) | Primary content-only |
+| WER-prosa M1 (com mascaramento markup) | [METRICS.md M1](metricas.md) | Primary content-only |
 | TEDS M3 (tabelas) | METRICS.md M3 | Estrutura tabular |
 | LLM-as-judge para fórmulas | LITERATURA_v2 §5.2 | substitui CDM (rebaixado) |
-| Calibração do reconstrutor (ruído base) | [T072](../tickets/research/T072_calibracao_reconstrutor.md) | isola erro extração vs reconstrutor |
-| GT humano em mini-corpus (5-10 pgs) | [T060](../tickets/open/T060_mini_corpus_gt_humano.md) | destrava T072 e validação não-circular |
+| Calibração do reconstrutor (ruído base) | [T072](../../tickets/research/T072_calibracao_reconstrutor.md) | isola erro extração vs reconstrutor |
+| GT humano em mini-corpus (5-10 pgs) | [T060](../../tickets/open/T060_mini_corpus_gt_humano.md) | destrava T072 e validação não-circular |
 
 ---
 
@@ -223,7 +223,7 @@ pdf2md CSS é visualmente distinto do source).
 
 ## 7. Tradeoffs explícitos do projeto
 
-Reusando os eixos do [PHILOSOPHY §"Tradeoffs explícitos"](PHILOSOPHY.md):
+Reusando os eixos do [PHILOSOPHY §"Tradeoffs explícitos"](../explanation/philosophy.md):
 
 | Eixo | Ponta atual | Possível mover para... | Quando |
 |---|---|---|---|
@@ -254,9 +254,9 @@ Hoje os labs e09-e14 produziram **3-4 perfis sólidos**. T090 ainda research; es
 
 | Termo | Significado |
 |---|---|
-| **L0 / L0.5 / L1-L5** | Níveis da arquitetura recursiva ([PHILOSOPHY](PHILOSOPHY.md)). L0=doc, L0.5=doc visual, L1=figura→vetor, L2=fórmula→LaTeX, L3=tabela, L4=logo (texto+brasão), L5=CAD (out-of-scope) |
+| **L0 / L0.5 / L1-L5** | Níveis da arquitetura recursiva ([PHILOSOPHY](../explanation/philosophy.md)). L0=doc, L0.5=doc visual, L1=figura→vetor, L2=fórmula→LaTeX, L3=tabela, L4=logo (texto+brasão), L5=CAD (out-of-scope) |
 | **Bloat ratio** | tokens(MD₂) / tokens(MD₁) no round-trip. > 2× é sinal de alucinação |
 | **Round-trip textual** | MD₁ → PDF → MD₂; comparar via SequenceMatcher |
 | **Pixel-roundtrip** | PDF_orig → render → img; comparar com img de PDF₁ = MD→PDF (T070) |
-| **Triângulo macro/médio/micro** | Decomposição da métrica visual em níveis de granularidade ([PHILOSOPHY](PHILOSOPHY.md)) |
-| **Frente A-E** | Cobertura do conversor (Validação, Textual, Estrutural, Otimização, Vetorial — ver [ROADMAP](../ROADMAP.md)) |
+| **Triângulo macro/médio/micro** | Decomposição da métrica visual em níveis de granularidade ([PHILOSOPHY](../explanation/philosophy.md)) |
+| **Frente A-E** | Cobertura do conversor (Validação, Textual, Estrutural, Otimização, Vetorial — ver [ROADMAP](../../ROADMAP.md)) |

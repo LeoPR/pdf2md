@@ -2,9 +2,9 @@
 
 > *Revisão honesta do curso do projeto, lições aprendidas, decisões que se
 > mostraram certas e erradas, e direções recomendadas. Snapshot 2026-05-16,
-> v0.7.0. Complementa [`ARQUITETURA.md`](ARQUITETURA.md) (estado técnico),
-> [`PHILOSOPHY.md`](PHILOSOPHY.md) (decisões de design) e
-> [`DIARIO.md`](../DIARIO.md) (timeline cronológica).*
+> v0.7.0. Complementa [`ARQUITETURA.md`](arquitetura.md) (estado técnico),
+> [`PHILOSOPHY.md`](philosophy.md) (decisões de design) e
+> [`diario.md`](diario.md) (timeline cronológica).*
 
 ## TL;DR
 
@@ -26,7 +26,7 @@ absolutos OneDrive, AulaQuantum). Documentação cresceu mais que a
 implementação — possível over-engineering de articulação relativo a
 features concretas entregues.
 
-**Próximo gargalo principal:** [T060](../tickets/open/T060_mini_corpus_gt_humano.md)
+**Próximo gargalo principal:** [T060](../../tickets/open/T060_mini_corpus_gt_humano.md)
 (GT humano em mini-corpus) — sem ele, várias outras frentes não destravam.
 
 ---
@@ -91,7 +91,7 @@ compilador: se o ciclo fecha bem, há **evidência indireta** de extração
 rica, sem precisar de GT humano em escala.
 
 **Onde ajudou:** evita o pântano de "round-trip alto é qualidade alta"
-(criticado em [Moon 2020](LITERATURA.md), Mirage 2025). Reconhece o
+(criticado em [Moon 2020](literatura.md), Mirage 2025). Reconhece o
 limite: ciclo nunca fecha 100% porque MD < PDF em expressividade.
 
 ### 2.4 Triângulo macro/médio/micro
@@ -143,7 +143,7 @@ Vários módulos têm refs literais a `C:\Users\leona\...\AulaQuantum\...`.
 **Impacto:** projeto não roda em outra máquina sem editar código.
 
 **Justificativa parcial:** convenção da máquina documentada (Z:\caches,
-Acadêmicos/, etc.), aceita explicitamente em [`docs/ANALISE_CRITICA.md`
+Acadêmicos/, etc.), aceita explicitamente em [`docs/explanation/analise_critica.md`
 no contexto da memória pessoal do usuário](#). Mas:
 - Onboarding de colaborador externo seria longo
 - Push público (preparado mas não feito) exige sanitização
@@ -258,7 +258,7 @@ Round-trip 95% em N&C LaTeX, 13.6% em Wilson 1800 scan (e03), 46% em
 IRS f1040 form (e05). Variância enorme **por categoria de PDF**.
 
 **Implicação:** "qualidade do conversor" não é número único.
-[`docs/METRICS.md`](METRICS.md) já capturava isso; e02/e03/e05
+[`docs/reference/metricas.md`](../reference/metricas.md) já capturava isso; e02/e03/e05
 quantificaram empiricamente.
 
 ### 4.2 Bloat ratio detecta alucinação de re-OCR (T071)
@@ -268,7 +268,7 @@ marker alucina no PDF intermediário do round-trip, inflando MD₂ em 3-8×.
 Não encontrei nome consolidado para isso na literatura (Shah 2025
 "Seeing is Believing" e Zhang 2025 "Consensus Entropy" cobrem casos
 relacionados mas distintos — ver
-[`LITERATURA_v2.md §1`](LITERATURA_v2.md)).
+[`LITERATURA_v2.md §1`](literatura.md)).
 
 **Status:** heurística simples (1 número, 1 threshold), implementada
 em `stats.py`, defensável como contribuição metodológica original.
@@ -333,7 +333,7 @@ wall total do e10. Candidato óbvio para `multiprocess.Pool` (estimativa:
 
 **Gap importante:** o ecossistema 2025-2026 mudou muito (MinerU 2.5,
 Granite-Docling, olmOCR-2, DeepSeek-OCR, PaddleOCR-VL — ver
-[LITERATURA_v2 §3](LITERATURA_v2.md)). Continuamos com Marker como base
+[LITERATURA_v2 §3](literatura.md)). Continuamos com Marker como base
 mais porque funciona do que porque é o melhor. Re-baseline com Marker
 × Nougat × olmOCR-2 × Granite-Docling em N&C cap 4 + arxiv_1706 seria
 o experimento de maior ROI hoje.
@@ -418,7 +418,7 @@ mensuravelmente melhor, considerar troca apesar de AGPL.
 
 ### 8.3 Telemetria depende da minha máquina específica
 
-Perfis em [`TECNOLOGIAS.md`](TECNOLOGIAS.md) são valores absolutos da
+Perfis em [`TECNOLOGIAS.md`](../reference/tecnologias.md) são valores absolutos da
 minha RTX 3060 + i7. Outras máquinas terão números muito diferentes.
 
 **Mitigação:** complexidade é invariante (memória `arquitetura-instrumento-mapa-roteador`).
@@ -427,7 +427,7 @@ f(n) independente de hardware.
 
 ### 8.4 Push público nunca foi exercitado
 
-`docs/LICENSING.md` discute preparação mas o repo nunca foi pushado.
+`docs/reference/corpus/licensing.md` discute preparação mas o repo nunca foi pushado.
 Riscos:
 - Paths hardcoded vazariam pra usuários externos
 - N&C content em `corpus/` é copyrighted (Cambridge UP)

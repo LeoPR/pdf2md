@@ -2,7 +2,7 @@
 
 Lista de PDFs cuja **origem é local** (em outro projeto) ou **proprietary**, com possível cópia de trabalho.
 
-Use este manifest para fontes "minhas" — extrações iniciais que vieram de outro contexto, ou cópias pessoais de livros adquiridos. Para corpus público de benchmark (CC, public domain, arXiv), ver [`../_canonical/MANIFEST.md`](../_canonical/MANIFEST.md).
+Use este manifest para fontes "minhas" — extrações iniciais que vieram de outro contexto, ou cópias pessoais de livros adquiridos. Para corpus público de benchmark (CC, public domain, arXiv), ver [`manifest_canonical.md`](manifest_canonical.md).
 
 ## Schema
 
@@ -18,7 +18,7 @@ Campos:
 - `publisher` (str, opt): editora.
 - `pages` (int): número de páginas.
 - `license` (str): `proprietary` | `cc_by` | `cc_by_sa` | `cc_by_nc` | `public_domain` | `arxiv non-exclusive` | `read-only-online` | outro.
-- `category` (str): taxonomia controlada (ver `docs/METRICS.md` quando criado). Atual:
+- `category` (str): taxonomia controlada (ver `docs/reference/metricas.md` quando criado). Atual:
     - **Livros / livros-texto**: `livro_math_heavy`, `livro_image_heavy`, `livro_classical_typography`
     - **Papers acadêmicos**: `paper_math_heavy`, `paper_bio_med`
     - **Documentos "sujos"** (degradam o pipeline):

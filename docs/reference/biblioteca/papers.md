@@ -107,7 +107,7 @@
 - **Ano**: 2020
 - **Refs**: [PDF](https://aclanthology.org/2020.eamt-1.11.pdf)
 - **Sumário**: *Revisiting Round-Trip Translation for Quality Estimation*. BLEU(input, RTT) correlaciona **pobremente** com qualidade real em MT. Recuperável quando combinada com métricas semânticas ([Zhuo et al. 2209.07351](https://arxiv.org/abs/2209.07351)).
-- **Status no projeto**: **referência apenas** (justifica rebaixar round-trip a health check; ver [`../METRICS.md`](../METRICS.md))
+- **Status no projeto**: **referência apenas** (justifica rebaixar round-trip a health check; ver [`../METRICS.md`](../metricas.md))
 - **Relação com**: define [RTT](glossario.md#round-trip--rtt); base do rebaixamento de round-trip; ver também [Aiken & Park 2010] mencionado em v1; reforçado por [Mirage 2025](#mirage-of-hallucination-detection-emnlp-2025).
 
 ### RTT-LiT 2026 — *Round-Trip Translation Reveals What Frontier Multilingual Benchmarks Miss*

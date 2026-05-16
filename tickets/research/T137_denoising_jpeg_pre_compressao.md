@@ -80,7 +80,7 @@ livros.
 
 > **Atualização 2026-05-10**: este Nível 3 foi **promovido a ticket
 > próprio [T180](T180_reconstrucao_vetorial_imagens.md)** (Frente E
-> da hierarquia, [PHILOSOPHY eixo de representação](../../docs/PHILOSOPHY.md#eixo-de-representação)
+> da hierarquia, [PHILOSOPHY eixo de representação](../../docs/explanation/philosophy.md#eixo-de-representação)
 > Nível 4). T137 mantém o foco em **denoising** (níveis 1-2 — filtros
 > clássicos e ML JPEG-specific). A reconstrução vetorial é tratada
 > em T180.

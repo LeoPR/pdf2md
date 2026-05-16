@@ -19,7 +19,7 @@ Sub-ticket de [T130](T130_image_optimization.md) — nível 4 (texto LaTeX).
 
 ## Hipótese
 
-Para fórmulas tipográficas em livros/papers (Nielsen-Chuang, Preskill, arxiv), pix2tex atinge **CDM ≥ 0.85** ([Character Detection Matching, LITERATURA.md §1.3](../../docs/LITERATURA.md)) com confidence threshold ≥ 0.85.
+Para fórmulas tipográficas em livros/papers (Nielsen-Chuang, Preskill, arxiv), pix2tex atinge **CDM ≥ 0.85** ([Character Detection Matching, LITERATURA.md §1.3](../../docs/explanation/literatura.md)) com confidence threshold ≥ 0.85.
 
 Fallback: se confidence < 0.85, manter como imagem.
 
@@ -66,4 +66,4 @@ Considerar usar CPU only para validação primeira (mais lento mas evita conflit
 - Frente B (captura textual — fórmula é texto) **e** Frente D (compressão semântica)
 - Depende de T133 (detector)
 - Generalizado por T160 (OCR semântico de qualquer imagem-com-texto)
-- Métrica via [docs/METRICS.md](../../docs/METRICS.md) M2 (CDM)
+- Métrica via [docs/reference/metricas.md](../../docs/reference/metricas.md) M2 (CDM)
