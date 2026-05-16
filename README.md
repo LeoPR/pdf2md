@@ -7,28 +7,38 @@ amadureceu além do escopo daquela disciplina. Mora em
 `Acadêmicos/transmutos/pdf2md/` por convenção da máquina (ver
 [`Z:\caches\README.md`](Z:\caches\README.md) para padrões locais).
 
-## Status
+## Status (v0.7.0, 2026-05-16)
 
-| Componente | Estado |
-|---|---|
-| Extração `marker-pdf` (GPU) | Estável |
-| MD → PDF via `pandoc + Chrome + KaTeX` | Estável |
-| Round-trip MD → PDF → MD' com similaridade | Estável |
-| Multi-iteration round-trip (convergência) | Estável (97.4% após 5 iter no paper de teste) |
-| Telemetria por extração + agregada | Estável |
-| Telemetria por step (wall/cpu/mem/gpu/io) | Estável (v0.5 — `pdf2md.telemetry`) |
-| Pixel-roundtrip visual (align + SSIM + WER) | Estável (v0.6 — `pdf2md rt-pixel`) |
-| Compressão adaptativa de imagens | Nível 1-2 (PNG paleta lossy gated) |
-| Marcador de proveniência por arquivo | Estável (`pdf2md prov`) |
-| **CLI unificado `pdf2md`** | Estável (v0.4 — macro + 10 subcomandos sem subprocess) |
-| Restauração de artefatos JPEG | Roadmap (T137) |
-| Vetorização SVG (potrace) | Roadmap (T132) |
-| Detecção fórmula → LaTeX (pix2tex) | Roadmap (T133/T134) |
+| Camada / capacidade | Estado | Versão | Notas |
+|---|---|---|---|
+| **Extração** marker-pdf 1.10.2 (GPU) | Estável | v0.1+ | 95.09% round-trip em N&C cap 4 |
+| **MD → PDF** pandoc 3.9 + Chrome + KaTeX | Estável | v0.1+ | |
+| **Round-trip textual** MD → PDF → MD' | Estável | v0.1+ | mediana sim 95% LaTeX nativo |
+| **Multi-iteration round-trip** | Estável | v0.2+ | 97.4% após 5 iter em paper |
+| **CLI unificado `pdf2md`** | Estável | v0.4 | macro convert + 10 subcomandos, sem subprocess |
+| **Telemetria por extração + agregada** | Estável | v0.4 | `_stats.json`, `_OVERVIEW.json` |
+| **Otimização adaptativa de imagens** | Estável (níveis 1-2) | v0.4 | PNG paleta lossy + 1-bit + JPEG mantido; -38.6% em N&C |
+| **Marcador de proveniência idempotente** | Estável | v0.4 | `pdf2md prov`, HTML comment + blockquote |
+| **Telemetria por step** (wall/cpu/mem/gpu/io) | Estável | v0.5 | `pdf2md.telemetry` (psutil + nvidia-smi) |
+| **Pixel-roundtrip visual L0.5** | Estável | v0.6 | `pdf2md rt-pixel`: align Hungarian/DTW + SSIM + WER |
+| **rt-pixel integrado no convert** | Estável | v0.7 | `--rt-pixel` ou `--best` ativam automaticamente |
+| Vetorização SVG (potrace) | Roadmap | — | T132 |
+| Detecção + extração fórmula → LaTeX | Roadmap | — | T133/T134 (pix2tex) |
+| Reconstrução vetorial de logos | Roadmap | — | T180 (texto+fonte+brasão) |
+| Macro-intent CLI (`--rapido`/`--auto`) | Roadmap | — | T090 (depende mapa de perfis) |
+| Mini-corpus GT humano | Roadmap | — | T060 (destrava T072 calibração) |
+| Alt-tools (Nougat/MinerU/olmOCR/Docling) | Pesquisa | — | T410, e06/e07/e08 descartados — ver [`docs/TECNOLOGIAS.md`](docs/TECNOLOGIAS.md) |
 
-Arquitetura completa: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) ·
-Filosofia de design: [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) ·
-Tese da família transmutos: [`docs/META_TRANSMUTOS.md`](docs/META_TRANSMUTOS.md) ·
-Bancada experimental: [`docs/LAB_PROTOCOL.md`](docs/LAB_PROTOCOL.md).
+**Documentação:**
+- Arquitetura completa: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)
+- Filosofia de design: [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md)
+- Tese da família transmutos: [`docs/META_TRANSMUTOS.md`](docs/META_TRANSMUTOS.md)
+- Schema do MD canônico: [`docs/MD_CANONICAL.md`](docs/MD_CANONICAL.md)
+- **Perfis de tecnologias (tempo/mem/gpu)**: [`docs/TECNOLOGIAS.md`](docs/TECNOLOGIAS.md)
+- **Análise crítica do curso**: [`docs/ANALISE_CRITICA.md`](docs/ANALISE_CRITICA.md)
+- Painel de métricas: [`docs/METRICS.md`](docs/METRICS.md)
+- Revisão de literatura: [`docs/LITERATURA.md`](docs/LITERATURA.md) · [`v2`](docs/LITERATURA_v2.md)
+- Bancada experimental: [`docs/LAB_PROTOCOL.md`](docs/LAB_PROTOCOL.md)
 
 ---
 

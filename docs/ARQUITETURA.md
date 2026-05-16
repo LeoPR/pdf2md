@@ -1,12 +1,15 @@
 # Arquitetura — `pdf2md`
 
-*Visão consolidada do conceito, das camadas e das ferramentas. Para detalhes por camada, ver [`arquitetura/`](arquitetura/).*
+*Visão consolidada do conceito, das camadas e das ferramentas (v0.7.0, 2026-05-16).
+Para detalhes por camada, ver [`arquitetura/`](arquitetura/). Perfis cross-recursos
+em [`TECNOLOGIAS.md`](TECNOLOGIAS.md).*
 
 ---
 
 ## 1. Conceito abstrato
 
-O `pdf2md` opera num **fluxo de 4 camadas** com **round-trip como validador permanente**:
+O `pdf2md` opera num **fluxo de 4 camadas** com **round-trip duplo** (textual e visual)
+como **validador permanente**:
 
 ```
                           ┌────────── ROUND-TRIP (validador) ──────────┐
@@ -32,10 +35,10 @@ O `pdf2md` opera num **fluxo de 4 camadas** com **round-trip como validador perm
 | Camada | Função | Estado atual | Detalhes |
 |---|---|---|---|
 | **1 — Extração** | PDF → texto + estrutura + imagens + fórmulas | marker-pdf 1.10.2 (GPU RTX 3060) | [`arquitetura/01_extracao.md`](arquitetura/01_extracao.md) |
-| **2 — Otimização** | Imagens raw → representação mais semântica | `optimize_images.py` (PNG paleta lossy, T131 closed) | [`arquitetura/02_otimizacao.md`](arquitetura/02_otimizacao.md) |
+| **2 — Otimização** | Imagens raw → representação mais semântica | `pdf2md.optimize` (PNG paleta lossy/1-bit, T131 closed) | [`arquitetura/02_otimizacao.md`](arquitetura/02_otimizacao.md) |
 | **3 — Reconstrução** | MD → PDF visualizável | pandoc 3.9 + Chrome headless + KaTeX | [`arquitetura/03_reconstrucao.md`](arquitetura/03_reconstrucao.md) |
-| **4 — Métrica** | MD vs MD' → similarity + divergências | token similarity (`SequenceMatcher`) + 6 categorias | [`arquitetura/04_metricas.md`](arquitetura/04_metricas.md) |
-| **Pipeline** | Orquestração (scripts) | `src/{roundtrip,stats,restructure,...}.py` | [`arquitetura/05_pipeline.md`](arquitetura/05_pipeline.md) |
+| **4 — Métrica** | Textual (MD vs MD') + Visual (PDF render-render comparado) | textual: `SequenceMatcher` + bloat_ratio. Visual: `pdf2md.pixel_roundtrip` (align Hungarian + SSIM + WER) | [`arquitetura/04_metricas.md`](arquitetura/04_metricas.md) |
+| **Pipeline + Instrumento** | Orquestração + telemetria por step | `pdf2md/{cli,stats,roundtrip,pixel_roundtrip,telemetry,...}.py` | [`arquitetura/05_pipeline.md`](arquitetura/05_pipeline.md) |
 
 ### Por que round-trip
 
@@ -87,15 +90,24 @@ Round-trip captura uma propriedade **mensurável** sem precisar de ground-truth:
                                   │
                                   ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│ Camada 4 — MÉTRICA / VALIDAÇÃO                                       │
-│ ──────────────────────────────                                       │
+│ Camada 4 — MÉTRICA / VALIDAÇÃO (textual + visual)                    │
+│ ──────────────────────────────────────────────                       │
 │                                                                      │
-│ ATUAL    │ SequenceMatcher token similarity (`roundtrip.py`)         │
-│          │ + 6 categorias de divergência (math, heading, emphasis,   │
-│          │   table, separator, other)                                │
-│ FUTURO   │ M1 WER-prosa · M2 CDM (fórmulas) · M3 TEDS (tabelas)      │
-│          │ M4 count-diff (fórmulas, citações, headers, imagens)      │
-│          │ T060 GT humano em mini-corpus de 5-10 páginas             │
+│ TEXTUAL  │ SequenceMatcher token similarity (`pdf2md.roundtrip`)     │
+│          │ + 8 categorias de divergência (math, heading, emphasis,   │
+│          │   table, image_ref, separator, whitespace, other)         │
+│          │ + bloat_ratio (T071: detector de alucinação)              │
+│ VISUAL   │ `pdf2md.pixel_roundtrip` (v0.6, T070 promovido parcial):  │
+│          │ - Alinhamento Hungarian (default) / DTW (monotônico)      │
+│          │ - Macro SSIM por par alinhado                             │
+│          │ - Médio WER da página (após alinhamento)                  │
+│          │ - Micro block-a-block DESCARTADO (e10/e11 provaram que    │
+│          │   fragmentação incompatível com reflow)                   │
+│ INSTRUM. │ `pdf2md.telemetry` (v0.5, T085): wall/cpu/mem/gpu/io      │
+│          │ por step. Overhead < 1%. Sem dep torch obrigatória.       │
+│ FUTURO   │ M1 WER-prosa mascarado · M3 TEDS · LLM-as-judge (CDM      │
+│          │   rebaixado em LITERATURA_v2 §5.2) · GT humano (T060)     │
+│          │   · Calibração reconstrutor (T072, depende T060)          │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -144,38 +156,72 @@ Símbolos: ✓ closed; sem símbolo = research/open. Lista completa de tickets e
 
 ## 5. Pipeline atual (orquestração)
 
-Scripts em [`../src/`](../src/) compõem o fluxo end-to-end:
+Pacote `pdf2md/` em [`../src/pdf2md/`](../src/pdf2md/) com 10 módulos:
 
 ```
-src/
-├── stats.py            ← Camada 4: telemetria + round-trip metrics
-├── aggregate_stats.py  ← Camada 4: agregação multi-doc
-├── roundtrip.py        ← Cam 1 + Cam 3 + Cam 4: MD → PDF → MD' → compare
-├── multi_roundtrip.py  ← Cam 4: iterar round-trip N vezes (estabilidade)
-├── optimize_images.py  ← Camada 2: PNG paleta lossy / 1-bit
-├── gen_pdfs.py         ← Camada 3: bulk MD → PDF por capítulo
-└── restructure.py      ← Camada 1 (pós): fatiar MD por TOC do PDF
+src/pdf2md/
+├── cli.py              ← Typer app: macro convert + 11 subcomandos
+├── normalize.py        ← Token-stream canônico para comparação
+├── provenance.py       ← Marcador idempotente (HTML comment + blockquote)
+├── stats.py            ← Cam 4: telemetria + métricas
+├── aggregate.py        ← Cam 4: agregação multi-doc (_OVERVIEW)
+├── roundtrip.py        ← Cam 1+3+4: MD → PDF → MD' → compare textual
+├── multi_roundtrip.py  ← Cam 4: N iterações de round-trip
+├── pdfs.py             ← Cam 3: md_to_pdf (v0.4.1: out_pdf + overwrite=False)
+├── restructure.py      ← Cam 1 pós: split MD por TOC
+├── optimize.py         ← Cam 2: PNG paleta lossy / 1-bit / JPEG
+├── telemetry.py        ← v0.5 T085: wall/cpu/mem/gpu/io por step
+└── pixel_roundtrip.py  ← v0.6 T070: align + macro SSIM + médio WER
 ```
+
+Shims de back-compat em `src/*.py` (13 linhas cada) preservam invocação
+standalone histórica (`python src/stats.py FOLDER`, etc.).
+
+CLI subcomandos (v0.7.0):
+
+| Subcomando | Função |
+|---|---|
+| `pdf2md convert FILE.pdf [flags]` | macro one-shot inteligente (auto-detect via TOC) |
+| `pdf2md extract / restruct / optimize / stats / prov` | etapas isoladas do pipeline |
+| `pdf2md rt / rt-multi` | round-trip textual single ou iterativo |
+| `pdf2md rt-pixel ORIG RENDER` | round-trip visual (Hungarian + SSIM + WER) |
+| `pdf2md pdfs DIR` | bulk MD → PDF por capítulo |
+| `pdf2md aggr ROOT` | OVERVIEW de múltiplos docs |
+| `pdf2md norm FILE.md` | normalize canônico |
+| `pdf2md doctor / version / help` | meta |
 
 Detalhes em [`arquitetura/05_pipeline.md`](arquitetura/05_pipeline.md).
 
 ---
 
-## 6. Estado experimental (lab/)
+## 6. Estado experimental (lab/) — atualizado 2026-05-16
 
-Experimentos validados até agora:
+15 labs até hoje. Sumário cronológico:
 
 | ID | Variável testada | Resultado | Estado |
-|---|---|---:|---|
-| `lab/e00_baseline_marker` | Pipeline reproduzível em N&C cap. 4 | round-trip 95.09% (bate histórico) | `.frozen` |
-| `lab/e01_baseline_corpus_categorias` | Categoria do doc (3 PDFs) | round-trip 91.34%-98.58% | `.frozen` |
+|---|---|---|---|
+| `e00_baseline_marker` | Pipeline reproduzível em N&C cap 4 | rt 95.09% (bate histórico) | `.frozen` |
+| `e01_baseline_corpus_categorias` | 3 PDFs (paper LaTeX, notes, livro_clássico) | rt 91-98% | `.frozen` |
+| `e02_pdfs_sujos` | 5 PDFs degradados (CDC, IRS, scan, slides) | rt 46-97%; padrões de falha identificados | `.frozen` |
+| `e03_atkins_wilson_scan` | text-layer vs sem-text-layer | text-layer ajuda; bloat 7.7× é alucinação | `.frozen` |
+| `e04_t131_validation_corpus` | T131 em 7 docs | 45-55% economia line art; 0% fotos | `.frozen` |
+| `e05_acroform_gate` | Q11 escapes markdown penalizam rt | sim — IRS f1040 46→73% sem escapes | `.frozen` |
+| `e06_mineru25_pro` | Q15 MinerU 2.5-Pro | **blocked** (FastAPI crash Win+RTX3060) | `.blocked` |
+| `e07_marker_llm` | Marker `--use_llm` + Ollama llama3.2-vision | descartado p/ esse modelo+tool (40× lento, 0 ganho) | descarte com escopo |
+| `e08_granite_docling` | Q16 Granite-Docling-258M via docling | descartado p/ N&C (50× lento, base64 imgs) | descarte com escopo |
+| `e09_pixel_roundtrip_proto` | T070 protótipo + macro SSIM | macro promove; bbox-IoU geom falha | promoção parcial |
+| `e10_pixel_roundtrip_fingerprint` | block-a-block fingerprint matching | descarta (cobertura 0%); +bug T076 descoberto | descarta |
+| `e11_fingerprint_refinado` | 4 variantes de fingerprint local | descarta — fragmentação incompatível com reflow | descarta |
+| `e12_metricas_globais_pagina` | G1 WER global / G2 grid / G3 anchors | **insight**: páginas desalinham após reflow | replano |
+| `e13_alinhamento_paginas` | DTW vs Hungarian align | **destrava T070** — Hungarian WER med 0.376 | promove |
+| `e14_pixel_roundtrip_cross_pdf` | pixel-roundtrip em 3 categorias além N&C | generaliza — WER med 0.26-0.42, todos passam | promove |
 
-Próximos candidatos a virar experimento:
-- T060 (Frente A, validar round-trip vs GT humano)
-- T160 (Frente B, OCR semântico generalizado)
-- T410 (alt-tools — Marker × Nougat × MinerU × olmOCR × Docling)
-- Expansão do e01 para PDFs scanned (Newton, Wilson — categoria scanned_image_only)
-- PDFs "sujos" (categoria definida em e02; pesquisa histórica em [`_archive/PDFS_SUJOS_CANDIDATOS.md`](_archive/PDFS_SUJOS_CANDIDATOS.md))
+Próximos candidatos:
+
+- **T060** (Frente A, mini-corpus GT humano 5-10 pgs) — destrava T072 calibração
+- **e15** OCR semântico de imagem (T160, Frente B) ou potrace SVG (T132, Frente C+D)
+- **e1X** alt-tools comparativo Marker × Nougat × olmOCR-2 × Docling (T410) com pixel-roundtrip como métrica
+- **e16** macro-intent CLI initial implementation (T090) usando os 3-4 perfis já coletados
 
 ---
 
@@ -183,21 +229,35 @@ Próximos candidatos a virar experimento:
 
 ```
 docs/
-├── ARQUITETURA.md            (este arquivo — overview)
+├── ARQUITETURA.md            (este arquivo — overview de camadas)
 ├── arquitetura/
 │   ├── 01_extracao.md        Camada 1: ferramentas de extração
 │   ├── 02_otimizacao.md      Camada 2: otimização de imagens
 │   ├── 03_reconstrucao.md    Camada 3: engines MD → PDF
 │   ├── 04_metricas.md        Camada 4: validação e métricas
 │   └── 05_pipeline.md        Orquestração dos scripts atuais
-├── PHILOSOPHY.md             Hierarquia de prioridades + eixo de representação
-├── LITERATURA.md             Revisão de papers (métricas, benchmarks, ferramentas)
-├── METRICS.md                Painel de métricas adotado
+├── PHILOSOPHY.md             Hierarquia de prioridades + eixo de representação +
+│                             validação por fechamento recursivo + tradeoffs + triângulo
+├── META_TRANSMUTOS.md        Tese da família (pdf2md como instância)
+├── MD_CANONICAL.md           Schema do output (pivot universal)
+├── METRICS.md                Painel de métricas adotado (M1-M4)
+├── TECNOLOGIAS.md            ** Perfis cross-recursos (tempo/mem/gpu) **
+├── ANALISE_CRITICA.md        Trajetória + lições + análise crítica do curso
+├── LITERATURA.md             Revisão v1 de papers
+├── LITERATURA_v2.md          v2: alucinação + MinerU 2.5-Pro + olmOCR-2 + LLM-judge
 ├── LAB_PROTOCOL.md           Regras da bancada experimental
-├── LICENSING.md              Matriz de licenças do corpus (preparo para push público)
+├── LICENSING.md              Matriz de licenças do corpus
 ├── biblioteca/               Catálogo (ferramentas/métricas/papers/benchmarks/glossário)
 ├── arquitetura/              Sub-docs por camada (01-05)
-└── _archive/                 Documentos históricos (PDFS_SUJOS_CANDIDATOS, etc.)
+└── _archive/                 Documentos históricos
 ```
+
+Documentos novos desde a v0.4 (2026-05):
+- **PHILOSOPHY.md** ganhou validação por fechamento recursivo + triângulo macro/médio/micro + calibração reconstrutor + ablação modular + tradeoffs + convergência
+- **META_TRANSMUTOS.md** (novo) — tese da família de conversores
+- **MD_CANONICAL.md** (novo) — schema do output
+- **TECNOLOGIAS.md** (novo) — perfis e dados empíricos cross-recursos
+- **ANALISE_CRITICA.md** (novo) — trajetória e revisão crítica
+- **LITERATURA_v2.md** — atualizações pós-experimentos lab/
 
 E os planos de execução estão em [`../ROADMAP.md`](../ROADMAP.md).

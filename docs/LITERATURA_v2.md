@@ -266,3 +266,103 @@ Métrica que aloca cada palavra numa grid 2D (row, horizontal cell) e mede simil
 ---
 
 *Última atualização: 2026-05-10. Próxima revisão sugerida: após Q15/Q16 completarem (decisão de re-baseline MinerU2.5-Pro vs Marker) ou se um competidor open-source publicar OmniDocBench v1.7 score > 96.*
+
+---
+
+## 7. Atualização 2026-05-16 — pós-experimentos e versions v0.4-v0.7
+
+### 7.1 Q15 (MinerU 2.5-Pro) → blocked operacional
+
+[Lab e06](../lab/e06_mineru25_pro/RESULT.md): 3 tentativas em Win+RTX3060.
+Install OK via `uv` (após primeiro falhar com `pip` em loop de uvicorn);
+mas FastAPI server interno crasha silenciosamente após download dos
+modelos. Não foi possível obter outputs.
+
+**Status:** Q15 **blocked**, não respondido. Tentativas adicionais
+fariam sentido em ambiente Linux ou via API REST direta.
+
+### 7.2 Q16 (Granite-Docling-258M) → respondido parcialmente
+
+[Lab e08](../lab/e08_granite_docling/RESULT.md): install limpo via `uv pip install docling`,
+1 comando, sem servidor. Rodou foreground transparente. **Descartado
+para N&C** (50× mais lento que Marker GPU, imagens em base64 inline,
+LaTeX verboso) mas **viable para casos curtos / single-file / sem GPU**.
+
+**Status:** Q16 **respondido com escopo**. Confirma que Granite-Docling
+é operacionalmente fácil (lição arquitetural: CLI direta + transformers
+> servidor FastAPI opaco), mas não é o caminho para nosso corpus principal.
+
+### 7.3 Q7 (e07) descartado — não estava no backlog Q11-17 original mas vale registrar
+
+Marker `--use_llm` + Ollama `llama3.2-vision:11b` no cap 4 N&C
+([Lab e07](../lab/e07_marker_llm/RESULT.md)): 40× mais lento que Marker
+base, ganho zero. **Descartado para esse modelo específico em Ollama**.
+
+**Conclusão metodológica:** "LLM" é categoria com centenas de modelos;
+conclusão se aplica só a essa combinação específica. Outros VLMs
+(Gemini, Qwen3-VL, GPT-4V) podem performar diferente.
+
+### 7.4 Pipeline visual de validação (T070) — contribuição original
+
+**Achado de literatura:** pixel-roundtrip combinando alinhamento de
+páginas + macro SSIM + médio WER **não tem precedente claro** que
+encontrei. Trabalhos relacionados:
+
+- **READoc** ([Li et al. 2025](https://aclanthology.org/2025.findings-acl.1128/)) compara
+  via TEDS, EDS, KTDS contra GT extraído de fonte LaTeX/HTML —
+  **não é pixel-based** e exige GT externo. Conceitualmente diferente.
+- **OmniDocBench** ([OpenDataLab](https://github.com/opendatalab/OmniDocBench))
+  compara contra GT manual via métricas hibridas. Também não pixel-based.
+- **Mathpix** e similares fazem pixel-comparison interno para QA mas
+  não publicam o algoritmo.
+- **DocLayNet** (IBM) tem bbox annotations mas não compara DOIS PDFs
+  alinhados.
+
+A combinação `Hungarian align over WER + SSIM macro per pair` no contexto
+de validação PDF↔MD não aparece em paper revisado encontrado. Defensável
+como instrumentação prática (não pretende ser benchmark formal — é
+health-check estrutural).
+
+**Possível paper para o futuro:** "Pixel-Roundtrip: A Calibrated Visual
+Validator for PDF↔Markdown Pipelines" — focando no triângulo (com
+descobertas dos labs e09-e13 sobre o que **não** funciona).
+
+### 7.5 Ecosystem update — modelos novos desde 2026-05-10
+
+Pequenas atualizações:
+- **MinerU 3.0+ branch** (não testado) inclui FastAPI server por design,
+  reinforcing concern de Win+GPU compat
+- **Qwen3-VL-Plus** continua líder OmniDocBench v1.7 (92.7) — modelo
+  proprietário, API paga
+- **PaddleOCR-VL 0.9B** continua candidato CPU-friendly não testado
+
+### 7.6 Backlog v2 atualizado
+
+| Q | Status (2026-05-16) | Próximo |
+|---|---|---|
+| Q11 AcroForm gate | **respondido** (e05) | implementar gate em `pdf2md.stats` se quiser produção |
+| Q12 Consensus Entropy | pendente | depende de ensemble multi-VLM setup |
+| Q13 LLM-as-judge vs CDM | pendente | depende de T060 GT + API setup |
+| Q14 READoc S³uite | pendente | depende de T060 GT |
+| Q15 MinerU 2.5-Pro | **blocked** | Linux retry ou API direta |
+| Q16 Granite-Docling viable CPU | **respondido com escopo** (e08) | considerar p/ docs curtos |
+| Q17 LLM-as-judge alucinação | pendente | depende de API setup |
+
+3 de 7 respondidos. Bloqueio principal: T060 (GT humano em mini-corpus)
+destrava Q13, Q14, Q17. Q12 e Q15 são caminhos paralelos.
+
+### 7.7 Triagem da literatura — novidades a investigar (não-prioridade alta)
+
+Não houve revisão sistemática nas 2 semanas seguintes a 2026-05-10. Mas
+áreas onde valeria olhar:
+
+- **OmniDocBench v1.7 leaderboard** atualizado (procura por novos
+  open-source com score > 96)
+- **Paper de MinerU 3.0** (se publicado) para entender o redesign
+- **Acceleration / RTX 5090 compat** — alguma ferramenta SOTA exige
+  GPU Blackwell?
+- **Novos benchmarks específicos PDF↔MD** — READoc é de set/2024, pode
+  ter follow-up
+
+*Próxima revisão sugerida: quando T060 (GT humano) estiver pronto e
+permitir comparativo mais sério.*

@@ -339,6 +339,48 @@ destino existe.
 ~3s, macro SSIM ~22s para o mesmo dataset (45pgs). Preset `--rapido` pode
 skip-SSIM mantendo só alinhamento+WER (>7× mais rápido).
 
+## 2026-05-16 (parte 2) — v0.7.0 + docs maturando
+
+Marco continuação: v0.6.0 → v0.7.0 (integração) + bloco grande de docs.
+
+**v0.7.0** integra `pdf2md.pixel_roundtrip` no macro `convert` via
+flag `--rt-pixel` (e `--best` ativa automaticamente). Default OFF
+(mantém convert rápido como antes); opt-in adiciona ~30-60s/cap. Helper
+`_run_rt_pixel_on_out` cobre book + paper layouts; agregado consolidado
+em `out/_pixel_roundtrip.json`. 110 tests passing.
+
+**Bloco de docs maturando a articulação:**
+
+- `docs/TECNOLOGIAS.md` (novo, ~250 linhas) — perfis cross-recursos.
+  Quatro categorias (GPU-bound ML, CPU-bound paralelo, CPU-bound single,
+  I/O-bound subprocess) com dados empíricos dos labs e09-e14. Tabela de
+  alternativas testadas (e07, e08, e06) com status nominal. Sugestão
+  inicial de macro-intents (`--rapido` ~6min, `--qualidade` ~12min).
+- `docs/ANALISE_CRITICA.md` (novo, ~450 linhas) — revisão honesta do
+  curso. Decisões certas (bancada-suja, escopo nominal, triângulo,
+  feedback memories), decisões erradas (paths hardcoded, docs > features,
+  CSS hardcoded), surpresas técnicas (Hungarian > DTW na maioria,
+  marker frágil em scans, SSIM nunca 0.95), backlog Q11-17 status,
+  próximos passos por ROI estimado.
+- `docs/ARQUITETURA.md` atualizado — Camada 4 ganhou seção textual +
+  visual + instrumento; tabela de 15 labs com estado.
+- `docs/LITERATURA_v2.md` ganhou §7 atualizando Q15/Q16/Q11 status,
+  registrando que pixel-roundtrip não tem precedente claro encontrado
+  na literatura.
+- `ROADMAP.md` atualizado — frente A "avançada"; tabela alt-tools com
+  estado de cada candidato; tickets fechados marcados.
+- `README.md` — tabela de features completa (15 linhas, vs 7 antes),
+  índice de docs expandido com links para TECNOLOGIAS + ANALISE_CRITICA.
+
+**Reconhecimento explícito** (documentado em ANALISE_CRITICA §3.3):
+docs cresceram mais que features no período v0.4-v0.7. Tradeoff
+legítimo (articulação destrava decisões) mas pode ser over-engineering
+para escopo atual (1 usuário, 1 corpus). Recomendação: parar de criar
+docs "meta" até features concretas (T060/T132/T160) saírem do roadmap.
+
+**Gap crítico identificado**: T060 (GT humano em mini-corpus, 5-10 pgs)
+destrava T072, T410, Q13, Q14. 4-6h humanas resolvem; valor permanente.
+
 ## Próximos passos planejados
 
 Ver [`ROADMAP.md`](ROADMAP.md) para o quadro completo. Curto prazo:
