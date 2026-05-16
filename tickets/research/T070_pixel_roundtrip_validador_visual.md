@@ -131,6 +131,47 @@ não implementado. Reformulado:
 - **Fase 2**: pareamento robusto (sub-ticket acima) → médio/micro com
   pareamento validado.
 
+## Achados do lab e10 (2026-05-16)
+
+Fingerprint word-bigram + Hungarian rodado em `lab/e10_pixel_roundtrip_fingerprint/`:
+
+- **Cobertura mediana 0%** (peak 83%): word-bigram é fraco para PDFs com
+  reflow + escapes markdown + hyphenation + caracteres especiais (α vs \\alpha).
+- **Médio IoU geométrico = 0** mesmo onde fingerprint pareou — descoberta
+  fundamental: **bbox IoU em coordenadas absolutas é a métrica errada**
+  para PDFs com layouts diferentes (margem/fonte distintas tornam bboxes
+  incomparáveis mesmo com conteúdo idêntico).
+- **Micro WER ≈ 0.39** onde houve cobertura — promissor (vs 1.0 do e09)
+  mas limitado pela baixa cobertura.
+
+### Decisão arquitetural derivada
+
+O vértice "médio" do triângulo **não deve ser bbox-IoU geométrico**. Precisa
+medir preservação estrutural, não identidade de coordenadas. Alternativas
+a testar:
+
+| Opção | Lab futuro |
+|---|---|
+| Bbox IoU em coords normalizadas (% page) | e12 |
+| Kendall-τ / Spearman sobre ordem de blocks | e12 |
+| Densidade por célula (página N×M grid) | e12 |
+| Drop "médio" — só macro + micro | e12 |
+
+### Sub-tickets refinados
+
+- **e11 — fingerprint refinado**: char 3-grams + normalização forte
+  (NFC, strip `\\`, lowercase) + threshold dinâmico
+- **e12 — métrica médio alternativa**: comparar as 4 opções acima no
+  mesmo dataset
+
+### Bônus
+
+- Telemetria (instrumentação local em `lab/e10/telemetry.py`) validou
+  o padrão T085 — pronto para promover a `pdf2md/telemetry.py`
+- Primeiro perfil concreto coletado: macro_ssim_per_page é gargalo
+  (22s = 49% do wall total, single-thread, RSS 323MB peak) — candidato
+  óbvio para paralelização (multiprocess pool).
+
 ## Conexão
 
 - Frente A (validação)

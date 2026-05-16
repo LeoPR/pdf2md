@@ -61,8 +61,10 @@ Cada um destes tem ou terá um experimento correspondente em [`../lab/eNN_/`](..
 | Ticket | Status | Título | Experimento sugerido | Frente |
 |---|---|---|---|---|
 | [T050](closed/T050_baseline_marker_reproduzivel.md) | (c) | Baseline marker reproduzível — round-trip 95.09% (bate histórico) | `lab/e00_baseline_marker/` (.frozen) | A |
-| [T070](research/T070_pixel_roundtrip_validador_visual.md) | (r) | Pixel-roundtrip L0.5 — triângulo macro/médio/micro (macro promove; médio/micro replaneja após e09) | `lab/e09_pixel_roundtrip_proto/` | A |
+| [T070](research/T070_pixel_roundtrip_validador_visual.md) | (r) | Pixel-roundtrip L0.5 — macro promove; bbox-IoU geom descartado como vértice "médio" após e10 | `lab/e09_*`, `lab/e10_*` | A |
 | [T072](research/T072_calibracao_reconstrutor.md) | (r) | Calibração do reconstrutor — ruído base + reconstrutores múltiplos | futuro `lab/eXX_calibration/` | A |
+| [T085](research/T085_telemetry_module.md) | (r) | Módulo `pdf2md.telemetry` — instrumento (tempo/mem/cpu/gpu/io por step) | promove de `lab/e10/` | A |
+| [T090](research/T090_macro_intent_routing.md) | (r) | Macro-intent + roteador profile-aware (`--rapido`/`--qualidade`/`--auto`/`--indexacao`) | depois de N labs | A |
 | (sem ticket) | — | **Baseline em 3 categorias do corpus canônico** — round-trip 91.34%-98.58% | `lab/e01_baseline_corpus_categorias/` (.frozen) | A |
 | (sem ticket) | — | **Pipeline em 5 PDFs "sujos"** — rt 46-97%; AcroForm divisor; scan+OCR quebra roundtrip (não extract) | `lab/e02_pdfs_sujos/` (.frozen) | A |
 | (sem ticket) | — | **Atkins vs Wilson scan**: Atkins 92.11% (com text-layer), Wilson 13.62% (sem) — text-layer **ajuda**; bloat 7.7× revela padrão de alucinação | `lab/e03_atkins_wilson_scan/` (.frozen) | A |
