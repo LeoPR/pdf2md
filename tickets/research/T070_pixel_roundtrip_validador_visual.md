@@ -91,10 +91,52 @@ Uma métrica visual única não é conclusiva. O triângulo é.
 - Render PDF em ferramentas múltiplas — fixar PyMuPDF como padrão
 - Implementar OCR próprio — usar PyMuPDF text-extract direto onde possível
 
+## Achados do lab e09 (2026-05-16)
+
+Protótipo rodado em `lab/e09_pixel_roundtrip_proto/` validou o triângulo
+empiricamente em cap 4 N&C (45 pgs livro vs 49 pgs reconstruído). Resultados:
+
+| Vértice | Median (45 pgs) | Veredito |
+|---|---|---|
+| Macro SSIM | 0.615 (range 0.49–0.74) | **PROMOVE** — discrimina layouts; vai pra `pdf2md/pixel_roundtrip.py` |
+| Médio (bbox IoU ingênuo) | 0.000 | **DESCARTA** pareamento por ordem-de-leitura; replanejar |
+| Micro (WER por bbox) | 1.000 | **BLOQUEADO** por médio |
+
+### Sub-tickets derivados (próximas iterações antes de cristalizar)
+
+- **Pareamento robusto de bboxes**: pareamento ingênuo "1º bloco de A
+  com 1º de B" não funciona com reflow (PDF original 45pg vs render
+  49pg; counts de blocks divergem 4-86 vs 16). Alternativas a testar:
+  - texto-fingerprint matching (Jaccard sobre n-grams do conteúdo)
+  - header anchor matching (extrair Theorem N.M, Equation, etc.)
+  - métrica content-level sem parear blocks (WER agregado por página)
+
+### Bugs descobertos no caminho (separar em tickets próprios)
+
+- **`md_to_pdf` sobrescreve PDF co-irmão silenciosamente** quando MD e
+  PDF têm mesmo basename (e.g. `04.md` + `04.pdf`). Reproduzido —
+  destruiu o PDF render em `corpus/`. Ver [T076](T076_md_to_pdf_overwrite_silencioso.md).
+- **PDF em `corpus/<doc>/<cap>/<cap>.pdf` NÃO é source** — é gerado pelo
+  `md_to_pdf` (metadata: HeadlessChrome+Skia). Source verdadeiro mora
+  no AulaQuantum. Documentado em [MD_CANONICAL §"Acessórios"](../../docs/MD_CANONICAL.md#arquivos-acessórios).
+
+### Replanejamento de critérios
+
+Critério original (`macro<0.95 AND micro<0.05` para identificar erro de
+reconstrução) **inválido**: micro depende de pareamento robusto, ainda
+não implementado. Reformulado:
+
+- **MVP fase 1** (curto prazo): macro SSIM apenas. Já útil como métrica
+  global complementar ao token-roundtrip.
+- **Fase 2**: pareamento robusto (sub-ticket acima) → médio/micro com
+  pareamento validado.
+
 ## Conexão
 
 - Frente A (validação)
 - Pré-requisito de [T072](T072_calibracao_reconstrutor.md) — calibração precisa do pixel-roundtrip rodando
 - Complementa [T050](../closed/T050_baseline_marker_reproduzivel.md) (textual)
 - Sub-mecanismo de [T402](T402_pipeline_fractal_recursivo.md) (meta)
+- Bloqueia/bloqueado por [T076](T076_md_to_pdf_overwrite_silencioso.md) (bug do reconstrutor)
+- Validado empiricamente em `lab/e09_pixel_roundtrip_proto/`
 - Vincula a [PHILOSOPHY §"Validação por fechamento"](../../docs/PHILOSOPHY.md#validação-por-fechamento-recursivo-de-ciclos) e §"Triângulo"

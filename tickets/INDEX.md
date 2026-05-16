@@ -35,6 +35,7 @@ Código que já roda e está estabilizado em `src/`.
 | Ticket | Status | Título |
 |---|---|---|
 | [T071](closed/T071_bloat_ratio_alucinacao_heuristica.md) | (c) | Heurística `bloat_ratio` em stats.py — detecta padrão de alucinação |
+| [T076](open/T076_md_to_pdf_overwrite_silencioso.md) | (o) | Bug: md_to_pdf sobrescreve PDF co-irmão silenciosamente (patch v0.4.1) |
 | [T101](closed/T101_marker_pdf_extraction_com_gpu_rtx_3060.md) | (c) | Marker PDF extraction com GPU (RTX 3060) |
 | [T102](closed/T102_restructure_output_por_capitulo_indexmd.md) | (c) | Restructure output por capítulo + index.md |
 | [T103](closed/T103_round_trip_test_script.md) | (c) | Round-trip test script |
@@ -60,7 +61,7 @@ Cada um destes tem ou terá um experimento correspondente em [`../lab/eNN_/`](..
 | Ticket | Status | Título | Experimento sugerido | Frente |
 |---|---|---|---|---|
 | [T050](closed/T050_baseline_marker_reproduzivel.md) | (c) | Baseline marker reproduzível — round-trip 95.09% (bate histórico) | `lab/e00_baseline_marker/` (.frozen) | A |
-| [T070](research/T070_pixel_roundtrip_validador_visual.md) | (r) | Pixel-roundtrip L0.5 — triângulo macro/médio/micro | futuro `lab/eXX_pixel_roundtrip/` | A |
+| [T070](research/T070_pixel_roundtrip_validador_visual.md) | (r) | Pixel-roundtrip L0.5 — triângulo macro/médio/micro (macro promove; médio/micro replaneja após e09) | `lab/e09_pixel_roundtrip_proto/` | A |
 | [T072](research/T072_calibracao_reconstrutor.md) | (r) | Calibração do reconstrutor — ruído base + reconstrutores múltiplos | futuro `lab/eXX_calibration/` | A |
 | (sem ticket) | — | **Baseline em 3 categorias do corpus canônico** — round-trip 91.34%-98.58% | `lab/e01_baseline_corpus_categorias/` (.frozen) | A |
 | (sem ticket) | — | **Pipeline em 5 PDFs "sujos"** — rt 46-97%; AcroForm divisor; scan+OCR quebra roundtrip (não extract) | `lab/e02_pdfs_sujos/` (.frozen) | A |

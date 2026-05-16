@@ -198,6 +198,34 @@ Ignorados por `find_chapter_mds()` em `pdf2md/pdfs.py`.
 | `_multi_roundtrip.{md,json}` | `pdf2md rt-multi` | Drift N iterações |
 | `_marker_raw/` | etapa interna do `convert` | Saída crua do marker (efêmera) |
 | `index.md` | `pdf2md restruct` (book) | TOC agregado |
+| `<basename>.pdf` co-irmão do `<basename>.md` | `pdf2md pdfs` (render via pandoc+Chrome) | **PDF reconstruído (render), NÃO o PDF original do livro** |
+
+### ⚠ Distinção crítica: `<cap>.pdf` em corpus/ é render, não source
+
+PDFs em `corpus/<doc>/<chapter>/<chapter>.pdf` foram **gerados pelo
+próprio pdf2md** via `pdf2md.pdfs.md_to_pdf` — não são o source original.
+
+Sinais inequívocos no metadata:
+- `creator`: `Mozilla/5.0 ... HeadlessChrome/<version>`
+- `producer`: `Skia/PDF m<version>`
+- footer: `p. N / M` (formato do CSS_INLINE do pdf2md)
+
+**Source original** do PDF (livro, paper) mora **fora do `corpus/`** —
+ou em `corpus/_sources/` (gitignored, referenciado em
+`corpus/_sources/MANIFEST.md` via path absoluto), ou em outro projeto
+read-only (caso N&C → AulaQuantum).
+
+**Como confirmar antes de comparar PDFs**:
+```python
+import fitz
+doc = fitz.open(pdf_path)
+print(doc.metadata.get("creator"), doc.metadata.get("producer"))
+# Se contém "HeadlessChrome" ou "Skia" → é render pdf2md, não source
+```
+
+Quando precisar do PDF original para benchmark visual (T070
+pixel-roundtrip): extrair páginas-alvo do source verdadeiro via PyMuPDF
+`insert_pdf(doc, from_page, to_page)`.
 
 JSON é canônico (machine-readable); MD é renderizado a partir do JSON
 (human-readable). Modificar manualmente o MD não atualiza o JSON.
