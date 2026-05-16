@@ -25,6 +25,7 @@ amadureceu além do escopo daquela disciplina. Mora em
 
 Arquitetura completa: [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) ·
 Filosofia de design: [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) ·
+Tese da família transmutos: [`docs/META_TRANSMUTOS.md`](docs/META_TRANSMUTOS.md) ·
 Bancada experimental: [`docs/LAB_PROTOCOL.md`](docs/LAB_PROTOCOL.md).
 
 ---
@@ -194,7 +195,8 @@ pdf2md/
 ├── docs/
 │   ├── ARQUITETURA.md         (overview 4 camadas)
 │   ├── arquitetura/           (detalhes por camada)
-│   ├── PHILOSOPHY.md          (hierarquia + eixo de representação)
+│   ├── PHILOSOPHY.md          (hierarquia + eixo de representação + validação por fechamento)
+│   ├── META_TRANSMUTOS.md     (tese da família — pdf2md como instância)
 │   ├── METRICS.md             (painel multi-métrica)
 │   ├── LITERATURA.md          (snapshot v1 — ver v2)
 │   ├── LITERATURA_v2.md       (incl. T071 alucinação + Q-list)
