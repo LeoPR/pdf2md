@@ -1,6 +1,6 @@
 [project]
 name = "pdf2md"
-version = "0.6.0"
+version = "0.7.0"
 description = "Conversor PDF↔MD com round-trip mensurável e otimização adaptativa de imagens"
 authors = [
     { name = "Leonardo Marques de Souza", email = "leonardo.marques.souza@gmail.com" }

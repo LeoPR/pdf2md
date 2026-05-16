@@ -271,7 +271,7 @@ def version():
         from importlib.metadata import version as _v
         pkg_ver = _v("pdf2md")
     except Exception:
-        pkg_ver = "0.6.0 (uninstalled)"
+        pkg_ver = "0.7.0 (uninstalled)"
 
     commit = detect_current_commit() or "—"
     typer.echo(f"pdf2md {pkg_ver}  (commit {commit})")
@@ -590,10 +590,12 @@ def convert(
     book: bool = typer.Option(False, "--book", help="Força split por capítulo (default: auto via TOC)"),
     paper: bool = typer.Option(False, "--paper", help="Força flat (sem restructure)"),
     quick: bool = typer.Option(False, "--quick", "-q", help="Pula otimização + round-trip"),
-    best: bool = typer.Option(False, "--best", help="Otimização total + multi-roundtrip 3 iter"),
+    best: bool = typer.Option(False, "--best", help="Otimização total + multi-roundtrip 3 iter + rt-pixel"),
     no_optimize: bool = typer.Option(False, "--no-optimize", help="Não otimiza imagens"),
     no_stats: bool = typer.Option(False, "--no-stats", help="Não gera _stats.md"),
     no_provenance: bool = typer.Option(False, "--no-provenance", help="Não marca proveniência"),
+    rt_pixel: bool = typer.Option(False, "--rt-pixel", help="Roda pixel-roundtrip visual L0.5 (~30-60s extra/cap)"),
+    rt_pixel_skip_ssim: bool = typer.Option(False, "--rt-pixel-skip-ssim", help="Modo rápido do pixel-roundtrip (só WER textual)"),
 ):
     """[MACRO] Pipeline completo: extract + restructure + optimize + stats + provenance.
 
@@ -692,7 +694,79 @@ def convert(
             work = out / "_roundtrip_work"
             rt_multi(first_md, work_dir=work, iterations=3)  # type: ignore
 
+    # rt-pixel: validador visual L0.5 (T070, v0.6.0). Opt-in via --rt-pixel ou --best.
+    if rt_pixel or best:
+        typer.secho("\n[+] rt-pixel (validador visual L0.5)...", bold=True)
+        _run_rt_pixel_on_out(pdf, out, skip_ssim=rt_pixel_skip_ssim or quick)
+
     typer.secho(f"\n✓ Pronto. Saída em {out}", bold=True, fg=typer.colors.GREEN)
+
+
+def _run_rt_pixel_on_out(pdf_orig: Path, out: Path, *, skip_ssim: bool = False) -> None:
+    """Gera PDF render do MD canônico e roda pixel_roundtrip vs PDF original.
+
+    Para layouts book/paper, usa o primeiro MD (paper) ou TODOS (book) e gera
+    `_pixel_roundtrip.json` na raiz com agregados por capítulo.
+    """
+    from pdf2md.pixel_roundtrip import run_pixel_roundtrip
+    from pdf2md.pdfs import md_to_pdf
+    import tempfile
+
+    # Acha MDs principais (igual ao pdfs.find_chapter_mds, mas tolera paper layout)
+    md_targets = []
+    for chap_dir in sorted(out.iterdir()):
+        if not chap_dir.is_dir():
+            continue
+        md = chap_dir / f"{chap_dir.name}.md"
+        if md.exists():
+            md_targets.append(md)
+    # Paper layout: MD direto na raiz
+    if not md_targets:
+        md_targets = [m for m in out.glob("*.md") if not m.name.startswith("_")]
+
+    if not md_targets:
+        typer.secho("  [SKIP] nenhum MD encontrado para rt-pixel", fg=typer.colors.YELLOW)
+        return
+
+    results = []
+    for md in md_targets:
+        typer.echo(f"  {md.parent.name}/...")
+        with tempfile.TemporaryDirectory(prefix="rt_pixel_") as tmp:
+            tmp_dir = Path(tmp)
+            tmp_md = tmp_dir / "source.md"
+            tmp_md.write_text(md.read_text(encoding="utf-8"), encoding="utf-8")
+            # Copia images/ se existir (md_to_pdf precisa pra resolve image paths)
+            images_src = md.parent / "images"
+            if images_src.is_dir():
+                tmp_imgs = tmp_dir / "images"
+                tmp_imgs.mkdir()
+                for img in images_src.iterdir():
+                    if img.is_file():
+                        shutil.copy2(img, tmp_imgs / img.name)
+            pdf_render = tmp_dir / "render.pdf"
+            md_to_pdf(tmp_md, out_pdf=pdf_render, overwrite=True)
+            result = run_pixel_roundtrip(pdf_orig, pdf_render, skip_ssim=skip_ssim)
+
+        agg = result.agg
+        typer.echo(f"    WER med={agg['wer_median']:.3f} %<0.60={agg['pct_wer_tol']:.1%}"
+                   + (f" SSIM={agg.get('ssim_median', 0):.3f}" if not skip_ssim else ""))
+        results.append({
+            "chapter": md.parent.name,
+            "md": str(md.relative_to(out)),
+            "n_orig_pages": result.n_orig_pages,
+            "n_render_pages": result.n_render_pages,
+            "monotonic": result.monotonic,
+            "agg": agg,
+        })
+
+    # Salva agregado consolidado
+    import json
+    rt_pixel_path = out / "_pixel_roundtrip.json"
+    rt_pixel_path.write_text(
+        json.dumps({"pdf_orig": str(pdf_orig), "chapters": results}, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    typer.echo(f"  [OK] {rt_pixel_path}")
 
 
 # ---------------------------------------------------------------------------
