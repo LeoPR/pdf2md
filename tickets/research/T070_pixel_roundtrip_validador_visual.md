@@ -164,6 +164,42 @@ a testar:
 - **e12 — métrica médio alternativa**: comparar as 4 opções acima no
   mesmo dataset
 
+## Achados do lab e11 (2026-05-16)
+
+Ablação de 4 variantes de fingerprint local (char vs word, ±norm,
+absoluto vs top-k%) em `lab/e11_fingerprint_refinado/`:
+
+| Variante | Cov med | WER med | Veredito |
+|---|---:|---:|---|
+| V0 word 2-gram (baseline) | 0.0% | 0.39 | baseline e10 |
+| V1 char 3-gram | 2.6% | 0.71 | leve melhoria cobertura, piora WER |
+| V2 char+norm | 2.6% | 0.71 | norm pouco ajuda |
+| V3 V2+top-30% | 10.3% | 0.87 | força pareamento, degrada |
+| V4 V3+ordem | 10.3% | 0.91 | ordem-weight não ajuda |
+
+**Nenhuma atinge cov>50% + WER<0.30.** Insight estrutural: o problema **não é
+o fingerprint específico** — é tentar parear blocks individuais quando a
+**fragmentação difere** entre PDFs. Render fragmenta cada linha (reflow);
+livro mantém parágrafo. Granularidades incompatíveis → fingerprint local
+não casa, independente do método.
+
+### Decisão arquitetural derivada (e11)
+
+**Abandonar matching block-a-block.** O vértice "médio" precisa ser
+medido **globalmente** ou via **estrutura**, não por pareamento granular.
+e12 testará 3 alternativas:
+
+1. **Página inteira global** — concatenar texto, WER global por página
+2. **Grid density** — N×M células, distribuição de caracteres
+3. **Headings/anchors** — Kendall-τ sobre ordem de elementos estruturais
+
+### Bônus do e11
+
+- `pdf2md.telemetry` validado fora da bancada-suja (primeiro uso em
+  ambiente real após promoção T085 v0.5.0)
+- Insight de tempo: char 3-gram é **8× mais lento** que word 2-gram
+  (3.4s vs 0.43s, 45 páginas) — primeiro dado real do mapa T090
+
 ### Bônus
 
 - Telemetria (instrumentação local em `lab/e10/telemetry.py`) validou
