@@ -235,6 +235,46 @@ grandeza mais barato que macro SSIM** (22s/49pgs). Para indexação em
 massa, métrica textual barata + alinhamento de páginas é caminho viável
 ("rápido + bom-o-suficiente").
 
+## Achados do lab e13 (2026-05-16)
+
+Alinhamento de páginas via Hungarian e DTW destrava o vértice "médio":
+
+| Método | n pares | WER med | %WER<0.30 | %WER<0.60 | Monotonic |
+|---|---:|---:|---:|---:|---|
+| baseline i==i (e12) | 45 | 0.962 | 8.9% | 15.6% | ✓ |
+| A1 DTW | 50 | 0.401 | 34.0% | 84.0% | ✓ |
+| A2 Hungarian | 45 | **0.376** | 37.8% | **91.1%** | ✗ |
+
+**Alinhamento funciona dramaticamente** — WER mediano cai 60% após
+qualquer alinhamento. **Threshold WER<0.30 é otimista demais** — mesmo
+após alinhamento perfeito, ~62% das páginas têm WER > 0.30 por causa de
+diferenças tipográficas legítimas (math KaTeX vs LaTeX nativo, hyphenation,
+encoding, page numbering). Threshold realista: **WER < 0.60 captura 91%**.
+
+### Decisão arquitetural derivada (e13)
+
+Pipeline definido para o vértice "médio" de T070:
+
+```
+1. Macro:  SSIM por par alinhado     (e09 promove)
+2. Médio:  Hungarian align + WER     (e13 destrava)
+3. Micro:  drop block-a-block         (e11 descarta — não é o caminho)
+```
+
+Triângulo **reduzido** de 3 para 2 vértices efetivos (macro + médio
+agregado per-page). Micro fica diagnóstico secundário, não obrigatório.
+
+### Insight quantitativo para T090
+
+Alinhamento textual (~3s para 45×49 pgs) é **>7× mais rápido** que macro
+SSIM (~22s). Em pipeline "rápido": SKIP macro, mantém medio (alinhamento +
+WER pareado). Em "qualidade": macro + medio.
+
+### Próximo
+
+e14 (ou direto em `src/pdf2md/pixel_roundtrip.py`): pipeline integrado
+alinhamento + macro + medio.
+
 ### Bônus
 
 - Telemetria (instrumentação local em `lab/e10/telemetry.py`) validou
