@@ -271,7 +271,7 @@ def version():
         from importlib.metadata import version as _v
         pkg_ver = _v("pdf2md")
     except Exception:
-        pkg_ver = "0.4.1 (uninstalled)"
+        pkg_ver = "0.5.0 (uninstalled)"
 
     commit = detect_current_commit() or "—"
     typer.echo(f"pdf2md {pkg_ver}  (commit {commit})")

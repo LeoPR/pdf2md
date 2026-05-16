@@ -1,9 +1,9 @@
 ---
 id: T085
 titulo: Módulo pdf2md.telemetry — instrumento de telemetria por step
-status: research
+status: closed
 criado_em: 2026-05-16
-fechado_em:
+fechado_em: 2026-05-16
 fase: 4
 depende_de: []
 blocks: [T090]
