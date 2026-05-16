@@ -35,7 +35,7 @@ Código que já roda e está estabilizado em `src/`.
 | Ticket | Status | Título |
 |---|---|---|
 | [T071](closed/T071_bloat_ratio_alucinacao_heuristica.md) | (c) | Heurística `bloat_ratio` em stats.py — detecta padrão de alucinação |
-| [T076](open/T076_md_to_pdf_overwrite_silencioso.md) | (o) | Bug: md_to_pdf sobrescreve PDF co-irmão silenciosamente (patch v0.4.1) |
+| [T076](closed/T076_md_to_pdf_overwrite_silencioso.md) | (c) | Bug: md_to_pdf sobrescreve PDF co-irmão silenciosamente — fix em v0.4.1 |
 | [T101](closed/T101_marker_pdf_extraction_com_gpu_rtx_3060.md) | (c) | Marker PDF extraction com GPU (RTX 3060) |
 | [T102](closed/T102_restructure_output_por_capitulo_indexmd.md) | (c) | Restructure output por capítulo + index.md |
 | [T103](closed/T103_round_trip_test_script.md) | (c) | Round-trip test script |

@@ -1,9 +1,9 @@
 ---
 id: T076
 titulo: md_to_pdf sobrescreve PDF co-irmão silenciosamente quando basenames colidem
-status: open
+status: closed
 criado_em: 2026-05-16
-fechado_em:
+fechado_em: 2026-05-16
 fase: 2
 depende_de: []
 blocks: [T070]

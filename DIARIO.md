@@ -260,6 +260,36 @@ Tag `v0.4.0`. Próxima frente prevista: pesquisa (Frentes A-E) ou
 mini-corpus GT humano (T060) destravando validação não-circular do
 round-trip.
 
+## 2026-05-16 — Camada conceitual + lab e09 + v0.4.1
+
+Sessão de articulação arquitetural seguida de validação empírica.
+
+**Articulação** (4 docs formalizando a tese implícita):
+- `PHILOSOPHY.md` ganha 6 seções (validação por fechamento recursivo,
+  triângulo macro/médio/micro, calibração do reconstrutor, ablação
+  modular, tradeoffs explícitos, convergência vs divergência)
+- `META_TRANSMUTOS.md` (novo): tese da família — pdf2md como instância
+  de decompilador/recompilador universal `objeto ↔ MD+acessórios ↔ objeto`
+- `MD_CANONICAL.md` (novo): schema do output como pivot canônico
+- Tickets T070 (pixel-roundtrip), T072 (calibração), T402 (meta-fractal)
+
+**Validação empírica** em `lab/e09_pixel_roundtrip_proto/`:
+- Macro SSIM (median 0.615) discrimina cap 4 N&C vs render → promove
+- Pareamento por ordem-de-leitura para bbox IoU **falha** (45 pgs orig
+  vs 49 pgs render, reflow torna ordem inválida). Médio/micro adiados
+  para versão com pareamento por texto-fingerprint
+- Lab achou 2 bugs colaterais mais valiosos que o resultado primário:
+  - PDFs em `corpus/<doc>/<cap>/<cap>.pdf` são **renders do pdf2md**,
+    não sources do livro (metadata HeadlessChrome+Skia). Documentado
+    em `MD_CANONICAL.md§"Distinção crítica"`.
+  - `md_to_pdf(md)` sobrescreve PDF co-irmão silenciosamente (T076).
+    Destruiu o PDF render do cap 4; recuperado via `git restore`.
+
+**v0.4.1 (patch)**: T076 fixado — `md_to_pdf(md, out_pdf=None, *, overwrite=False)`.
+Default agora levanta `FileExistsError` quando destino existe.
+`generate_all` passa `overwrite=True` explicitamente (re-runs são uso
+esperado). 81 tests passando (2 novos cobrindo o guard).
+
 ## Próximos passos planejados
 
 Ver [`ROADMAP.md`](ROADMAP.md) para o quadro completo. Curto prazo:

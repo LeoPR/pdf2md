@@ -42,14 +42,44 @@ hr { border: 0; border-top: 1px solid #c8d2dc; margin: 1.5em 0; }
 
 def md_to_pdf(
     md_path: Path,
+    out_pdf: Path | None = None,
     *,
     pandoc: str = DEFAULT_PANDOC,
     chrome: str = DEFAULT_CHROME,
     css: str = CSS_INLINE,
+    overwrite: bool = False,
 ) -> Path:
-    """Converte um MD em PDF, salvando ao lado. Retorna path do PDF gerado."""
+    """Converte um MD em PDF, salvando ao lado (ou em `out_pdf` se passado).
+
+    Args:
+        md_path: arquivo MD source.
+        out_pdf: destino do PDF (default: `md_path.with_suffix(".pdf")` —
+            mesmo diretório, mesmo basename). Em layouts onde MD e PDF original
+            do livro têm o mesmo basename, o default sobrescreveria o original
+            — passe `out_pdf` explícito ou use diretório temp (T076).
+        pandoc, chrome, css: tools/CSS externos.
+        overwrite: se False (default), raise `FileExistsError` quando destino
+            já existe — proteção contra destruir um PDF pré-existente
+            silenciosamente (T076).
+
+    Returns:
+        Path do PDF gerado.
+
+    Raises:
+        FileExistsError: destino existe e `overwrite=False`.
+        RuntimeError: Chrome não produziu o PDF.
+    """
     md_path = md_path.resolve()
-    pdf_path = md_path.with_suffix(".pdf")
+    pdf_path = (out_pdf if out_pdf else md_path.with_suffix(".pdf")).resolve()
+
+    # T076: proteção contra overwrite silencioso. Chama explicit overwrite=True
+    # ou passa out_pdf único se quiser re-run.
+    if pdf_path.exists() and not overwrite:
+        raise FileExistsError(
+            f"PDF de destino já existe: {pdf_path}. "
+            f"Passe overwrite=True para sobrescrever ou out_pdf=... para outro caminho."
+        )
+
     chapter_dir = md_path.parent
 
     with tempfile.TemporaryDirectory(prefix="md2pdf_") as tmp_dir:
@@ -96,13 +126,18 @@ def find_chapter_mds(base: Path) -> list[Path]:
 
 
 def generate_all(base: Path, *, on_progress=None) -> tuple[int, int]:
-    """Gera PDF para todos os capítulos. Retorna (sucessos, falhas)."""
+    """Gera PDF para todos os capítulos. Retorna (sucessos, falhas).
+
+    Re-runs sobrescrevem PDFs anteriores por design (uso normal do
+    `pdf2md pdfs` / `pdf2md convert`). Para single-shot com proteção,
+    chamar `md_to_pdf(md)` direto (sem overwrite).
+    """
     targets = find_chapter_mds(base)
     ok = 0
     fail = 0
     for md in targets:
         try:
-            pdf = md_to_pdf(md)
+            pdf = md_to_pdf(md, overwrite=True)
             kb = pdf.stat().st_size / 1024
             if on_progress:
                 on_progress(md, pdf, kb, None)

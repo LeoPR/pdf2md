@@ -1,7 +1,9 @@
-"""Tests para pdf2md.pdfs — apenas find_chapter_mds (sem invocar pandoc/Chrome)."""
+"""Tests para pdf2md.pdfs — find_chapter_mds + md_to_pdf overwrite guard (T076)."""
 from pathlib import Path
 
-from pdf2md.pdfs import find_chapter_mds
+import pytest
+
+from pdf2md.pdfs import find_chapter_mds, md_to_pdf
 
 
 def test_find_chapter_mds_basic(tmp_path: Path):
@@ -32,3 +34,35 @@ def test_find_chapter_mds_sorted(tmp_path: Path):
         (d / f"{name}.md").write_text("x", encoding="utf-8")
     found = find_chapter_mds(tmp_path)
     assert [p.parent.name for p in found] == ["00_first", "07_middle", "12_last"]
+
+
+def test_md_to_pdf_raises_when_destination_exists_default(tmp_path: Path):
+    """T076: sem overwrite=True, raise FileExistsError se destino existe.
+
+    Pre-condição checada antes de invocar pandoc/Chrome — não precisa de
+    tools externos para o teste.
+    """
+    md = tmp_path / "doc.md"
+    md.write_text("# Title", encoding="utf-8")
+    pdf = md.with_suffix(".pdf")
+    sentinel = b"original PDF content - must NOT be overwritten"
+    pdf.write_bytes(sentinel)
+
+    with pytest.raises(FileExistsError):
+        md_to_pdf(md)
+
+    # PDF original preservado bit-a-bit
+    assert pdf.read_bytes() == sentinel
+
+
+def test_md_to_pdf_raises_on_explicit_out_pdf_when_exists(tmp_path: Path):
+    """T076: protecao tambem para out_pdf explicito (proprio caminho conflita)."""
+    md = tmp_path / "doc.md"
+    md.write_text("# Title", encoding="utf-8")
+    custom = tmp_path / "custom.pdf"
+    custom.write_bytes(b"existing")
+
+    with pytest.raises(FileExistsError):
+        md_to_pdf(md, out_pdf=custom)
+
+    assert custom.read_bytes() == b"existing"
