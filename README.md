@@ -197,6 +197,7 @@ pdf2md/
 │   ├── arquitetura/           (detalhes por camada)
 │   ├── PHILOSOPHY.md          (hierarquia + eixo de representação + validação por fechamento)
 │   ├── META_TRANSMUTOS.md     (tese da família — pdf2md como instância)
+│   ├── MD_CANONICAL.md        (schema do output — MD + acessórios)
 │   ├── METRICS.md             (painel multi-métrica)
 │   ├── LITERATURA.md          (snapshot v1 — ver v2)
 │   ├── LITERATURA_v2.md       (incl. T071 alucinação + Q-list)
