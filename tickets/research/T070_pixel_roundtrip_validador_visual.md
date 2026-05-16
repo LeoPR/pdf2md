@@ -200,6 +200,41 @@ e12 testará 3 alternativas:
 - Insight de tempo: char 3-gram é **8× mais lento** que word 2-gram
   (3.4s vs 0.43s, 45 páginas) — primeiro dado real do mapa T090
 
+## Achados do lab e12 (2026-05-16)
+
+3 métricas globais por página testadas no cap 4 N&C:
+
+| Métrica | Mediana | Veredito |
+|---|---:|---|
+| G1 WER global (concat texto, normalizado) | 0.962 | aparenta falha total |
+| G2 Grid Pearson (6×8 célula density) | 0.424 | aparenta falha parcial |
+| G3 Kendall-τ anchors | 0.541 (cov 13%) | poucos anchors comuns |
+
+**Mas o achado não é "métricas ruins" — é descobrir POR QUÊ:** páginas
+i vs i estão **desalinhadas** após reflow (orig 45pg vs render 49pg =
+4pg deslocamento acumulado).
+
+Padrão na curva per-page de G1: WER 0.02 nas primeiras pgs, despenca
+para 0.96+ a partir da pg ~9 (onde desalinhamento atinge 1 página inteira).
+Não é problema da métrica — é **problema de pareamento de páginas**.
+
+### Decisão arquitetural derivada (e12)
+
+O vértice "médio" do triângulo precisa de **alinhamento de páginas como
+pré-passo** antes de qualquer métrica per-page. Caso contrário, métricas
+medem conteúdos não-correspondentes.
+
+Próximo lab (e13): alinhamento via DTW sobre fingerprint de página, ou
+bipartite matching Hungarian global. Após alinhamento, G1+G2 viram
+candidatas reais ao "médio"; G3 fica como diagnóstico.
+
+### Insight para T090
+
+Métricas textuais (G1/G2/G3) custam ~0.06s/45pgs cada — **ordem de
+grandeza mais barato que macro SSIM** (22s/49pgs). Para indexação em
+massa, métrica textual barata + alinhamento de páginas é caminho viável
+("rápido + bom-o-suficiente").
+
 ### Bônus
 
 - Telemetria (instrumentação local em `lab/e10/telemetry.py`) validou
