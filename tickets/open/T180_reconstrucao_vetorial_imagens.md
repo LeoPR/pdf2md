@@ -1,14 +1,49 @@
 ---
 id: T180
 titulo: Reconstrução vetorial de imagens-com-texto (texto + fonte + geometria + brasão residual)
-status: research
+status: open
 criado_em: 2026-05-10
 fechado_em:
 fase: 4
-depende_de: [T160]
+depende_de: []
 blocks: []
 tags: [conversor, imagens, vetorizacao, reconstrucao, frente-e]
 kind: experimento
+---
+
+## Estado pós-experimental (2026-05-17)
+
+`lab/e16_image_decompose/` (logo Cambridge, N=1) e `lab/e17_vlm_full_page/`
+(pg 204 N&C math, N=1) trouxeram evidência empírica que redesenha o ticket:
+
+**Confirmado** (e16):
+- 4/4 VLMs locais via Ollama leem texto curto em logo simples
+- `gemma3:4b` é o **mais rápido E correto** (46s, transcrição fiel)
+- `gemma3:12b` empata em qualidade mas é 2.6× mais lento
+- `llama3.2-vision:11b` regride (troca caso e adiciona pontuação)
+- VLM substitui o passo de "OCR semântico para small-image" originalmente
+  delegado a T160 — para o escopo limitado de T180, VLM é auto-suficiente
+
+**Falsificado** (e17):
+- VLMs (4/4) **alucinam massivamente** em página math+prosa+layout
+  (nível 5 da hierarquia de testes)
+- Não escalam para extração full-page — Marker continua insubstituível
+- Mais capacidade = alucinação mais confiante (gemma3:12b alucinou mais
+  elaboradamente que gemma3:4b)
+
+**Implicação para T180**:
+- T180 fica **escopado a small-image decompose** (logos, headers, badges,
+  brasões institucionais)
+- **Não tentar** generalizar para figuras complexas / diagramas multi-elemento /
+  páginas
+- Dependência de T160 **removida** (VLM faz a parte de OCR para o escopo
+  pequeno; T160 fica para "OCR semântico generalizado" que é problema maior)
+- Ferramenta padrão: **`gemma3:4b` via Ollama** (rapidez + custo + acerto
+  em small-image)
+
+Status promovido `research → open`: existe caminho empiricamente apoiado
+para começar implementação, mesmo que XL em escopo.
+
 ---
 
 ## Contexto
@@ -27,13 +62,18 @@ Para elementos repetitivos do corpus (logos de editora, headers de página, marc
 - Qualidade visual perceptualmente equivalente (SSIM ≥ 0.95) ou superior (sem artefatos JPEG)
 - Searchability total do texto extraído
 
-## Método (especulativo)
+## Método (revisado pós-e16)
 
-1. **Extração** (delegada a T160):
-   - OCR para identificar texto + bbox de cada palavra
-   - Detecção de fonte via matching contra Adobe / Google Fonts (ou via Surya layout)
-   - Geometria: posição, tamanho, rotação de cada glyph
-   - Bitmap residual: pixels não cobertos pelo texto reconstruído (brasão, ornamentos)
+1. **Extração** (VLM-as-tool, escopo small-image):
+   - **OCR + estrutura via VLM Ollama** (default `gemma3:4b` — escolhido por
+     custo-acerto em logos): prompt fiel-de-transcrição
+   - **Detecção de fonte**: VLM descritivo ("serif Times-like, all caps, bold")
+     em vez de matching formal — N=1 (Cambridge logo) ainda não testou
+     classificador fino; usar Times como fallback
+   - **Geometria**: bbox via prompt VLM + heurística baseada nas dimensões
+     da imagem em pixels
+   - **Bitmap residual**: inpaint do texto via Pillow simples (paint sobre
+     bbox) → sobra o brasão
 
 2. **Representação canônica**:
    ```yaml
@@ -84,9 +124,12 @@ Reconstrução de logos comerciais via re-render do nome **não viola direito au
 ## Conexão
 
 - Frente E da hierarquia (reconstrução vetorial) — pilar
-- Depende de T160 (extração)
+- **Dependência de T160 removida pós-e16**: VLM faz OCR no escopo small-image
 - Promovido a partir de T137 nível 3 (que era especulativo)
 - Habilita parte de T440 (MD como transporte — assets vetoriais são naturalmente compactos)
+- Apoiado empiricamente em [`lab/e16_image_decompose/notes.md`](../../lab/e16_image_decompose/notes.md)
+- Limite externo empírico em [`lab/e17_vlm_full_page/notes.md`](../../lab/e17_vlm_full_page/notes.md):
+  VLM não escala para full-page; não tentar generalizar T180 além de small-image
 
 ## Origem da ideia
 

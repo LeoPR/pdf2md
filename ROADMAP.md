@@ -1,6 +1,6 @@
 # Roadmap
 
-*Atualizado 2026-05-16, v0.7.0. Para perfis cross-recursos das tecnologias
+*Atualizado 2026-05-17, v0.7.0. Para perfis cross-recursos das tecnologias
 ver [`docs/reference/tecnologias.md`](docs/reference/tecnologias.md); para análise crítica da
 trajetória ver [`docs/explanation/analise_critica.md`](docs/explanation/analise_critica.md).*
 
@@ -59,7 +59,7 @@ decrescente. Trabalho ativo segue ordem alfabética dentro do que está prioriza
 | **B — Captura textual** | máximo de texto incluindo OCR de imagens-com-texto; preserva 1ª prioridade da [PHILOSOPHY](docs/explanation/philosophy.md) | [T101](tickets/closed/T101_marker_pdf_extraction_com_gpu_rtx_3060.md) ✓, [T160](tickets/research/T160_ocr_semantico_generalizado.md) (research) | parcial; T160 generaliza |
 | **C — Captura estrutural** | tabelas, headers, fórmulas e imagens com semântica preservada (2ª prioridade) | [T102](tickets/closed/T102_restructure_output_por_capitulo_indexmd.md) ✓, [T132](tickets/research/T132_potrace_svg_line_art.md), [T133](tickets/research/T133_detector_de_formula.md), [T134](tickets/research/T134_pix2tex_formulas.md) | em progresso |
 | **D — Otimização de representação** | formato adaptativo, lossless, denoise; ascende no [eixo de representação](docs/explanation/philosophy.md#eixo-de-representação) | [T131](tickets/closed/T131_classificador_e_compressao_imagens_nc.md) ✓, [T135](tickets/research/T135_ssim_gate_qualidade.md), [T136](tickets/closed/T136_breakdown_formato_stats.md) ✓, [T137](tickets/research/T137_denoising_jpeg_pre_compressao.md) | parcial |
-| **E — Reconstrução vetorial** | texto + fonte + geometria + brasão residual; Nível 4 do eixo de representação | [T180](tickets/research/T180_reconstrucao_vetorial_imagens.md) (research) | ambição — ainda 0% |
+| **E — Reconstrução vetorial** | texto + fonte + geometria + brasão residual; Nível 4 do eixo de representação | [T180](tickets/open/T180_reconstrucao_vetorial_imagens.md) (open) | escopo refinado pós-e16/e17 — VLM viabiliza small-image (logos), não escala para página |
 | **Meta-design** | tese da família + roteamento profile-aware | [T401](tickets/open/T401_documentar_hierarquia_de_prioridades.md), [T402](tickets/research/T402_pipeline_fractal_recursivo.md), [T090](tickets/research/T090_macro_intent_routing.md) | **avançada** — PHILOSOPHY + META_TRANSMUTOS + MD_CANONICAL + TECNOLOGIAS prontos; routing pendente |
 
 A ordem natural de execução é A → B → C → D → E, mas frentes podem rodar em paralelo conforme experimentos abrem.
@@ -85,7 +85,7 @@ Detalhes em [`tickets/INDEX.md`](tickets/INDEX.md) seção "Fase 0".
 
 ### Fase 2 — Adoção e empacotamento ✓ ESTÁVEL
 
-- [x] [T107](tickets/open/T107_md_to_pdf_per_chapter.md) MD → PDF por capítulo (`pdf2md pdfs`)
+- [x] [T107](tickets/closed/T107_md_to_pdf_per_chapter.md) MD → PDF por capítulo (`pdf2md pdfs`) — fechado 2026-05-17
 - [x] [T108](tickets/closed/T108_pacote_conversor_readme.md) `pip install pdf2md` com CLI unificado (v0.4)
 - [x] **v0.5.0** `pdf2md.telemetry` ([T085](tickets/closed/T085_telemetry_module.md))
 - [x] **v0.6.0** `pdf2md.pixel_roundtrip` ([T070](tickets/research/T070_pixel_roundtrip_validador_visual.md) parcial)
@@ -117,7 +117,7 @@ Detalhes em [`tickets/INDEX.md`](tickets/INDEX.md) seção "Fase 0".
 - [ ] [T420](tickets/research/T420_fallback_low_resource_sem_gpu_sem_modelos_ml_pesados.md) Stack low-resource (sem GPU)
 - [ ] [T440](tickets/research/T440_md_como_formato_de_transporte_vs_pdf.md) MD compactado como formato de distribuição
 - [ ] [T160](tickets/research/T160_ocr_semantico_generalizado.md) OCR semântico generalizado (Frente B)
-- [ ] [T180](tickets/research/T180_reconstrucao_vetorial_imagens.md) Reconstrução vetorial (Frente E)
+- [ ] [T180](tickets/open/T180_reconstrucao_vetorial_imagens.md) Reconstrução vetorial (Frente E) — escopo refinado pós-e16/e17: VLM (gemma3:4b) viabiliza small-image (logos/headers), não full-page
 - [ ] [T090](tickets/research/T090_macro_intent_routing.md) Macro-intent CLI (`--rapido`/`--qualidade`/`--auto`) — depende de mapa de perfis com 3+ tools
 
 ### Fase 5 — Corpus e validação

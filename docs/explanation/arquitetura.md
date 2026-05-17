@@ -1,6 +1,6 @@
 # Arquitetura — `pdf2md`
 
-*Visão consolidada do conceito, das camadas e das ferramentas (v0.7.0, 2026-05-16).
+*Visão consolidada do conceito, das camadas e das ferramentas (v0.7.0, 2026-05-17).
 Para detalhes por camada, ver [`arquitetura/`](arquitetura/). Perfis cross-recursos
 em [`TECNOLOGIAS.md`](../reference/tecnologias.md).*
 
@@ -194,9 +194,9 @@ Detalhes em [`arquitetura/05_pipeline.md`](arquitetura/05_pipeline.md).
 
 ---
 
-## 6. Estado experimental (lab/) — atualizado 2026-05-16
+## 6. Estado experimental (lab/) — atualizado 2026-05-17
 
-15 labs até hoje. Sumário cronológico:
+17 labs + infra T060. Sumário cronológico:
 
 | ID | Variável testada | Resultado | Estado |
 |---|---|---|---|
@@ -215,13 +215,32 @@ Detalhes em [`arquitetura/05_pipeline.md`](arquitetura/05_pipeline.md).
 | `e12_metricas_globais_pagina` | G1 WER global / G2 grid / G3 anchors | **insight**: páginas desalinham após reflow | replano |
 | `e13_alinhamento_paginas` | DTW vs Hungarian align | **destrava T070** — Hungarian WER med 0.376 | promove |
 | `e14_pixel_roundtrip_cross_pdf` | pixel-roundtrip em 3 categorias além N&C | generaliza — WER med 0.26-0.42, todos passam | promove |
+| `e15_gt_validation` | Infraestrutura para T060 (GT humano vs PyMuPDF) | scripts prontos, aguarda curadoria humana | infra (não-experimental) |
+| `e16_image_decompose` | T180 piloto: 4 VLMs Ollama no logo Cambridge (N=1) | 3/4 transcrevem fiel; `gemma3:4b` mais rápido E correto (46s) | promove parcial → T180 |
+| `e17_vlm_full_page` | VLM como extrator full-page em pg204 N&C math (N=1) | **0/4 acertam** — 3 alucinam, 1 vazio. Nível 5 da hierarquia falsificado | descarte com escopo |
 
-Próximos candidatos:
+### Lição transversal e16+e17 (VLM-as-tool)
 
-- **T060** (Frente A, mini-corpus GT humano 5-10 pgs) — destrava T072 calibração
-- **e15** OCR semântico de imagem (T160, Frente B) ou potrace SVG (T132, Frente C+D)
-- **e1X** alt-tools comparativo Marker × Nougat × olmOCR-2 × Docling (T410) com pixel-roundtrip como métrica
-- **e16** macro-intent CLI initial implementation (T090) usando os 3-4 perfis já coletados
+Sequência testou se VLMs locais via Ollama (4–12B) viabilizam capacidade
+nova. **Resposta empírica**:
+
+- ✓ **Small-image OCR** (logo curto, header, badge): VLM **funciona** —
+  `gemma3:4b` (4B) basta. Apoia T180 com escopo realista.
+- ✗ **Full-page extraction** (página math+prosa+layout): VLM **aluci
+  confiantemente** — não substitui Marker. Mais capacidade ≠ mais fidelidade.
+
+Conclusão: VLM-as-tool **confinado a T180** (Frente E). Marker / Surya /
+pipeline atual permanece único caminho viável para extração full-page.
+Não há "Eixo C" formal — VLM é ferramenta auxiliar dentro de T180, não
+camada ortogonal.
+
+### Próximos candidatos
+
+- **T060** (Frente A, mini-corpus GT humano 5-10 pgs) — destrava T072 calibração e T410 (alt tools)
+- **T180** start (escopo small-image refinado pós-e16/e17)
+- **e1X** alt-tools comparativo Marker × Nougat × olmOCR-2 × Docling (T410)
+  com pixel-roundtrip como métrica — depende T060
+- **macro-intent CLI** (T090) usando os perfis já coletados
 
 ---
 

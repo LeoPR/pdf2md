@@ -40,7 +40,7 @@ Código que já roda e está estabilizado em `src/`.
 | [T102](closed/T102_restructure_output_por_capitulo_indexmd.md) | (c) | Restructure output por capítulo + index.md |
 | [T103](closed/T103_round_trip_test_script.md) | (c) | Round-trip test script |
 | [T104](closed/T104_round_trip_test_em_1_capitulo_baseline.md) | (c) | Round-trip baseline (cap. 4 → 95.1%) |
-| [T107](open/T107_md_to_pdf_per_chapter.md) | (o) | MD → PDF por capítulo via Chrome |
+| [T107](closed/T107_md_to_pdf_per_chapter.md) | (c) | MD → PDF por capítulo via Chrome — fechado 2026-05-17 (coberto por `pdf2md.pdfs.generate_all()`) |
 | [T108](closed/T108_pacote_conversor_readme.md) | (c) | Pacote `pip install pdf2md` + CLI (macro + 10 subcomandos finos) — fechado 2026-05-11 |
 
 ## `imagens` — Otimização adaptativa de imagens
@@ -77,7 +77,7 @@ Cada um destes tem ou terá um experimento correspondente em [`../lab/eNN_/`](..
 | [T134](research/T134_pix2tex_formulas.md) | (r) | pix2tex para fórmulas-imagem detectadas | futuro `lab/eXX_pix2tex/` | B+D |
 | [T137](research/T137_denoising_jpeg_pre_compressao.md) | (r) | Denoising JPEG antes da compressão | futuro `lab/eXX_jpeg_denoise/` | D |
 | [T160](research/T160_ocr_semantico_generalizado.md) | (r) | OCR semântico generalizado de imagens-com-texto | futuro `lab/eXX_semantic_ocr/` | **B (atual)** |
-| [T180](research/T180_reconstrucao_vetorial_imagens.md) | (r) | Reconstrução vetorial (texto + fonte + brasão residual) | futuro `lab/eXX_reconstrutor_vetorial/` | E |
+| [T180](open/T180_reconstrucao_vetorial_imagens.md) | (o) | Reconstrução vetorial (texto + fonte + brasão residual) — escopo refinado pós-e16/e17 | `lab/e16_image_decompose/` + `lab/e17_vlm_full_page/` | E |
 | [T410](research/T410_testar_ferramentas_alternativas_nougat_mineru_pdftotext.md) | (r) | Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling | família `lab/e1X_*` | A+B+C |
 | [T420](research/T420_fallback_low_resource_sem_gpu_sem_modelos_ml_pesados.md) | (r) | Fallback low-resource (sem GPU) | futuro `lab/eXX_low_resource/` | B |
 | [T450](closed/T450_investigar_ibm_lesson_1_round_trip_critico.md) | (c) | IBM lesson 1 — fechado como "categoria conhecida" (bloat 3.4× via padrão de e03) | (sem lab dedicado — entendido sistemicamente) | A |
@@ -122,7 +122,7 @@ Próximas famílias de experimentos (alinhadas com [Frentes do ROADMAP](../ROADM
 - **Frente C/D — captura estrutural + otimização**:
   - [T132](research/T132_potrace_svg_line_art.md), [T133](research/T133_detector_de_formula.md), [T134](research/T134_pix2tex_formulas.md), [T135](research/T135_ssim_gate_qualidade.md), [T136](open/T136_breakdown_formato_stats.md)
 - **Família `lab/e1X_*`** (T410): comparação Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling
-- **Frente E — ambição**: [T180](research/T180_reconstrucao_vetorial_imagens.md) (reconstrução vetorial)
+- **Frente E — ambição**: [T180](open/T180_reconstrucao_vetorial_imagens.md) (reconstrução vetorial — escopo small-image pós-e16/e17)
 
 Packaging (T108) **fechado** em 2026-05-11 com MVP: pacote pip + CLI unificado
 (macro `pdf2md convert` + 10 subcomandos finos + `doctor`/`version`).

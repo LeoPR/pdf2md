@@ -108,7 +108,7 @@ Recomendação inicial de **macro-intents** (T090):
 | Line art → SVG via potrace | [T132](../../tickets/research/T132_potrace_svg_line_art.md) | research |
 | Detector + extrator fórmula→LaTeX | [T133](../../tickets/research/T133_detector_de_formula.md) + [T134](../../tickets/research/T134_pix2tex_formulas.md) | research |
 | Denoise JPEG antes da compressão | [T137](../../tickets/research/T137_denoising_jpeg_pre_compressao.md) | research |
-| Reconstrução vetorial logos (Nível 4) | [T180](../../tickets/research/T180_reconstrucao_vetorial_imagens.md) | research |
+| Reconstrução vetorial logos (Nível 4) | [T180](../../tickets/open/T180_reconstrucao_vetorial_imagens.md) | open — escopo small-image refinado pós-e16/e17 |
 
 ---
 
