@@ -43,7 +43,11 @@ TARGETS = [
     (
         "preskill_ph219_ch5",
         Path(r"Z:/caches/corpus/pdf2md/preskill_ph219_ch5.pdf"),
-        [0, 1],
+        # Originalmente [0, 1] mas eram cover + TOC (sem math).
+        # [2, 4] = pg3 (5.1 Classical Circuits + 5.1.1 + eqs 5.1, 5.2)
+        #       + pg5 (continuação de 5.1.2, math básico)
+        # Decisão 2026-05-18 ao iniciar afunilamento T060.
+        [2, 4],
         "notes_1col math_denso",
     ),
     (
