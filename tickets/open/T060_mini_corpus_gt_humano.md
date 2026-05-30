@@ -1,6 +1,6 @@
 ---
 id: T060
-titulo: Mini-corpus de GT humano (5-10 páginas curadas)
+titulo: Mini-corpus de GT humano (4-5 páginas; gatilho condicional para 10 em T060.2)
 status: open
 criado_em: 2026-05-10
 fechado_em:
@@ -9,7 +9,20 @@ depende_de: [T031, T040]
 blocks: [T410]
 tags: [validacao, gt, ground-truth, mini-corpus]
 kind: infra
+altitude: execucao
 ---
+
+## Rescope 2026-05-19 (workflow reavaliação-2-propósitos)
+
+Escopo original era 8-10 páginas (~4-6h trabalho humano). Workflow identificou
+que **N=4-5** é o **sinal estatístico mínimo** para responder H_promo/H_descarta
+do lab/e15. Páginas adicionais ficam para **T060.2 condicional**, disparado só
+se gap WER ≥ 1pp sobreviver à variância de N=4-5.
+
+Mudanças concretas:
+- Páginas alvo: 4-5 (4 Preskill + 1 N&C opcional), em vez de 8-10
+- Esforço estimado: 2-3h humano (vs 4-6h)
+- Arxiv 1706/2106 + tabela CDC + Trotter movidos para T060.2 condicional
 
 ## Contexto
 
@@ -17,39 +30,45 @@ kind: infra
 
 Para a **Frente A (Validação)** ficar completa, precisa de mini-corpus pequeno com MD canônico transcrito manualmente.
 
-## Objetivo
+## Objetivo (rescope 2026-05-19)
 
-Curar 5-10 páginas com MD canônico em `corpus/_gt/`, cobrindo casos representativos:
+Curar **4-5 páginas** com MD canônico em `corpus/_gt/`, focando no corpus principal:
 
-- 2 páginas N&C cap. 4 (math denso, já tem MD₁ histórico — auditar e corrigir)
-- 2 páginas Preskill ph219 ch5 (matéria pareada com N&C cap. 4 — comparação inter-source)
-- 1 página de arxiv 1706.03762 (multi-col denso, math moderado)
-- 1 página de arxiv 2106.05919v2 (math heavy, paper longo)
-- 1 página com tabela complexa
-- 1 página com fórmula multi-linha (Trotter expansion ou similar)
+- **4 páginas Preskill ph219 ch5** (notes 1-col math denso): pg03 ✓ (2026-05-19), pg05, pg07, pg15 — calibra protocolo + cobertura intra-source
+- **1 página N&C cap 4** opcional (math denso book) — comparação inter-source
+
+Cortado do escopo atual (vai para T060.2 se gap WER promover GT a primária):
+- ~~2 páginas N&C cap 4 (reduzido para 1 opcional)~~
+- ~~1 página arxiv 1706.03762 (paper 2-col)~~
+- ~~1 página arxiv 2106.05919v2 (math heavy)~~
+- ~~1 página tabela complexa CDC~~
+- ~~1 página fórmula multi-linha Trotter~~
 
 Cada página GT acompanhada de:
 - `<id>/<page>.expected.md` — MD canônico
 - `<id>/<page>.note.md` — observações sobre desvios da regra de markdown (e.g. tabela com colspan que precisou inline-HTML)
 
-## Critérios de aceitação
+## Critérios de aceitação (rescope)
 
-- [ ] 8-10 páginas em `corpus/_gt/` com MD curado
-- [ ] Para cada página: cobertura de pelo menos 1 caso de cada categoria-meta
-- [ ] Pipeline atual rodado nas mesmas páginas (extração → MD; comparação WER-prosa contra GT)
-- [ ] Resultado: tabela WER-prosa, count-diff de fórmulas, count-diff de citações por página
+- [x] **1 página** em `corpus/_gt/` com MD curado canônico (pg03 ✓ 2026-05-19)
+- [ ] **3-4 páginas restantes** em `corpus/_gt/` (pg05, pg07, pg15 Preskill + 1 N&C cap 4 opcional)
+- [ ] Para cada página: cobertura de ao menos 1 caso da categoria-meta (math denso, headers aninhados, eq numerada)
+- [ ] Pipeline atual rodado nas mesmas páginas (comparação WER-prosa contra GT)
+- [ ] Resultado: tabela WER-prosa + count-diff por página com **N ≥ 4**
 - [ ] Comparação: gap entre `WER(GT, extracao)` e `WER(roundtrip)` quantificado
 
-## Critério de promoção / descarte
+## Critério de promoção / descarte / disparo T060.2
 
-- Promover para `lab/eXX_gt_validation/` se a comparação revelar gap significativo (> 1pp) entre round-trip e GT — vira métrica primária do projeto
-- Descartar / congelar se gap < 1pp — round-trip continua sendo proxy aceitável
+- **Promover GT** a métrica primária (round-trip vira health-check) se `WER(GT, extracao) − WER(roundtrip) ≥ 1pp` mediano com N≥4
+- **Descartar GT** (round-trip continua proxy aceitável) se gap `< 1pp` mediano
+- **Disparar T060.2** (expandir para arxiv 1706/2106 + tabela + Trotter) **só** se gap promove **e** variância alta no N=4-5 indicar que mais páginas trariam sinal mais limpo. Caso contrário, T060.2 não roda — economia de 2-4h de curadoria humana
 
 ## Não-objetivo
 
-- Curar livro inteiro — 8-10 páginas representativas é suficiente para responder a Q1 da [LITERATURA.md §6](../../docs/explanation/literatura.md)
-- Validar todas as métricas de [METRICS.md](../../docs/reference/metricas.md) — apenas WER-prosa + count-diffs nesta passagem
-- Automatizar a curadoria — é trabalho humano consciente, ~4-6h
+- Curar livro inteiro — 4-5 páginas respondem Q1 da [literatura.md §6](../../docs/explanation/literatura.md)
+- Validar todas as métricas de [metricas.md](../../docs/reference/metricas.md) — apenas WER-prosa + count-diffs
+- Automatizar a curadoria — é trabalho humano consciente, **~2-3h com rescope** (vs 4-6h escopo original)
+- Cobrir paper 2-col, tabela gov, math heavy nesta passagem — vão para T060.2 condicional
 
 ## Esforço estimado
 

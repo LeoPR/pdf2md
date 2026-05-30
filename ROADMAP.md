@@ -1,8 +1,31 @@
 # Roadmap
 
-*Atualizado 2026-05-17, v0.7.0. Para perfis cross-recursos das tecnologias
+*Atualizado 2026-05-19, v0.7.0. Para perfis cross-recursos das tecnologias
 ver [`docs/reference/tecnologias.md`](docs/reference/tecnologias.md); para análise crítica da
 trajetória ver [`docs/explanation/analise_critica.md`](docs/explanation/analise_critica.md).*
+
+## Duas altitudes operacionais (rescope 2026-05-19)
+
+O trabalho do pdf2md vive em **duas altitudes** que coexistem no mesmo repo
+mas operam em ritmos diferentes:
+
+| Altitude | Conteúdo | Ritmo |
+|---|---|---|
+| **Operacional** | Frentes A-E (Validação, Extração textual, Estrutural, Otimização, Reconstrução vetorial) — tickets executáveis, labs `eXX`, módulos em `src/pdf2md/` | dias-semanas |
+| **Meta-design** | [T400](tickets/research/T400_conversor_projeto_autonomo.md) / [T401](tickets/open/T401_documentar_hierarquia_de_prioridades.md) / [T402](tickets/research/T402_pipeline_fractal_recursivo.md) + [`philosophy.md`](docs/explanation/philosophy.md) + [`transmutos.md`](docs/explanation/transmutos.md) + [`md_canonical.md`](docs/reference/md_canonical.md) + memória delta-E — articulação conceitual que orienta decisões sem prazo | meses |
+
+[T060](tickets/open/T060_mini_corpus_gt_humano.md) vive **na interseção** das duas
+altitudes por design: curadoria humana é simultaneamente instrumentação da
+Frente A *e* falsificação empírica da tese delta-E. Ritmo artesanal é
+esperado — não bug de processo.
+
+Esta distinção foi articulada explicitamente em 2026-05-19 (workflow
+reavaliação-2-propósitos, veredito `rescope_unico`) para resolver desconforto
+de "2 propósitos num". Tickets ganham campo `altitude:` em
+[`tickets/INDEX.md`](tickets/INDEX.md). Não há intenção de separar em 2 repos
+até segunda instância concreta nascer (ver T400).
+
+---
 
 Dois recortes complementares do trabalho:
 

@@ -7,6 +7,22 @@ Para o recorte por **Frente de cobertura (A-E)**, ver [`../ROADMAP.md`](../ROADM
 > Status indicado entre parênteses: `(o)` open, `(p)` in_progress,
 > `(c)` closed, `(r)` research, `(b)` blocked.
 
+## Campo `altitude:` (rescope 2026-05-19)
+
+A partir de 2026-05-19, tickets ganham campo `altitude:` no frontmatter para
+distinguir as **duas altitudes operacionais** do projeto (ver
+[ROADMAP § Duas altitudes](../ROADMAP.md#duas-altitudes-operacionais-rescope-2026-05-19)):
+
+- **`altitude: execucao`** — Frentes A-E. Tickets executáveis, ritmo dias-semanas.
+  Exemplos: T060 (GT humano), T070 (pixel-roundtrip), T072 (calibração),
+  T180 (image decompose), T410 (alt-tools).
+- **`altitude: meta`** — Meta-design. Ritmo de meses, orienta sem prazo.
+  Exemplos: T400 (autonomous project), T401 (philosophy), T402 (fractal),
+  T440 (MD-as-transport).
+
+Tickets sem `altitude:` no frontmatter herdam por heurística: `kind: decisao`
+→ `meta`; demais → `execucao`. Atualizar quando re-editar.
+
 ---
 
 ## `infra` — Bancada, corpus, manifests, baseline

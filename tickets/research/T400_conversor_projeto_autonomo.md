@@ -9,7 +9,21 @@ depende_de: [T100]
 blocks: []
 tags: [conversor, projeto-autonomo, meta]
 kind: decisao
+altitude: meta
 ---
+
+## Gatilho de separação `transmutos/` (rescope 2026-05-19)
+
+Workflow reavaliação-2-propósitos resolveu a tensão "1 repo vs 2 repos" como
+**gatilho condicional explícito**:
+
+> Separar `transmutos/` em repo próprio **SE E SOMENTE SE** segunda instância
+> concreta (`pptx2md`, `docx2md`, `html2md`, etc.) for iniciada **com código**.
+> Até lá, transmutos vive como [`docs/explanation/transmutos.md`](../../docs/explanation/transmutos.md)
+> no próprio pdf2md, **sem custo de coordenação**.
+
+Isso transforma a ansiedade "separar agora ou não?" em decisão futura
+objetiva. Estado atual: 1 instância (pdf2md), 0 segunda — não separar.
 
 ## Contexto
 
