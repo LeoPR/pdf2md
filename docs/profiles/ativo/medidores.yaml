@@ -1,0 +1,145 @@
+algoritmo:
+  id: medidores
+  nome: "Medidores (telemetry + rt-pixel + rt-textual + multi-roundtrip)"
+  versao: "0.7.0"
+  tipo: measurer
+  estado: implementado
+  particao: ativo
+  lab_origem:
+    - lab/e09_pixel_roundtrip_proto
+    - lab/e10_pixel_roundtrip_fingerprint
+    - lab/e13_alinhamento_paginas
+    - lab/e14_pixel_roundtrip_cross_pdf
+    - src/pdf2md/telemetry.py
+    - src/pdf2md/pixel_roundtrip.py
+    - src/pdf2md/roundtrip.py
+    - src/pdf2md/multi_roundtrip.py
+  medido_em: 2026-05-16
+  licenca: HPND   # depende de Pillow + scikit-image + scipy + psutil
+  dependencias_externas: offline
+
+dimensoes:
+  velocidade_wall_full_doc:
+    valor: 22
+    unidade: s/50pg
+    confianca: medido
+    contexto: "SSIM macro single-threaded (gargalo conhecido — T070 follow-up)"
+    notas: "Round-trip textual é instantâneo; pixel-roundtrip SSIM é o custo dominante"
+
+  uso_hardware_acelerador:
+    valor: CPU-only
+    pico_vram_mb: 0
+    confianca: medido
+
+  uso_memoria_RAM_host:
+    valor: 200
+    unidade: MB
+    confianca: medido
+    contexto: "psutil + Pillow + scikit-image carregados"
+
+  tempo_cold_start:
+    valor: 0.5
+    unidade: s
+    confianca: medido
+
+  tempo_inferencia_unitario:
+    valor: 0.44
+    unidade: s/pg_par
+    confianca: medido
+
+  qualidade_prose_texto:
+    valor: N-A
+    confianca: medido
+    notas: "Mede qualidade de extratores, não extrai"
+
+  qualidade_math_semantica:
+    valor: N-A
+    confianca: medido
+
+  qualidade_tabelas:
+    valor: N-A
+    confianca: medido
+
+  preservacao_numeros_citacoes:
+    valor: N-A
+    confianca: medido
+
+  alucinacao_risco:
+    valor: zero
+    sinal: "transformação determinística sobre inputs"
+    confianca: medido
+
+  determinismo:
+    valor: deterministico-com-seed
+    confianca: medido
+
+  estabilidade_runtime:
+    taxa_crash_pct: 0
+    taxa_output_vazio_pct: 0
+    confianca: medido
+    contexto: "10+ runs em e09-e14 sem crash"
+
+  granularidade_operacional:
+    valor: documento
+    confianca: medido
+    notas: "Telemetria por step; pixel-roundtrip por documento; rt-textual por documento"
+
+  riqueza_formato_intermediario:
+    valor: MD+DocTags/JSON     # _stats.json + telemetry.json + alignment.json
+    confianca: medido
+
+  cobertura_tipo_documento:
+    livro: forte
+    paper_arxiv: forte
+    slides: medio
+    scan: medio
+    form_acroform: medio
+    confianca: medido
+    notas: "Agnóstico ao extrator — qualquer output MD pode ser medido"
+
+  cobertura_tipo_elemento:
+    prose: forte
+    math_inline: medio        # WER-textual cego à semântica LaTeX (lição e18)
+    math_display: medio
+    tabela: nao_medido        # TEDS não implementado
+    figura_vetorial: nao_medido
+    logo: medio               # via pixel-roundtrip SSIM
+    confianca: medido
+
+  scaling_behavior:
+    descricao: "linear em n_paginas; gargalo SSIM single-threaded"
+    pontos_medidos:
+      - {n_paginas: 50, wall_s: 22}
+    confianca: medido
+    notas: "Multiprocess SSIM identificado como follow-up T070; ainda não implementado"
+
+dimensoes_que_vence:
+  - universalidade_medicao              # agnóstico ao extrator
+  - alucinacao_risco                    # zero
+  - determinismo                        # bit-for-bit
+  - dependencias_externas               # offline
+  - uso_hardware_acelerador             # CPU-only
+
+notas: |
+  Camada de medição da arquitetura 4-camadas — instrumento na visão
+  "instrumento → mapa → roteador".
+
+  Componentes:
+  - `telemetry.py` (T085): wall/cpu/mem/gpu/io por step, overhead <1%
+  - `pixel_roundtrip.py` (T070 parcial v0.6): align Hungarian/DTW + macro SSIM + WER medio
+  - `roundtrip.py`: token_similarity textual + 8 categorias de divergência + bloat_ratio (T071)
+  - `multi_roundtrip.py`: N iterações para detecção de convergência/drift
+
+  Lições aplicáveis ao mapa:
+  - WER-textual cego à semântica em math (e18 paradoxo qwen3-vl × pix2tex)
+  - SSIM macro é gargalo single-threaded; multiprocess pendente
+
+  Sem este componente, route() não tem como comparar candidatos.
+
+evidencias:
+  - path: lab/e14_pixel_roundtrip_cross_pdf/README.md
+    quote: "generaliza em 3 categorias além N&C, WER med 0.26-0.42"
+  - path: src/pdf2md/telemetry.py
+    quote: "TelemetryRun captura wall/cpu/mem/gpu/io overhead <1%"
+  - path: tickets/closed/T085_telemetry_module.md
+    quote: "instrumento agnóstico ao extrator"

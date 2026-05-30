@@ -1,0 +1,76 @@
+algoritmo:
+  id: mineru-2-5-pro
+  nome: "MinerU 2.5-Pro"
+  versao: "3.0.4"
+  tipo: extractor
+  estado: blocked
+  particao: inferido
+  lab_origem: lab/e06_mineru25_pro
+  medido_em: 2026-05-11
+  licenca: Apache-2.0
+  dependencias_externas: server-externo   # FastAPI server, modelo on-demand
+
+dimensoes:
+  velocidade_wall_full_doc:
+    valor: nao_medido
+    confianca: inferido
+    notas: "OmniDocBench reportou 95.69 mas em ambiente Linux/CUDA"
+
+  uso_hardware_acelerador:
+    valor: GPU-required
+    pico_vram_mb: nao_medido
+    confianca: inferido
+
+  qualidade_prose_texto:
+    valor: nao_medido
+    confianca: inferido
+    notas: "OmniDocBench v1.6: 95.69 (esperado alto se rodar)"
+
+  qualidade_math_semantica:
+    valor: nao_medido
+    confianca: inferido
+
+  estabilidade_runtime:
+    taxa_crash_pct: 100         # nesta plataforma Windows+RTX3060
+    taxa_output_vazio_pct: 100
+    confianca: medido
+    contexto: "3 tentativas 2026-05-10/11: FastAPI server crashed silently sem logs"
+
+  determinismo:
+    valor: desconhecido
+    confianca: inferido
+
+  granularidade_operacional:
+    valor: documento
+    confianca: inferido
+
+  riqueza_formato_intermediario:
+    valor: MD+DocTags/JSON
+    confianca: inferido
+
+  cobertura_tipo_documento:
+    livro: nao_medido
+    paper_arxiv: nao_medido
+    confianca: inferido
+
+dimensoes_que_vence: []   # blocked nesta plataforma
+
+notas: |
+  BLOCKED em Windows+RTX3060 (2026-05-11). Causas prováveis: CUDA OOM,
+  bug MinerU 3.x Windows, falta hf_xet downloads HTTP slow.
+
+  Recuperável via:
+  - Linux ou WSL2
+  - API externo (mineru-api standalone)
+  - Retry com hf_xet instalado
+
+  NÃO bloqueia projeto — Marker continua baseline.
+
+  Permanece em inferido/ como candidato T410 (alt-tools comparison) quando
+  ambiente Linux estiver disponível.
+
+evidencias:
+  - path: lab/e06_mineru25_pro/RESULT.md
+    quote: "3 tentativas crash silencioso FastAPI server Windows+RTX3060"
+  - path: docs/explanation/literatura.md
+    quote: "Q15 MinerU 2.5-Pro OmniDocBench v1.6 95.69"

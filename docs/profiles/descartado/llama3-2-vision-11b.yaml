@@ -1,0 +1,53 @@
+algoritmo:
+  id: llama3-2-vision-11b
+  nome: "llama3.2-vision:11b (Ollama)"
+  versao: "llama3.2-vision:11b"
+  tipo: extractor
+  estado: descartado
+  particao: descartado
+  lab_origem:
+    - lab/e07_marker_llm                # via Marker --use_llm
+    - lab/e16_image_decompose
+    - lab/e17_vlm_full_page
+    - lab/e18_vlm_formula_isolada
+  medido_em: 2026-05-17
+  licenca: Llama 3.2 license   # community license, restrições
+  dependencias_externas: server-externo
+
+modo_de_falha_dominante: |
+  Dominado em TODAS as dimensões testadas:
+
+  - Small-image (e16): pior fidelidade que gemma3:4b — troca case ("Cambridge"
+    vs "CAMBRIDGE") e adiciona pontuação ("Press.") onde não há
+  - Full-page (e17): comportamento de Q&A (responde Exercise 4.9) em vez de
+    transcrever. Bias de instruct-tuning incompatível com OCR fiel.
+  - Math isolada (e18): output verboso 4295 chars / 298 linhas, WER 0.911 FAIL,
+    alucinação massiva
+  - Combo Marker --use_llm (e07): 40× custo (19m45s vs 30s baseline),
+    regressão em headers e apostrophes, 3 falhas Ollama prompt_eval_count em 2pg
+
+regra_aplicada: "Sua regra: algoritmo bom em NENHUMA dimensão → descartar"
+
+veredito: "Sem vantagem em nenhuma dimensão dentre os testes feitos."
+
+contexto_de_descarte: |
+  Descarte ESCOPADO ao modelo+ferramenta específicos (llama3.2-vision:11b via Ollama).
+  Não generaliza para "categoria VLM" — feedback_escopo_de_conclusao aplicado.
+
+  Hipóteses NÃO testadas que poderiam render:
+  - Versões maiores de Llama vision (90B se vier no Ollama)
+  - Mesmo modelo em backend não-Ollama (vllm, exllama)
+  - Cenários onde Marker é fraco (scan-only, AcroForm) — não testados
+
+  Mantido em descartado/ como registro histórico e proteção contra re-teste
+  inadvertido no mesmo escopo.
+
+evidencias:
+  - path: lab/e07_marker_llm/RESULT.md
+    quote: "40× wall, regressão headers, 3 falhas Ollama prompt_eval_count"
+  - path: lab/e16_image_decompose/notes.md
+    quote: "llama3.2-vision regrede: 'Cambridge University Press.' (caso e pontuação errados)"
+  - path: lab/e17_vlm_full_page/notes.md
+    quote: "llama3.2-vision respondeu Exercise 4.9 em vez de transcrever"
+  - path: lab/e18_vlm_formula_isolada/notes.md
+    quote: "llama3.2-vision WER 0.911 FAIL, alucinação verbose 4295 chars"

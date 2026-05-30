@@ -1,0 +1,126 @@
+algoritmo:
+  id: qwen3-vl-8b-small-image
+  nome: "qwen3-vl:8b (Ollama) — escopo small-image apenas"
+  versao: "qwen3-vl:8b"
+  tipo: extractor
+  estado: testado
+  particao: ativo
+  lab_origem:
+    - lab/e16_image_decompose
+    - lab/e17_vlm_full_page    # output VAZIO (descartado naquela partição)
+    - lab/e18_vlm_formula_isolada    # WER baixo mas erro semântico catastrófico (descartado)
+  medido_em: 2026-05-17
+  licenca: Apache-2.0
+  dependencias_externas: server-externo   # Ollama daemon
+
+dimensoes:
+  velocidade_wall_full_doc:
+    valor: N-A
+    confianca: medido
+
+  uso_hardware_acelerador:
+    valor: GPU-opcional
+    pico_vram_mb: 5500
+    confianca: medido
+
+  uso_memoria_RAM_host:
+    valor: 700
+    unidade: MB
+    confianca: estimado
+
+  tempo_cold_start:
+    valor: 5
+    unidade: s
+    confianca: estimado
+
+  tempo_inferencia_unitario:
+    valor: 112
+    unidade: s/imagem
+    confianca: medido
+
+  qualidade_prose_texto:
+    valor: alto
+    confianca: medido
+    contexto: "Transcrição exata 'CAMBRIDGE / UNIVERSITY PRESS' em e16"
+
+  qualidade_math_semantica:
+    valor: baixo
+    confianca: medido
+    contexto: "e18 fórmula isolada: WER-LaTeX 0.232 (texto) MAS erro de agrupamento no expoente — semanticamente errado"
+    notas: "i(α-β)/2 em vez de i(α-β/2) — catastrófico para quantum gates"
+
+  qualidade_tabelas:
+    valor: nao_medido
+    confianca: inferido
+
+  preservacao_numeros_citacoes:
+    valor: medio
+    confianca: estimado
+
+  alucinacao_risco:
+    valor: medio              # em small-image; alto em full-page (descartado partição)
+    confianca: medido
+
+  determinismo:
+    valor: nao-deterministico
+    confianca: medido
+
+  estabilidade_runtime:
+    taxa_crash_pct: 0
+    taxa_output_vazio_pct: 33   # 1/3 nas tentativas de full-page (e17 + e17-phase2); 0% em small-image
+    confianca: medido
+    notas: "Específico do escopo full-page com prompts longos; small-image funciona consistentemente"
+
+  granularidade_operacional:
+    valor: recorte
+    confianca: medido
+
+  riqueza_formato_intermediario:
+    valor: MD
+    confianca: medido
+
+  cobertura_tipo_documento:
+    livro: N-A
+    paper_arxiv: N-A
+    slides: N-A
+    scan: N-A
+    form_acroform: N-A
+    confianca: medido
+
+  cobertura_tipo_elemento:
+    prose: N-A
+    math_inline: nao_medido
+    math_display: baixo            # erro semântico em e18
+    tabela: N-A
+    figura_vetorial: nao_medido
+    logo: forte
+    confianca: medido
+
+  scaling_behavior:
+    descricao: "~112s por small-image; falha em full-page"
+    pontos_medidos:
+      - {n_imagens: 1, wall_s: 112}
+    confianca: medido
+
+dimensoes_que_vence:
+  - qualidade_prose_texto_small_image    # exato em logo (alternativa robusta a gemma3:4b)
+  - cobertura_tipo_elemento.logo         # forte
+
+notas: |
+  Fallback secundário para T180 small-image se gemma3:4b falhar em logo específico.
+  Apache-2.0 (licença mais permissiva que gemma terms) — vantagem em cenários
+  empresariais.
+
+  CAVEATS críticos:
+  - Output vazio em full-page (e17, e17-phase2): 251s, 557s wall sem produzir nada.
+    Específico de complexidade visual de página inteira — não bug Ollama universal.
+  - Math semântico catastrófico em e18: WER-LaTeX baixo (0.232) MAS erro de
+    agrupamento no expoente (i(α-β)/2 vs i(α-β/2)). NÃO usar para math.
+
+evidencias:
+  - path: lab/e16_image_decompose/notes.md
+    quote: "qwen3-vl:8b transcrição exata CAMBRIDGE UNIVERSITY PRESS"
+  - path: lab/e17_vlm_full_page/notes.md
+    quote: "qwen3-vl:8b output VAZIO em pg204 (251s wall)"
+  - path: lab/e18_vlm_formula_isolada/notes.md
+    quote: "qwen3-vl WER 0.232 (OK numericamente) mas erro semântico catastrófico"

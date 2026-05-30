@@ -1,0 +1,42 @@
+algoritmo:
+  id: marker-use-llm-llama32-combo
+  nome: "Marker --use_llm + llama3.2-vision:11b via Ollama"
+  versao: "Marker 1.10.2 + llama3.2-vision:11b"
+  tipo: extractor
+  estado: descartado
+  particao: descartado
+  lab_origem: lab/e07_marker_llm
+  medido_em: 2026-05-10
+  licenca: GPL-3 (Marker) + Llama 3.2 license (modelo)
+  dependencias_externas: server-externo
+
+modo_de_falha_dominante: |
+  Combo específico Marker + llama3.2-vision via Ollama. Dominado pelo Marker base:
+
+  - **40× wall time**: 19m45s vs 30s baseline para mesmas 2pg de smoke (215-219)
+  - **Round-trip praticamente idêntico** ao baseline e00 — ganho zero em fidelidade
+  - **Regressão em detalhes**: double-prime apostrophes (vs ^{"}), header rebaixed
+  - **3 falhas Ollama** prompt_eval_count em 2pg testadas (bugs vision models)
+  - **Processadores LLM ativados 5/5** mas sem render para math nativo (Texify already does it)
+
+regra_aplicada: "Sua regra: algoritmo bom em NENHUMA dimensão"
+
+veredito: "Descartado para esse modelo+tool específico em N&C LaTeX nativo. N=1 modelo testado — feedback_escopo_de_conclusao aplicado."
+
+contexto_de_descarte: |
+  Descarte ESCOPADO ao combo concreto Marker --use_llm + llama3.2-vision:11b
+  via Ollama em N&C LaTeX nativo.
+
+  NÃO descarta categoria "Marker --use_llm" em geral. Hipóteses NÃO testadas:
+  - Outros modelos VLM (Gemini Flash, Claude vision, Qwen3-VL via vllm)
+  - Outros tools (vllm, exllama, llamafile)
+  - Outros corpus onde Marker é fraco (scan, AcroForm, slides)
+
+  T180 reescopado em 2026-05-17 (Marco D1): VLM-as-tool confinado a small-image
+  decompose. Combo Marker+VLM para extração full-page não é direção do projeto.
+
+evidencias:
+  - path: lab/e07_marker_llm/RESULT.md
+    quote: "smoke 2 pgs, wall 19m45s (40× baseline), 3 falhas Ollama, ganho zero rt"
+  - path: docs/explanation/analise_critica.md
+    quote: "descartado p/ esse modelo+tool específico (40× lento, 0 ganho)"

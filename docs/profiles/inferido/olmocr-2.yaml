@@ -1,0 +1,69 @@
+algoritmo:
+  id: olmocr-2
+  nome: "olmOCR-2 (AllenAI)"
+  versao: "nao_testado"
+  tipo: extractor
+  estado: previsto
+  particao: inferido
+  lab_origem: nao_testado_ainda
+  medido_em: nao_medido
+  licenca: Apache-2.0
+  dependencias_externas: download-on-demand
+
+dimensoes:
+  velocidade_wall_full_doc:
+    valor: nao_medido
+    confianca: inferido
+
+  uso_hardware_acelerador:
+    valor: GPU-required
+    pico_vram_mb: nao_medido
+    confianca: inferido
+
+  qualidade_prose_texto:
+    valor: alto             # RLVR-trained, com unit tests
+    confianca: inferido
+
+  qualidade_math_semantica:
+    valor: nao_medido
+    confianca: inferido
+
+  qualidade_tabelas:
+    valor: nao_medido
+    confianca: inferido
+
+  granularidade_operacional:
+    valor: documento
+    confianca: inferido
+
+  riqueza_formato_intermediario:
+    valor: MD
+    confianca: inferido
+
+  cobertura_tipo_documento:
+    livro: nao_medido
+    paper_arxiv: nao_medido
+    slides: nao_medido
+    scan: alto              # treinado em scan
+    form_acroform: medio    # candidato AcroForm (Marker fraco aqui)
+    confianca: inferido
+
+dimensoes_que_vence: []
+
+notas: |
+  Candidato T410. Diferenciais:
+  - Apache-2.0 (mais permissivo que Marker GPL-3) — vantagem em adoção empresarial
+  - RLVR (Reinforcement Learning from Verifiable Rewards) — quality control
+  - Unit tests no projeto — sinaliza maturidade engenharia
+
+  Nicho potencial:
+  - AcroForm Q11.b onde Marker é fraco (e05): testar especificamente
+  - PDFs scan-only (Wilson 1800 e03 rt 13.62% Marker)
+
+  ~2h teste se infra Protocol Extractor implementada.
+
+evidencias:
+  - path: docs/reference/tecnologias.md
+    quote: "olmOCR-2 AllenAI RLVR Apache-2.0"
+  - path: docs/explanation/analise_critica.md
+    quote: "candidato T410 com unit tests + Apache-2.0"

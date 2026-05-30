@@ -1,0 +1,139 @@
+algoritmo:
+  id: marker
+  nome: "Marker 1.10.2"
+  versao: "1.10.2"
+  tipo: extractor
+  estado: testado
+  particao: ativo
+  lab_origem:
+    - lab/e00_baseline_marker
+    - lab/e14_pixel_roundtrip_cross_pdf
+  medido_em: 2026-05-07
+  licenca: GPL-3
+  dependencias_externas: download-on-demand   # Surya + Texify + Equation models
+
+dimensoes:
+  velocidade_wall_full_doc:
+    valor: 12.9
+    unidade: s/pg
+    confianca: medido
+    contexto: "N&C cap4 ~50pg em RTX 3060 12GB = 645s total"
+
+  uso_hardware_acelerador:
+    valor: GPU-required
+    pico_vram_mb: 3400
+    confianca: medido
+    notas: "Surya é GPU-only; CPU fallback inviável"
+
+  uso_memoria_RAM_host:
+    valor: 1500
+    unidade: MB
+    confianca: estimado
+
+  tempo_cold_start:
+    valor: 30
+    unidade: s
+    confianca: estimado
+    notas: "carregar Surya+Texify+Equation; medir formalmente em Lab E2"
+
+  tempo_inferencia_unitario:
+    valor: 12.5
+    unidade: s/pg
+    confianca: medido
+
+  qualidade_prose_texto:
+    valor: 0.9509
+    unidade: token_similarity
+    confianca: medido
+    contexto: "round-trip N&C cap4 baseline (e00)"
+
+  qualidade_math_semantica:
+    valor: alto
+    confianca: estimado
+    notas: "math LaTeX nativo via Texify; WER-LaTeX vs GT humano pendente T060"
+
+  qualidade_tabelas:
+    valor: nao_medido
+    confianca: inferido
+
+  preservacao_numeros_citacoes:
+    valor: alto
+    confianca: estimado
+
+  alucinacao_risco:
+    valor: medio
+    sinal: "bloat_ratio > 2.0× + densidade < 200 tok/pg (T071)"
+    confianca: medido
+    contexto: "Wilson 1800 e03 bloat 7.7×; Atkins ok com text-layer"
+
+  determinismo:
+    valor: deterministico-com-seed
+    confianca: medido
+    notas: "bit-for-bit reprodutível com mesma versão + seed (T108)"
+
+  estabilidade_runtime:
+    taxa_crash_pct: 0
+    taxa_output_vazio_pct: 0
+    confianca: medido
+    contexto: "10+ runs e00-e14 sem crash silencioso"
+
+  granularidade_operacional:
+    valor: documento
+    confianca: medido
+
+  riqueza_formato_intermediario:
+    valor: MD+LaTeX
+    confianca: medido
+
+  cobertura_tipo_documento:
+    livro: forte
+    paper_arxiv: forte
+    slides: fraco
+    scan: fraco
+    form_acroform: fraco
+    confianca: medido
+
+  cobertura_tipo_elemento:
+    prose: forte
+    math_inline: forte
+    math_display: forte
+    tabela: medio
+    figura_vetorial: nao_medido
+    logo: medio
+    confianca: medido
+
+  scaling_behavior:
+    descricao: "linear em n_paginas, validado até 704pg"
+    pontos_medidos:
+      - {n_paginas: 5, wall_s: 30}
+      - {n_paginas: 50, wall_s: 645}
+      - {n_paginas: 704, wall_s: 6828}
+    confianca: medido
+
+dimensoes_que_vence:
+  - velocidade_wall_full_doc                # único extrator full-doc viável end-to-end
+  - qualidade_prose_texto                   # 95.09% baseline
+  - cobertura_tipo_documento.livro          # forte
+  - cobertura_tipo_documento.paper_arxiv    # forte
+  - riqueza_formato_intermediario           # MD+LaTeX > texto puro
+  - estabilidade_runtime                    # 0% crash em 10+ runs
+
+notas: |
+  Baseline insubstituível v0.7.0. Único extrator full-doc end-to-end testado em
+  produção (704pg N&C completo em 1h54). Round-trip 95.09% bate histórico
+  exato (T104).
+
+  Modos de falha conhecidos:
+  - bloat_ratio > 2× em PDFs sparse (re-OCR alucinante, padrão Wilson e03)
+  - Escapes markdown auto penalizam round-trip textual em formulários AcroForm (e05)
+  - Tabelas TEDS não medido formalmente — pendente T060/T410
+
+  Comparação contra Nougat/MinerU/olmOCR-2/Docling pendente T410 (precisa GT humano T060 primeiro).
+
+evidencias:
+  - path: lab/e00_baseline_marker/RESULT.md
+    quote: "round-trip 95.09% em cap 4 N&C, wall 645s, VRAM peak 3.4GB"
+  - path: lab/e14_pixel_roundtrip_cross_pdf/README.md
+    quote: "generaliza em 3 categorias além N&C, WER med 0.26-0.42"
+  - path: tickets/closed/T108_pacote_conversor_readme.md
+    quote: "Validação em produção N&C completo: 1h54min, 21/21 capítulos bit-for-bit reprodutíveis"

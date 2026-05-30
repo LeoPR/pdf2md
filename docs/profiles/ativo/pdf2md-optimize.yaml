@@ -1,0 +1,134 @@
+algoritmo:
+  id: pdf2md-optimize
+  nome: "pdf2md.optimize (PIL quantize + classify_image)"
+  versao: "0.7.0"
+  tipo: optimizer
+  estado: implementado
+  particao: ativo
+  lab_origem:
+    - lab/e04_t131_validation_corpus
+    - src/pdf2md/optimize.py
+  medido_em: 2026-05-09
+  licenca: HPND   # Pillow
+  dependencias_externas: offline
+
+dimensoes:
+  velocidade_wall_full_doc:
+    valor: 3
+    unidade: s/25_imagens
+    confianca: medido
+    contexto: "198 imagens em N&C cap4 total ≈ 24s"
+
+  uso_hardware_acelerador:
+    valor: CPU-only
+    pico_vram_mb: 0
+    confianca: medido
+
+  uso_memoria_RAM_host:
+    valor: 100
+    unidade: MB
+    confianca: medido
+    notas: "PIL load + quantize por imagem; ~30MB por imagem grande"
+
+  tempo_cold_start:
+    valor: 0.1
+    unidade: s
+    confianca: medido
+    notas: "PIL import only"
+
+  tempo_inferencia_unitario:
+    valor: 0.12
+    unidade: s/imagem
+    confianca: medido
+
+  qualidade_prose_texto:
+    valor: N-A
+    confianca: medido
+
+  qualidade_math_semantica:
+    valor: N-A
+    confianca: medido
+
+  qualidade_tabelas:
+    valor: N-A
+    confianca: medido
+
+  preservacao_numeros_citacoes:
+    valor: N-A
+    confianca: medido
+
+  alucinacao_risco:
+    valor: zero
+    sinal: "transformação determinística PIL quantize; sem ML"
+    confianca: medido
+
+  determinismo:
+    valor: deterministico-com-seed
+    confianca: medido
+    notas: "PIL quantize com palette fixa é bit-for-bit reprodutível"
+
+  estabilidade_runtime:
+    taxa_crash_pct: 0
+    taxa_output_vazio_pct: 0
+    confianca: medido
+    contexto: "validado em 7 docs (e04)"
+
+  granularidade_operacional:
+    valor: recorte
+    confianca: medido
+    notas: "Opera por imagem individual após extração"
+
+  riqueza_formato_intermediario:
+    valor: MD                # mantém referências MD originais com imagens otimizadas no lugar
+    confianca: medido
+
+  cobertura_tipo_documento:
+    livro: forte
+    paper_arxiv: forte
+    slides: forte
+    scan: forte
+    form_acroform: forte
+    confianca: medido
+    notas: "Universal pós-extração (depende apenas das imagens extraídas)"
+
+  cobertura_tipo_elemento:
+    prose: N-A
+    math_inline: N-A
+    math_display: N-A
+    tabela: N-A
+    figura_vetorial: nao_medido
+    logo: forte                  # T131 valida bw 1-bit, palette lossless
+    confianca: medido
+
+  scaling_behavior:
+    descricao: "linear em n_imagens"
+    pontos_medidos:
+      - {n_imagens: 25, wall_s: 3}
+      - {n_imagens: 198, wall_s: 24}
+    confianca: medido
+
+dimensoes_que_vence:
+  - uso_memoria_RAM_host           # <100MB
+  - alucinacao_risco               # zero (determinístico)
+  - determinismo                   # bit-for-bit
+  - cobertura_tipo_documento       # universal pós-extração
+  - velocidade_wall_full_doc       # 3s/25 imagens
+
+notas: |
+  T131 closed. -38.6% economia de bytes em N&C cap4 sem perda visual significativa.
+  Validado em 7 docs (e04): 45-55% em line art, 0% em fotos (correto — fotos
+  ficam JPEG mantido).
+
+  Funcionamento por classificação:
+  - ≤2 cores → PNG 1-bit
+  - ≤16 cores → PNG paleta indexada lossless
+  - >16 cores → JPEG mantido (continuous tone)
+
+  Componível com T132 (potrace SVG line art) e T134 (pix2tex math) quando ambos
+  forem promovidos para src/.
+
+evidencias:
+  - path: lab/e04_t131_validation_corpus/README.md
+    quote: "45-55% em line art, 0% em fotos"
+  - path: src/pdf2md/optimize.py
+    quote: "classify_image(): bw/palette/palette_lossy/continuous"

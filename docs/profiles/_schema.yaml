@@ -1,0 +1,130 @@
+# Schema canônico — template para cada perfil em ativo/ inferido/ descartado/
+# Não consumido diretamente; serve como referência para validação manual.
+# Quando promover algoritmo de inferido→ativo, preencher dimensões com confianca=medido.
+
+algoritmo:
+  id: example-algo                  # kebab-case, único, igual ao nome do arquivo sem .yaml
+  nome: "Example Algorithm 1.0"
+  versao: "1.0.0"                   # opcional
+  tipo: extractor                   # extractor | optimizer | measurer | router | adapter
+  estado: testado                   # testado | implementado | previsto | descartado | blocked
+  particao: ativo                   # ativo | inferido | descartado
+  lab_origem: lab/eXX_...           # path ou lista
+  medido_em: 2026-05-XX             # YYYY-MM-DD ou nao_medido
+  licenca: MIT                      # MIT | Apache-2.0 | HPND | GPL-3 | proprietario | indefinido
+  dependencias_externas: offline    # offline | download-on-demand | server-externo | API-cloud
+
+dimensoes:
+  # Eixo RECURSOS
+  velocidade_wall_full_doc:
+    valor: 645
+    unidade: s                      # s | s/pg | min
+    confianca: medido               # medido | estimado | inferido
+    contexto: "N&C cap4 ~50pg em RTX 3060 12GB"
+
+  uso_hardware_acelerador:
+    valor: GPU-required             # CPU-only | GPU-opcional | GPU-required
+    pico_vram_mb: 3400
+    confianca: medido
+
+  uso_memoria_RAM_host:
+    valor: 1500
+    unidade: MB
+    confianca: medido
+    contexto: "pico RSS durante extração"
+
+  tempo_cold_start:
+    valor: 30
+    unidade: s
+    confianca: medido
+
+  tempo_inferencia_unitario:
+    valor: 12.5
+    unidade: s/pg
+    confianca: medido
+
+  # Eixo FIDELIDADE
+  qualidade_prose_texto:
+    valor: 0.9509
+    unidade: token_similarity
+    confianca: medido
+    contexto: "round-trip N&C cap4 baseline (e00)"
+
+  qualidade_math_semantica:
+    valor: alto                     # alto | medio | baixo | nao_medido
+    confianca: estimado
+    notas: "math LaTeX nativo via Texify; WER vs GT humano pendente T060"
+
+  qualidade_tabelas:
+    valor: nao_medido               # numérico TEDS quando disponível
+    confianca: inferido
+
+  preservacao_numeros_citacoes:
+    valor: alto                     # 1ª prioridade philosophy.md
+    confianca: estimado
+
+  alucinacao_risco:
+    valor: medio                    # alto | medio | baixo | zero
+    sinal: "bloat_ratio > 2.0 + densidade < 200 tok/pg (T071)"
+    confianca: medido
+
+  # Eixo PROPRIEDADES ARQUITETURAIS
+  determinismo:
+    valor: deterministico-com-seed  # deterministico-com-seed | estavel-sem-seed | nao-deterministico | desconhecido
+    confianca: medido
+    notas: "Marker reproduz bit-for-bit com seed fixo entre versões iguais"
+
+  estabilidade_runtime:
+    taxa_crash_pct: 0
+    taxa_output_vazio_pct: 0
+    confianca: medido
+    contexto: "10+ runs em e00-e14 sem crash"
+
+  granularidade_operacional:
+    valor: documento                # recorte | pagina | documento
+    confianca: medido
+
+  riqueza_formato_intermediario:
+    valor: MD+LaTeX                 # texto-puro | MD | MD+LaTeX | MD+DocTags/JSON | HTML+anotacoes
+    confianca: medido
+
+  # Eixo OPERACIONAL
+  cobertura_tipo_documento:
+    livro: forte                    # forte | medio | fraco | N-A
+    paper_arxiv: forte
+    slides: nao_medido
+    scan: fraco
+    form_acroform: fraco
+    confianca: medido
+
+  cobertura_tipo_elemento:
+    prose: forte
+    math_inline: forte
+    math_display: forte
+    tabela: medio
+    figura_vetorial: nao_medido
+    logo: medio                     # vs gemma3:4b small-image — perde
+    confianca: medido
+
+  scaling_behavior:
+    descricao: "linear em n_paginas até 704pg validado"
+    pontos_medidos:
+      - {n_paginas: 5, wall_s: 30}
+      - {n_paginas: 50, wall_s: 645}
+      - {n_paginas: 704, wall_s: 6828}
+    confianca: medido
+
+notas: |
+  Veredito: baseline insubstituível v0.7.0. Marker é o único extrator full-doc
+  end-to-end testado em produção. Round-trip 95.09% bate histórico.
+
+  Modos de falha conhecidos:
+  - bloat_ratio > 2× em PDFs sparse (re-OCR alucinante, padrão Wilson e03)
+  - Tabelas TEDS não medido formalmente (T060)
+  - AcroForm penaliza round-trip por escape markdown (e05)
+
+evidencias:
+  - path: lab/e00_baseline_marker/RESULT.md
+    quote: "round-trip 95.09% em cap 4 N&C, wall 645s"
+  - path: docs/explanation/arquitetura.md
+    quote: "marker-pdf 1.10.2 (GPU RTX 3060)"

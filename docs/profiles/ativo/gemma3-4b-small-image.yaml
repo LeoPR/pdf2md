@@ -1,0 +1,135 @@
+algoritmo:
+  id: gemma3-4b-small-image
+  nome: "gemma3:4b (Ollama) — escopo small-image apenas"
+  versao: "gemma3:4b"
+  tipo: extractor
+  estado: testado
+  particao: ativo
+  lab_origem:
+    - lab/e16_image_decompose
+    - lab/e17_vlm_full_page    # descartado nesta partição
+    - lab/e18_vlm_formula_isolada
+  medido_em: 2026-05-17
+  licenca: proprietario   # gemma terms: Apache-ish mas com restrições
+  dependencias_externas: server-externo   # Ollama daemon
+
+dimensoes:
+  velocidade_wall_full_doc:
+    valor: N-A
+    confianca: medido
+    notas: "Não opera em documento neste escopo — só small-image"
+
+  uso_hardware_acelerador:
+    valor: GPU-opcional
+    pico_vram_mb: 3500
+    confianca: medido
+    notas: "Roda CPU se GPU não disponível; com GPU é ~10× mais rápido"
+
+  uso_memoria_RAM_host:
+    valor: 600
+    unidade: MB
+    confianca: estimado
+    notas: "cliente ollama Python só; servidor consome separado"
+
+  tempo_cold_start:
+    valor: 5
+    unidade: s
+    confianca: estimado
+    notas: "Ollama daemon já running; medir formalmente em Lab E2"
+
+  tempo_inferencia_unitario:
+    valor: 45.9
+    unidade: s/imagem
+    confianca: medido
+    contexto: "logo Cambridge ~70×30px (e16)"
+
+  qualidade_prose_texto:
+    valor: alto
+    confianca: medido
+    contexto: "Transcrição exata 'CAMBRIDGE / UNIVERSITY PRESS' em e16"
+
+  qualidade_math_semantica:
+    valor: nao_medido
+    confianca: inferido
+    notas: "Math em logos raramente ocorre; teste futuro se fizer sentido"
+
+  qualidade_tabelas:
+    valor: N-A
+    confianca: medido
+
+  preservacao_numeros_citacoes:
+    valor: medio
+    confianca: estimado
+
+  alucinacao_risco:
+    valor: baixo                # em small-image; ALTO em full-page (descartado naquela partição)
+    sinal: "output relacionado à imagem em escopo recorte"
+    confianca: medido
+
+  determinismo:
+    valor: nao-deterministico
+    confianca: medido
+    notas: "temperature=0 reduz variância mas não elimina; outputs podem variar entre runs"
+
+  estabilidade_runtime:
+    taxa_crash_pct: 0
+    taxa_output_vazio_pct: 0
+    confianca: medido
+    contexto: "1/1 sucesso em e16 small-image; em full-page (e17) gerou output mas alucinou conteúdo (não captura por taxa_crash)"
+
+  granularidade_operacional:
+    valor: recorte
+    confianca: medido
+    notas: "Crítico — small-image apenas. Full-page leva a alucinação massiva"
+
+  riqueza_formato_intermediario:
+    valor: MD
+    confianca: medido
+    notas: "Tendência a envolver em ```markdown ... ``` (filtro pós-VLM em lab/e17/helper.py)"
+
+  cobertura_tipo_documento:
+    livro: N-A
+    paper_arxiv: N-A
+    slides: N-A
+    scan: N-A
+    form_acroform: N-A
+    confianca: medido
+
+  cobertura_tipo_elemento:
+    prose: N-A
+    math_inline: nao_medido
+    math_display: N-A
+    tabela: N-A
+    figura_vetorial: nao_medido
+    logo: forte
+    confianca: medido
+
+  scaling_behavior:
+    descricao: "~45s por small-image; não escala para página inteira"
+    pontos_medidos:
+      - {n_imagens: 1, wall_s: 45.9}
+    confianca: medido
+
+dimensoes_que_vence:
+  - tempo_inferencia_unitario_small_image   # 45.9s — 2.5× mais rápido que gemma3:12b
+  - qualidade_prose_texto_small_image       # exato em logos
+  - uso_hardware_acelerador                 # GPU opcional, baixo VRAM
+
+notas: |
+  Vencedor para T180 (small-image decompose) em logos / headers / badges.
+
+  CRÍTICO: confinado a granularidade=recorte. Em full-page (e17) o modelo
+  alucina massivamente (inventa conteúdo). Workflow rescope 2026-05-17 marcou:
+  "VLM-as-tool confined to T180 (small-image)".
+
+  Tendência a envelopar resposta em ```markdown ... ``` mesmo com prompt explícito
+  anti-fence (e17 phase 2 ★). Filtro `strip_vlm_envelope` em lab/e17/helper.py
+  é defesa em profundidade.
+
+evidencias:
+  - path: lab/e16_image_decompose/notes.md
+    quote: "gemma3:4b mais rápido E correto (46s, exato) — vencedor"
+  - path: lab/e17_vlm_full_page/notes.md
+    quote: "0/4 VLMs acertam página math+prosa — falsificado nível 5"
+  - path: lab/e18_vlm_formula_isolada/notes.md
+    quote: "gemma3:4b WER-LaTeX 0.747 FAIL em fórmula isolada"

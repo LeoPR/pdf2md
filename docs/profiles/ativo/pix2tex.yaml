@@ -1,0 +1,139 @@
+algoritmo:
+  id: pix2tex
+  nome: "pix2tex (LaTeX-OCR dedicado)"
+  versao: "weights v0.0.1"
+  tipo: extractor
+  estado: testado
+  particao: ativo
+  lab_origem: lab/e18_vlm_formula_isolada
+  medido_em: 2026-05-18
+  licenca: MIT
+  dependencias_externas: offline   # ~150MB pesos baixados 1x, depois offline
+
+dimensoes:
+  velocidade_wall_full_doc:
+    valor: N-A
+    confianca: medido
+    notas: "Não opera em documento — escopo é recorte (formula isolada)"
+
+  uso_hardware_acelerador:
+    valor: CPU-only
+    pico_vram_mb: 0
+    confianca: medido
+    notas: "Funciona em CPU; pode usar GPU se torch detectar"
+
+  uso_memoria_RAM_host:
+    valor: 800
+    unidade: MB
+    confianca: estimado
+    notas: "torch + transformers carregados; medir formalmente em Lab E2"
+
+  tempo_cold_start:
+    valor: 11.9
+    unidade: s
+    confianca: medido
+    contexto: "primeira carga: 12s; download de pesos ~5s adicional"
+
+  tempo_inferencia_unitario:
+    valor: 6.5
+    unidade: s/formula
+    confianca: medido
+
+  qualidade_prose_texto:
+    valor: N-A
+    confianca: medido
+    notas: "Não extrai prose — só math"
+
+  qualidade_math_semantica:
+    valor: 1.0
+    unidade: precision_semantica
+    confianca: medido
+    contexto: "Eq (4.12) N&C: matriz 2×2 com expoentes complexos, 100% semanticamente correto"
+    notas: "WER-LaTeX texto-level 0.279 (estilo bmatrix vs array), mas elementos da matriz exatos"
+
+  qualidade_tabelas:
+    valor: N-A
+    confianca: medido
+
+  preservacao_numeros_citacoes:
+    valor: N-A
+    confianca: medido
+    notas: "Inclui label '(4.12)' indesejado no output — pós-processar com regex"
+
+  alucinacao_risco:
+    valor: zero
+    sinal: "output sempre relacionado à imagem; modelo dedicado treinado em corpus matemático"
+    confianca: medido
+
+  determinismo:
+    valor: deterministico-com-seed
+    confianca: estimado
+    notas: "torch eval mode com temperature=0; medir variância em Lab E2"
+
+  estabilidade_runtime:
+    taxa_crash_pct: 0
+    taxa_output_vazio_pct: 0
+    confianca: medido
+    contexto: "1 run em e18 sem incidente"
+
+  granularidade_operacional:
+    valor: recorte
+    confianca: medido
+    notas: "Crítico — opera em formula isolada (imagem cropada). Componível em pipeline híbrido"
+
+  riqueza_formato_intermediario:
+    valor: MD+LaTeX
+    confianca: medido
+    notas: "Output bruto é LaTeX puro; pode ser wrappado em $$...$$"
+
+  cobertura_tipo_documento:
+    livro: N-A
+    paper_arxiv: N-A
+    slides: N-A
+    scan: N-A
+    form_acroform: N-A
+    confianca: medido
+    notas: "Não classifica documento — opera em elemento"
+
+  cobertura_tipo_elemento:
+    prose: N-A
+    math_inline: medio
+    math_display: forte
+    tabela: N-A
+    figura_vetorial: N-A
+    logo: N-A
+    confianca: medido
+
+  scaling_behavior:
+    descricao: "constante por formula"
+    pontos_medidos:
+      - {n_formulas: 1, wall_s: 6.5}
+    confianca: medido
+
+dimensoes_que_vence:
+  - qualidade_math_semantica                # 100% em matriz 2×2 complexa
+  - alucinacao_risco                        # zero
+  - dependencias_externas                   # offline 150MB
+  - uso_hardware_acelerador                 # CPU-only viável
+  - granularidade_operacional               # recorte → componível
+  - tempo_cold_start                        # 11.9s (vs 30s Marker)
+
+notas: |
+  Vencedor para T134 (math image → LaTeX). Modelo dedicado treinado em corpus
+  matemático. VLM general-purpose perdeu em todas dimensões nesta categoria (e18).
+
+  Para pipeline híbrido: Marker extrai doc completo → detector de fórmula
+  identifica regiões → pix2tex extrai cada região como LaTeX. Granularidade
+  "recorte" habilita essa composição.
+
+  Limitação conhecida:
+  - Inclui label "(4.12)" no output (não respeita prompt-engineering)
+    → pós-processar com regex
+  - WER-LaTeX texto-level enganoso: pix2tex usa `\\left[\\begin{array}` em vez
+    de `\\begin{bmatrix}` (equivalente semantico). Grade por render+SSIM seria mais justo.
+
+evidencias:
+  - path: lab/e18_vlm_formula_isolada/notes.md
+    quote: "pix2tex semanticamente 100% correto, 4 VLMs falharam"
+  - path: lab/e18_vlm_formula_isolada/out/pix2tex.tex
+    quote: "U=\\left[\\begin{array}{c c c}{{e^{i(\\alpha-\\beta/2-\\delta/2)}\\cos\\frac{\\gamma}{2}}}..."

@@ -1,0 +1,68 @@
+algoritmo:
+  id: nougat
+  nome: "Nougat (Meta)"
+  versao: "nao_testado"
+  tipo: extractor
+  estado: previsto
+  particao: inferido
+  lab_origem: nao_testado_ainda
+  medido_em: nao_medido
+  licenca: MIT      # Nougat é MIT-licensed
+  dependencias_externas: download-on-demand
+
+dimensoes:
+  velocidade_wall_full_doc:
+    valor: nao_medido
+    confianca: inferido
+    notas: "Meta nougat é math-heavy specialized; esperado lento mas alta qualidade math"
+
+  uso_hardware_acelerador:
+    valor: GPU-required
+    pico_vram_mb: nao_medido
+    confianca: inferido
+
+  qualidade_math_semantica:
+    valor: alto             # benchmark math-heavy
+    confianca: inferido
+    notas: "Treinado especificamente em academic papers com math"
+
+  qualidade_prose_texto:
+    valor: nao_medido
+    confianca: inferido
+
+  riqueza_formato_intermediario:
+    valor: MD+LaTeX
+    confianca: inferido
+
+  granularidade_operacional:
+    valor: documento
+    confianca: inferido
+
+  cobertura_tipo_documento:
+    livro: nao_medido
+    paper_arxiv: alto       # SOTA em academic papers
+    slides: nao_medido
+    scan: medio
+    form_acroform: nao_medido
+    confianca: inferido
+
+dimensoes_que_vence: []   # ainda não testado
+
+notas: |
+  Candidato T410 prioritário para re-baseline contra Marker em N&C cap4 +
+  arxiv 1706_03762. Maior ROI esperado entre alt-tools (vs Granite-Docling
+  descartado, MinerU blocked).
+
+  Hipóteses a testar:
+  - Math LaTeX nativo (sem Texify intermediate) → fidelidade ≥ Marker?
+  - Wall time esperado 2-3× Marker (transformer encoder-decoder fullpage)
+  - Headers e cross-refs comparáveis?
+
+  Não bloqueia projeto. Lab E3 (T410) quando T060 destravado e infra
+  Protocol Extractor implementada.
+
+evidencias:
+  - path: docs/reference/tecnologias.md
+    quote: "Nougat (Meta math-specialized) — candidato T410"
+  - path: docs/explanation/analise_critica.md
+    quote: "maior ROI re-baseline junto Marker vs SOTA actual"

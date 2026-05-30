@@ -1,0 +1,51 @@
+algoritmo:
+  id: gemma3-12b-full-page
+  nome: "gemma3:12b — escopo full-page apenas"
+  versao: "gemma3:12b"
+  tipo: extractor
+  estado: descartado
+  particao: descartado
+  lab_origem:
+    - lab/e16_image_decompose       # small-image: empata com gemma3:4b mas 2.5× mais lento
+    - lab/e17_vlm_full_page         # full-page: alucinação elaborada
+    - lab/e18_vlm_formula_isolada   # math isolada: WER 0.529 FAIL
+  medido_em: 2026-05-17
+  licenca: proprietario   # Gemma terms
+
+modo_de_falha_dominante: |
+  Em full-page (e17): alucinação ELABORADA e CONFIANTE. Inventou capítulo
+  inteiro plausível-mas-falso ("Chapter 4 · 4.1 Single-Qubit Rotations ··· 4.7
+  Exercises"). Pior que gemma3:4b — mais capacidade = alucinação mais detalhada.
+
+  Em e17 phase 2 (com prompt anti-fence): novo bug emergente — copiou linhas
+  1-6 do próprio prompt como output (prompt leakage). Regressão por instruct-tuning.
+
+  Em small-image: empata em qualidade com gemma3:4b mas é 2.5× mais lento
+  (126.3s vs 49.2s). Dominado.
+
+  Em math isolada (e18): WER 0.529 FAIL, matriz com elementos errados (perdeu
+  γ, δ; misturou sin/cos).
+
+regra_aplicada: "Sua regra: algoritmo bom em NENHUMA dimensão dentro do escopo full-page"
+
+veredito: "Descartado para extração full-page. NÃO descartado para small-image — esse caso vive como gemma3-4b vencedor, gemma3-12b dominado."
+
+contexto_de_descarte: |
+  Descarte ESCOPADO a full-page extraction.
+
+  Em small-image: tecnicamente "perde" para gemma3:4b mas mantemos gemma3:4b
+  como vencedor; gemma3:12b não tem entrada própria em ativo/ porque é dominado
+  na intersecao.
+
+  Não generaliza para "gemma3 family inteira" — gemma3:4b é o representante
+  vencedor em small-image (T180).
+
+evidencias:
+  - path: lab/e17_vlm_full_page/notes.md
+    quote: "gemma3:12b inventou 'Chapter 4 - 4.1 Single-Qubit Rotations' inexistente"
+  - path: lab/e17_vlm_full_page/notes_phase2.md
+    quote: "prompt leakage — copiou as próprias regras do prompt no output"
+  - path: lab/e16_image_decompose/notes.md
+    quote: "gemma3:12b 120s vs gemma3:4b 46s — mesma qualidade"
+  - path: lab/e18_vlm_formula_isolada/notes.md
+    quote: "gemma3:12b WER 0.529 FAIL, matriz incorreta"
