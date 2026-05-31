@@ -277,6 +277,47 @@ def version():
     typer.echo(f"pdf2md {pkg_ver}  (commit {commit})")
 
 
+@app.command()
+def route(
+    pdf: Path = typer.Argument(..., help="PDF a rotear (dry-run, não converte)"),
+    intent: str = typer.Option("auto", "--intent", "-i",
+                               help="rapido|qualidade|balanceado|auto|indexacao|low-resource"),
+):
+    """Mostra a DECISÃO de roteamento (T090) p/ um PDF — dry-run, não executa.
+
+    Detecta o host (GPU/marker/ollama/tesseract), caracteriza o PDF (text-layer,
+    math, logos) e imprime o pipeline que `route()` escolheria, com o porquê.
+    """
+    from pdf2md.routing import DocInfo, HostInfo, RoutingError, ScanNoOCR
+    from pdf2md.routing import route as _route
+
+    host = HostInfo.detect()
+    typer.secho("host:", bold=True)
+    typer.echo(f"  CPU {host.cpu_cores} cores · RAM {host.ram_gb}GB · "
+               f"GPU {host.gpu_vram_mb}MB · marker={host.has_marker} · "
+               f"ollama={host.has_ollama} · tesseract={host.has_tesseract}")
+    try:
+        doc = DocInfo.probe(pdf)
+    except Exception as exc:
+        typer.secho(f"falha ao ler {pdf}: {exc}", fg=typer.colors.RED)
+        raise typer.Exit(1)
+    typer.secho("doc:", bold=True)
+    typer.echo(f"  {doc.n_pages}pg · text-layer={doc.has_text_layer} · "
+               f"math_density={doc.math_density} · logos={doc.has_raster_logos}")
+    try:
+        pipe = _route(intent, host, doc)
+    except (RoutingError, ScanNoOCR) as exc:
+        typer.secho(f"\n[ERRO] {exc}", fg=typer.colors.RED)
+        raise typer.Exit(2)
+    typer.secho(f"\n{pipe.summary()}", fg=typer.colors.GREEN, bold=True)
+    for s in pipe.steps:
+        typer.echo(f"  · {s.role:<9} {s.algo:<24} {s.reason}")
+    if pipe.pass2:
+        typer.echo(f"  pass2 (enfileirável): {pipe.pass2.summary()}")
+    for r in pipe.rationale:
+        typer.echo(f"  ℹ {r}")
+
+
 # ---------------------------------------------------------------------------
 # Subcomandos: utilitários puros (não precisam de tools externas)
 # ---------------------------------------------------------------------------
