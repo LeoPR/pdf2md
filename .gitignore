@@ -19,15 +19,23 @@ htmlcov/
 *~
 .vscode/
 
-# corpus — PDFs originais não vão pro git (refs ficam via MANIFEST.md, PDFs não)
+# corpus — política de 3 tiers (ver corpus/registry.py + corpus/examples/README.md)
+#
+# tier ZCACHE: fontes livres pesadas/recuperáveis — bytes NÃO vão pro git (só ref no
+# registry). Manifests humanos em docs/reference/corpus/.
 corpus/_sources/*
 !corpus/_sources/MANIFEST.md
 corpus/_canonical/*
 !corpus/_canonical/MANIFEST.md
-
-# Material derivado de fontes proprietary (Nielsen & Chuang QCQI — copyright Cambridge).
-# Já versionado no init (commit be19f01); ver docs/LICENSING.md para opções de purge se
-# o repo for empurrado público. A regra abaixo evita NOVOS adds desse dir.
+#
+# tier IN-REPO: corpus/examples/ É versionado (prova pronta — excertos livres pequenos).
+# NÃO ignorar. (regra explícita p/ deixar claro que é intencional)
+!corpus/examples/
+#
+# tier PRIVATE: material proprietary (Nielsen & Chuang QCQI — copyright Cambridge).
+# corpus/nielsen_chuang/ foi PURGADO do histórico em 2026-05-31 (git filter-repo).
+# Source vive read-only no AulaQuantum; output de uso volta pra lá. Ver corpus/RIGHTS.md.
+# Regra abaixo impede re-add acidental.
 corpus/nielsen_chuang/
 
 # diretórios temp do pipeline

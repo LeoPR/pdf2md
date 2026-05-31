@@ -30,19 +30,21 @@ ROOT = Path(__file__).parent
 PROJECT = ROOT.parent.parent
 TEMPLATE_NOTE = ROOT / "_TEMPLATE_note.md"
 
+# Resolver central de fontes (corpus/registry.py) — substitui paths hardcoded.
+sys.path.insert(0, str(PROJECT / "corpus"))
+from registry import resolve, SourceUnavailable  # noqa: E402
 
-# (doc_id, pdf_path, [page_indices_0based], categoria)
+
+# (doc_id, [page_indices_0based], categoria) — o path vem de resolve(doc_id).
 TARGETS = [
     (
         "nielsen_chuang_cap4",
-        Path(r"C:/Users/leona/OneDrive/Documents/Projects/Acadêmicos/AulaQuantum/pesquisa_geral/_sources/livros/Nielsen_Chuang_QCQI.pdf"),
         # pgs 199, 200, 204 do livro = indices 198, 199, 203 (1-based to 0-based)
         [198, 199, 203],
         "math_denso + formula_multilinha (Theorem 4.1 Z-Y decomposition pg 204)",
     ),
     (
         "preskill_ph219_ch5",
-        Path(r"Z:/caches/corpus/pdf2md/preskill_ph219_ch5.pdf"),
         # Originalmente [0, 1] mas eram cover + TOC (sem math).
         # [2, 4, 6, 14] = pg3 + pg5 + pg7 + pg15 (T060 ciclo #1, #2, #3, #4)
         # Decisão 2026-05-18 ao iniciar afunilamento T060. Estendido pg7+pg15 em 2026-05-30.
@@ -51,19 +53,16 @@ TARGETS = [
     ),
     (
         "arxiv_1706_03762",
-        Path(r"Z:/caches/corpus/pdf2md/arxiv_1706_03762.pdf"),
         [2],
         "paper_2col math_moderado",
     ),
     (
         "arxiv_2106_05919v2",
-        Path(r"Z:/caches/corpus/pdf2md/arxiv_2106_05919v2.pdf"),
         [29],
         "math_heavy",
     ),
     (
         "cdc_mmwr_73_35_a1",
-        Path(r"Z:/caches/corpus/pdf2md/cdc_mmwr_73_35_a1.pdf"),
         [0],
         "gov_multicol tabela_complexa",
     ),
@@ -124,9 +123,11 @@ def ensure_note(out_dir: Path, page_1based: int) -> None:
 def main() -> int:
     skipped = []
     created = []
-    for doc_id, pdf_path, page_indices, categoria in TARGETS:
-        if not pdf_path.exists():
-            print(f"[SKIP] {doc_id}: PDF não encontrado em {pdf_path}")
+    for doc_id, page_indices, categoria in TARGETS:
+        try:
+            pdf_path = resolve(doc_id)
+        except SourceUnavailable as exc:
+            print(f"[SKIP] {doc_id}: {exc}")
             skipped.append(doc_id)
             continue
         out_dir = ROOT / doc_id
@@ -145,7 +146,7 @@ def main() -> int:
             print(f"[OK] {draft_path.relative_to(ROOT)} ({categoria})")
 
     # README de cada doc
-    for doc_id, pdf_path, page_indices, categoria in TARGETS:
+    for doc_id, page_indices, categoria in TARGETS:
         if doc_id in skipped:
             continue
         out_dir = ROOT / doc_id
@@ -156,7 +157,7 @@ def main() -> int:
                 "",
                 f"**Categoria:** {categoria}",
                 "",
-                f"**PDF source:** `{pdf_path}`",
+                f"**PDF source:** via `corpus/registry.py` → `resolve(\"{doc_id}\")`",
                 "",
                 f"**Páginas alvo:** {', '.join(str(i+1) for i in page_indices)}",
                 "",

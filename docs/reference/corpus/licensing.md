@@ -10,9 +10,11 @@
 | **Documentação** (`docs/`, `README`, `ROADMAP`, etc.) | ✅ Próprio | Inclui referências a obras de terceiros (fair use citacional) |
 | **Tickets** (`tickets/`) | ✅ Próprio | Notas internas, sem conteúdo proprietary |
 | **Manifests** (`corpus/_*/MANIFEST.md`) | ✅ Próprio | URLs + sha256 + metadados, sem PDFs |
-| **PDFs originais** | ⛔ Excluídos via `.gitignore` | `corpus/_sources/*` e `corpus/_canonical/*` ignorados |
+| **PDFs originais (zcache)** | ⛔ Excluídos via `.gitignore` | `corpus/_sources/*` e `corpus/_canonical/*` ignorados; ref via `corpus/registry.py` |
+| **`corpus/examples/` (in-repo)** | ✅ Livre | Excertos public-domain / US-gov / arXiv — prova pronta, ~0.83MB. Ver `corpus/examples/README.md` |
 | **Extrações no `lab/`** | ⚠️ Caso a caso | Evidência sumária OK (`_stats_*.md`); MD inteiro NÃO |
-| **`corpus/nielsen_chuang/`** | ⛔ **PROBLEMA** | N&C inteiro extraído (cap. 1-12 + apêndices); copyright Cambridge University Press |
+| **`corpus/nielsen_chuang/`** | ✅ **RESOLVIDO (2026-05-31)** | Purgado do histórico via `git filter-repo`. Ver `corpus/RIGHTS.md` |
+| **Resultados derivados N&C** | ✅ Com declaração | Excertos GT + métricas OK público COM declaração de direito (`corpus/RIGHTS.md`) |
 
 ## Auditoria detalhada
 
@@ -50,7 +52,20 @@
 
 Esses estão OK porque não distribuem o material — só medem características.
 
-## Caminho para push público (3 opções)
+## Atualização 2026-05-31 — purge executado + tiers consolidados
+
+A **Opção A foi executada**: `corpus/nielsen_chuang/` (17MB, 248 arquivos, reprodução
+completa dos 21 caps) foi removido de TODA a history via `git filter-repo` (repo era
+local-only, sem remote → purge limpo). Os 3 excertos de ground-truth em
+`corpus/_gt/nielsen_chuang_cap4/` **permanecem** (fair use + declaração — ver
+`corpus/RIGHTS.md`).
+
+Tiers consolidados em `corpus/registry.py` (fonte-de-verdade para código):
+- **in-repo** (`corpus/examples/`, versionado): livre, prova pronta.
+- **zcache** (`Z:/caches/...`, não versionado): livre pesado + não-redistribuível.
+- **private** (AulaQuantum, fora do repo): proprietary (N&C); source E destiny lá.
+
+## Caminho para push público (3 opções) — histórico da decisão
 
 ### Opção A — Caminho mínimo (RECOMENDADO para marco inicial)
 
