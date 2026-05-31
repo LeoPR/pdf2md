@@ -277,8 +277,11 @@ executar pass2 (cron/fila) fica fora do escopo.
 
 ## BURACOS abertos que limitam as gates (mapa do que falta medir/construir)
 
-1. **scan-sem-GPU**: nenhum OCR CPU testado (Tesseract pendente — Lab E1 extensão / T420).
-   Hoje scan ⇒ marker(GPU) ou ERRO.
+1. **scan-sem-GPU**: PARCIALMENTE FECHADO (Lab e20, 2026-05-31). Scan **impresso**
+   tem caminho CPU: Tesseract 5.4.0 (WER 0.052 em Atkins 1874 p80, zero alucinação,
+   ~2.74s/pg, 124MB). A guarda de scan pode rotear Tesseract quando marker indisponível
+   e o scan é impresso. ABERTO ainda: scan **manuscrito** (Tesseract garbage; Marker
+   alucina) e scan ruim (baixo DPI/multi-coluna/tabela) — não medidos.
 2. **tabela**: TEDS não medido em nenhum extrator (marker `tabela: medio` estimado) —
    nenhuma gate diferencia qualidade de tabela ainda.
 3. **cropper de fórmula CPU**: sem ele, `pix2tex` só compõe atrás do Marker (GPU), e o

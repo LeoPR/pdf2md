@@ -92,9 +92,15 @@ dimensoes:
     livro: forte           # medido em N&C cap4 (text-layer denso)
     paper_arxiv: medio     # não medido especificamente
     slides: alto           # estimado
-    scan: nao_medido       # Tesseract NÃO testado (não instalado) — não generalizar
+    scan_impresso: forte   # MEDIDO e20: Tesseract WER 0.052 em Atkins 1874 p80 (impresso)
+    scan_manuscrito: fraco # MEDIDO e20: Tesseract garbage em Wilson (cursivo) — fora do escopo
     form_acroform: estimado
-    confianca: parcial     # só 'livro' é medido
+    confianca: parcial     # 'livro' e 'scan' medidos; resto estimado
+    notas: |
+      Sub-path scan usa Tesseract 5.4.0 (OCR, ~2.74s/pg @300dpi, RSS 124MB) — bem
+      mais lento que text-layer (0.02s/pg) mas único caminho CPU sem GPU. Zero
+      alucinação (vs Marker que alucinou 7.7× em Wilson, e03). Falha só em fração
+      empilhada (3½→"34") e em manuscrito cursivo.
 
   cobertura_tipo_elemento:
     prose: forte           # medido

@@ -83,8 +83,17 @@ REGISTRY: dict[str, dict] = {
         "path": ZCACHE / "ia_mathematics00wils.pdf",
         "url": "https://archive.org/details/mathematics00wils",
         "license": "public-domain",          # pré-1928
-        "title": "Wilson, Mathematics (1800s, scan PD)",
+        "title": "Wilson, Mathematics (1800s, scan MANUSCRITO PD)",
         "inrepo_excerpt": "examples/wilson_mathematics_excerpt.pdf",  # 2pg PD
+        "note": "scan manuscrito cursivo — limite de CPU-OCR (e20).",
+    },
+    "ia_atkins_pure_mathematics_1874": {
+        "tier": "zcache",
+        "path": ZCACHE / "ia_atkins_pure_mathematics_1874.pdf",
+        "url": "https://archive.org/details/...atkins",
+        "license": "public-domain",          # 1874
+        "title": "Atkins, Pure Mathematics (1874, scan IMPRESSO PD)",
+        "note": "scan impresso — CPU-OCR Tesseract WER 0.052 em p80 (e20).",
     },
     "irs_f1040_2025": {
         "tier": "zcache",
