@@ -279,14 +279,18 @@ def version():
 
 @app.command()
 def route(
-    pdf: Path = typer.Argument(..., help="PDF a rotear (dry-run, não converte)"),
+    pdf: Path = typer.Argument(..., help="PDF a rotear"),
     intent: str = typer.Option("auto", "--intent", "-i",
                                help="rapido|qualidade|balanceado|auto|indexacao|low-resource"),
+    execute: bool = typer.Option(False, "--execute", "-x",
+                                 help="Executa o pipeline decidido (default: só dry-run)"),
+    out: Path = typer.Option(None, "--out", "-o", help="Diretório de saída (com --execute)"),
 ):
-    """Mostra a DECISÃO de roteamento (T090) p/ um PDF — dry-run, não executa.
+    """Decide (e opcionalmente executa) o pipeline de conversão por intent (T090).
 
-    Detecta o host (GPU/marker/ollama/tesseract), caracteriza o PDF (text-layer,
-    math, logos) e imprime o pipeline que `route()` escolheria, com o porquê.
+    Sem --execute: dry-run — detecta host, caracteriza o PDF e imprime o pipeline
+    que `route()` escolheria + o porquê. Com --execute: roda os steps implementados
+    (pdftotext/tesseract/marker + optimize); refiners não-implementados pulam com nota.
     """
     from pdf2md.routing import DocInfo, HostInfo, RoutingError, ScanNoOCR
     from pdf2md.routing import route as _route
@@ -316,6 +320,22 @@ def route(
         typer.echo(f"  pass2 (enfileirável): {pipe.pass2.summary()}")
     for r in pipe.rationale:
         typer.echo(f"  ℹ {r}")
+
+    if not execute:
+        return
+    if out is None:
+        typer.secho("\n--execute requer --out DIR", fg=typer.colors.RED)
+        raise typer.Exit(1)
+    from pdf2md.executor import run_pipeline
+    typer.secho(f"\n[executando] → {out}", bold=True)
+    try:
+        res = run_pipeline(pipe, pdf, out)
+    except Exception as exc:
+        typer.secho(f"[ERRO execução] {exc}", fg=typer.colors.RED)
+        raise typer.Exit(3)
+    typer.secho(res.summary(), fg=typer.colors.GREEN)
+    for algo, why in res.skipped:
+        typer.echo(f"  ⊘ pulou {algo}: {why}")
 
 
 # ---------------------------------------------------------------------------
