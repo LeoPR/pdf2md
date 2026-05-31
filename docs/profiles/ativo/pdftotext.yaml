@@ -1,0 +1,140 @@
+algoritmo:
+  id: pdftotext
+  nome: "PyMuPDF text-layer estruturado (medido) / pdftotext (comparado) — CPU-only"
+  versao: "PyMuPDF 1.27.x; pdftotext (poppler) 24.x; Tesseract 5.x (não testado)"
+  tipo: extractor
+  estado: ativo
+  particao: ativo
+  lab_origem: lab/e19_cpu_only_baseline    # promovido de inferido após medição end-to-end
+  medido_em: 2026-05-31
+  licenca: AGPL-3-ou-comercial    # PyMuPDF AGPL-3; pdftotext (poppler) GPL-2; Tesseract Apache-2.0
+  dependencias_externas: offline
+
+# PROMOVIDO inferido -> ativo em 2026-05-31 (Lab E1 / e19).
+# Cobre BURACO #1 (extrator CPU-only end-to-end viável) e #2 (RSS pico).
+# Role no roteador T090: --rapido + --low-resource (sem GPU); pré-index rápido.
+
+dimensoes:
+  velocidade_wall_full_doc:
+    valor: 20.5
+    unidade: ms/pg
+    confianca: medido     # N&C cap4 45pg em 0.92s (PyMuPDF estruturado)
+    notas: "~1s/50pg. pdftotext -layout: 1.6s/45pg (~36ms/pg). Ordens de grandeza < Marker."
+
+  uso_hardware_acelerador:
+    valor: CPU-only
+    pico_vram_mb: 0
+    confianca: medido
+
+  uso_memoria_RAM_host:
+    valor: 63
+    unidade: MB
+    confianca: medido     # RSS pico processo, N&C cap4 (cobre buraco #2)
+
+  tempo_cold_start:
+    valor: 0.1
+    unidade: s
+    confianca: medido
+    notas: "import fitz; sem download de modelo, sem warm-up"
+
+  tempo_inferencia_unitario:
+    valor: 0.0205
+    unidade: s/pg
+    confianca: medido
+
+  qualidade_prose_texto:
+    valor: alto
+    confianca: medido
+    contexto: "prose pura (N&C pg200) WER 0.016 vs GT humano; com estruturação mínima (hífen+ligatura+drop header)"
+    notas: "Página mista (epígrafes/headers, pg199) WER 0.158. Estruturação fecha ~0.024 do gap vs PyMuPDF cru (e15)."
+
+  qualidade_math_semantica:
+    valor: baixo
+    confianca: medido
+    notas: "N&C pg204 (prova + matriz 2x2) WER 0.370, Δmath_i -27. Math vem Unicode cru, sem LaTeX. Limite do CPU-only — estruturação NÃO cria semântica math."
+
+  qualidade_tabelas:
+    valor: fraco
+    confianca: estimado
+    notas: "pdftotext -layout preserva alinhamento mas não estrutura; não medido contra GT de tabela"
+
+  preservacao_numeros_citacoes:
+    valor: alto
+    confianca: medido
+    notas: "text-layer literal preserva números"
+
+  alucinacao_risco:
+    valor: zero
+    sinal: "extração determinística de text-layer; sem ML"
+    confianca: medido
+
+  determinismo:
+    valor: deterministico
+    confianca: medido
+    notas: "mesma entrada -> mesma saída byte-a-byte (sem seed, sem sampling)"
+
+  estabilidade_runtime:
+    taxa_crash_pct: 0
+    taxa_output_vazio_pct: 0
+    confianca: medido
+    contexto: "45 páginas N&C + dezenas de usos em e15/e17 sem incidente"
+
+  granularidade_operacional:
+    valor: documento
+    confianca: medido
+
+  riqueza_formato_intermediario:
+    valor: markdown-estruturado
+    confianca: medido
+    notas: "headings (numeração de seção + font-size), parágrafos, normalização tipográfica. Sem math LaTeX, sem tabela GFM."
+
+  cobertura_tipo_documento:
+    livro: forte           # medido em N&C cap4 (text-layer denso)
+    paper_arxiv: medio     # não medido especificamente
+    slides: alto           # estimado
+    scan: nao_medido       # Tesseract NÃO testado (não instalado) — não generalizar
+    form_acroform: estimado
+    confianca: parcial     # só 'livro' é medido
+
+  cobertura_tipo_elemento:
+    prose: forte           # medido
+    math_inline: baixo     # medido
+    math_display: baixo    # medido
+    tabela: fraco          # estimado
+    figura_vetorial: perde # medido: labels soltos (ex. Figure 4.1 -> 'Fourier transform / NP')
+    logo: nao_medido
+    confianca: parcial
+
+dimensoes_que_vence:
+  - velocidade_wall_full_doc            # ~20ms/pg vs Marker (GPU, ordens de grandeza mais lento)
+  - uso_hardware_acelerador             # único CPU-only end-to-end medido viável
+  - uso_memoria_RAM_host                # 63MB pico
+  - tempo_cold_start                    # 0.1s, sem warm-up de modelo
+  - dependencias_externas               # offline
+  - alucinacao_risco                    # zero (determinístico)
+  - determinismo                        # byte-a-byte
+  - estabilidade_runtime                # 0% crash
+
+notas: |
+  Lab E1 (e19) confirmou o BURACO #1: caminho CPU-only end-to-end é viável, rápido e
+  estável, entregando MD completo útil como pré-index (deliverable: lab/e19/out/nc_cap4_pymupdf.md).
+
+  Vence 8 dimensões (recurso/robustez); perde fidelidade math/tabela/figura. Role natural
+  no roteador T090: intents --rapido e --low-resource (CPU sem GPU), e pré-index de
+  milhares de docs onde a fidelidade math não é o gargalo.
+
+  ESCOPO (não generalizar — feedback_escopo_de_conclusao): medido em 1 documento
+  text-layer (N&C cap4). scan-only (Tesseract) NÃO testado; cobertura scan permanece
+  estimada. Math degradado é limite estrutural do CPU-only, não bug.
+
+  Atenção licença: PyMuPDF AGPL-3 (copyleft forte) ou comercial. Para distribuição,
+  considerar pdftotext (poppler GPL-2) ou pdfplumber (MIT) como backend — pdftotext já
+  comparado (1.6s/45pg, mesma fraqueza em math).
+
+evidencias:
+  - path: lab/e19_cpu_only_baseline/RESULT.md
+    quote: "45pg 0.92s, RSS pico 63MB; grade pg200 0.016, pg204 0.370"
+  - path: lab/e19_cpu_only_baseline/out/stats.json
+    quote: "grade_vs_gt_structured vs grade_vs_gt_raw_e15"
+  - path: lab/e15_gt_validation/out/gt_comparison.md
+    quote: "baseline PyMuPDF cru: pg200 0.041, pg204 0.377"

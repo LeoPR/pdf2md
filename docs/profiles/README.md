@@ -86,6 +86,8 @@ Quando `src/pdf2md/routing.py` (T090) for implementado, vai consumir
 1. ~~Materializar 6 perfis MEDIDOS em `ativo/`~~ ✓ (2026-05-19)
 2. ~~Materializar 4-5 perfis PREVISTOS em `inferido/`~~ ✓ (2026-05-19)
 3. ~~Materializar 3 perfis DESCARTADOS em `descartado/`~~ ✓ (2026-05-19)
-4. Lab E1: cobrir buraco "CPU-only end-to-end" (pdftotext + PyMuPDF + Tesseract)
+4. ~~Lab E1: cobrir buraco "CPU-only end-to-end"~~ ✓ (2026-05-31, lab/e19) — `pdftotext` (PyMuPDF estruturado) PROMOVIDO inferido → ativo. Mede 8 dim end-to-end, vence 8 (recurso/robustez). Tesseract/scan ainda não testado.
 5. Lab E2: instrumentar `estabilidade_runtime` (10 runs) + cold-start separado
 6. Reescrever T090 spec com gates explícitos por intent macro
+
+**Estado das partições (2026-05-31):** ativo 7 (+pdftotext), inferido 3 (−pdftotext), descartado 3.
