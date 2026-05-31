@@ -36,6 +36,26 @@ expõe 3 buracos que limitam as gates (ver fim).
 > intent-coverage, profile-consistency) contra os 7 perfis. As correções estão
 > incorporadas; os limites honestos viraram BURACOS explícitos.
 
+## Status de implementação (2026-05-31)
+
+**IMPLEMENTADO** (3 marcos, cada um com revisão adversarial → 7+8+8 defeitos corrigidos):
+- **Marco 1 — decisão** (commit 20f71c9): `pdf2md/_profiles.py` (mapa machine-readable
+  dep-free) + `pdf2md/routing.py` (`HostInfo.detect`/`DocInfo.probe`/`route()` PURO,
+  profile-driven) + `pdf2md/cli.py route` dry-run + 24 testes.
+- **Marco 2 — execução** (commit 8b9af3e): `pdf2md/extractors.py` (pdftotext/tesseract
+  CPU) + `pdf2md/executor.py` (`run_pipeline`) + `route --execute` + 18 testes.
+- **Marco 3 — macro** (este): `--intent` integrado ao `pdf2md convert`. CPU primary
+  (pdftotext/tesseract) → branch enxuto (extract+stats+provenance); marker primary →
+  fluxo legado (restructure/stats/prov). `--quick`/`--best` mantidos como legado.
+
+CLI realizado como **`--intent <nome>`** (não 6 flags booleanas) — consistente com o
+comando `route`; semanticamente equivalente ao critério de aceitação.
+
+**Suite: 155 passed.** E2E: `pdf2md convert FILE.pdf -i rapido` → pdftotext + stats + prov.
+
+**Ainda NÃO executável** (pula com nota honesta): refiners pix2tex (BURACO #3 cropper-CPU)
+e gemma3/qwen (T180 small-image). Marker via intent não auto-roda em testes (GPU/tempo).
+
 ## Modelo de roteamento — taxonomia dos algoritmos
 
 Os 7 perfis ativos não competem todos no mesmo slot. Há **3 papéis**:

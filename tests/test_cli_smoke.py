@@ -56,5 +56,33 @@ def test_convert_help_describes_presets():
     r = _run(["convert", "--help"])
     assert r.returncode == 0
     out = r.stdout
-    for flag in ("--book", "--paper", "--quick", "--best"):
+    for flag in ("--book", "--paper", "--quick", "--best", "--intent"):
         assert flag in out, f"convert --help não menciona {flag}"
+
+
+# --- T090: roteamento por intent (in-process via exe editável) ---
+ARXIV = REPO / "corpus" / "examples" / "arxiv_1706_03762_excerpt.pdf"
+
+
+def test_route_command_dryrun():
+    if not ARXIV.exists():
+        return
+    r = _run(["route", str(ARXIV), "-i", "rapido"])
+    assert r.returncode == 0
+    assert "host:" in r.stdout and "rapido" in r.stdout and "pdftotext" in r.stdout
+
+
+def test_convert_intent_rapido_produces_md(tmp_path):
+    if not ARXIV.exists():
+        return
+    out = tmp_path / "conv_rapido"
+    r = _run(["convert", str(ARXIV), "-i", "rapido", "-o", str(out)])
+    assert r.returncode == 0, r.stderr
+    assert (out / "arxiv_1706_03762_excerpt.md").exists()
+
+
+def test_convert_intent_excludes_legacy_presets(tmp_path):
+    if not ARXIV.exists():
+        return
+    r = _run(["convert", str(ARXIV), "-i", "rapido", "--quick", "-o", str(tmp_path / "x")])
+    assert r.returncode != 0   # --intent é exclusivo com --quick/--best

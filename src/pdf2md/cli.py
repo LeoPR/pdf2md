@@ -650,8 +650,11 @@ def convert(
     out: Path = typer.Option(None, "--out", "-o", help="Diretório de saída (default: ./<pdf-basename>/)"),
     book: bool = typer.Option(False, "--book", help="Força split por capítulo (default: auto via TOC)"),
     paper: bool = typer.Option(False, "--paper", help="Força flat (sem restructure)"),
-    quick: bool = typer.Option(False, "--quick", "-q", help="Pula otimização + round-trip"),
-    best: bool = typer.Option(False, "--best", help="Otimização total + multi-roundtrip 3 iter + rt-pixel"),
+    intent: str = typer.Option(None, "--intent", "-i",
+        help="Roteamento profile-aware (T090): rapido|qualidade|balanceado|auto|indexacao|low-resource. "
+             "Escolhe a stack por host+doc. Substitui --quick/--best."),
+    quick: bool = typer.Option(False, "--quick", "-q", help="[legado] Pula otimização + round-trip"),
+    best: bool = typer.Option(False, "--best", help="[legado] Otimização total + multi-roundtrip 3 iter + rt-pixel"),
     no_optimize: bool = typer.Option(False, "--no-optimize", help="Não otimiza imagens"),
     no_stats: bool = typer.Option(False, "--no-stats", help="Não gera _stats.md"),
     no_provenance: bool = typer.Option(False, "--no-provenance", help="Não marca proveniência"),
@@ -681,10 +684,50 @@ def convert(
     out = out or Path.cwd() / pdf.stem
     out.mkdir(parents=True, exist_ok=True)
 
+    # T090: roteamento por intent (profile-aware). Decide a stack por host+doc.
+    if intent:
+        if quick or best:
+            typer.secho("--intent é exclusivo com --quick/--best (legado)", fg=typer.colors.RED)
+            raise typer.Exit(2)
+        from pdf2md.routing import DocInfo, HostInfo, RoutingError, ScanNoOCR
+        from pdf2md.routing import route as _route
+        host = HostInfo.detect()
+        try:
+            doc = DocInfo.probe(pdf)
+            pipe = _route(intent, host, doc)
+        except (RoutingError, ScanNoOCR) as exc:
+            typer.secho(f"[ERRO roteamento] {exc}", fg=typer.colors.RED)
+            raise typer.Exit(2)
+        typer.secho(f"[pdf2md] convert {pdf.name} → {out}", bold=True)
+        typer.secho(f"  {pipe.summary()}", fg=typer.colors.GREEN)
+        for r in pipe.rationale:
+            typer.echo(f"  ℹ {r}")
+
+        if pipe.primary in ("pdftotext", "tesseract"):
+            # caminho CPU: extrai → escreve md → stats + provenance (sem restructure/optimize)
+            from pdf2md.executor import run_pipeline
+            res = run_pipeline(pipe, pdf, out)
+            for algo, why in res.skipped:
+                typer.echo(f"  ⊘ {algo}: {why}")
+            if not no_stats:
+                typer.secho("\n[stats]", bold=True)
+                stats(out, source_pdf=pdf, roundtrip_md1=None, roundtrip_md2=None)  # type: ignore
+            if not no_provenance:
+                typer.secho("[provenance]", bold=True)
+                prov(out, pkg_version=None, source=pdf.name, sha256=str(pdf),  # type: ignore
+                     extractor=pipe.primary, when=None)
+            typer.secho(f"\n[OK] {res.output_md}", fg=typer.colors.GREEN)
+            raise typer.Exit(0)
+
+        # primary == marker → segue o fluxo marker legado (com restructure/stats/prov).
+        if pipe.degraded:
+            typer.secho("  [aviso] pipeline degradado — ver rationale acima", fg=typer.colors.YELLOW)
+
     is_book = book or (not paper and _detect_book(pdf))
-    typer.secho(f"[pdf2md] convert {pdf.name} → {out}", bold=True)
+    if not intent:
+        typer.secho(f"[pdf2md] convert {pdf.name} → {out}", bold=True)
+        typer.echo(f"  Preset: {'quick' if quick else ('best' if best else 'default')}")
     typer.echo(f"  Layout: {'book (restructure por TOC)' if is_book else 'paper (flat)'}")
-    typer.echo(f"  Preset: {'quick' if quick else ('best' if best else 'default')}")
 
     # 1. Extract
     # IMPORTANTE: marker_raw fica em pasta IRMÃ do out/, não dentro. Porque
