@@ -53,8 +53,27 @@ comando `route`; semanticamente equivalente ao critério de aceitação.
 
 **Suite: 155 passed.** E2E: `pdf2md convert FILE.pdf -i rapido` → pdftotext + stats + prov.
 
-**Ainda NÃO executável** (pula com nota honesta): refiners pix2tex (BURACO #3 cropper-CPU)
-e gemma3/qwen (T180 small-image). Marker via intent não auto-roda em testes (GPU/tempo).
+### Integração do cropper de fórmula (2026-06-01, pós Lab e21)
+
+BURACO #3 (cropper-CPU) **resolvido** em Lab e21 → integrado em 2 marcos (cada um com
+revisão adversarial; o do marco 2 achou 8 defeitos reais, corrigidos):
+- **Integração marco 1** (commit 3059f40): `pdf2md/formula_cropper.py` — cropper
+  estrutural CPU dep-free (pymupdf+pillow), promovido do Lab e21. + 8 testes.
+- **Integração marco 2** (commit 7e0892f): **gate VIRADO** — `pix2tex.needs` passa de
+  `formula_cropper` (exigia marker) p/ `pix2tex_runtime` (torch externo). `--qualidade`/
+  `--auto` em CPU com runtime pix2tex agora extrai math display → LaTeX. `HostInfo.has_pix2tex`,
+  `DocInfo.matrix_density`, executor roda pix2tex via subprocess (`_pix2tex_runner.py`) e
+  anexa as fórmulas. **168 passed.** E2E real validado (crop src + pix2tex venv e18).
+
+**FRONTEIRA MEDIDA (e21 onda 2):** display linha-única confiável (~0.80); **matriz fraca
+(~0.50)** — pix2tex trunca eq longa/embaralha 2×2. O roteador rebaixa confiança quando
+`matrix_density>0` (rationale) e prefere marker/GPU p/ matriz. As frases inline deste spec
+que dizem "math fica cru / BURACO #3 bloqueia --qualidade CPU" são **anteriores** a esta
+integração — valem só quando o runtime pix2tex está ausente.
+
+**Ainda NÃO executável** (pula com nota honesta): refiner gemma3/qwen (T180 small-image).
+**Deferido:** posição INLINE das fórmulas no corpo (hoje anexadas em seção ao fim — exige
+alinhamento com a saída pdftotext); custo de cropar/OCR o doc inteiro em `--qualidade`.
 
 ## Modelo de roteamento — taxonomia dos algoritmos
 
