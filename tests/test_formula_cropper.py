@@ -81,6 +81,13 @@ def test_crop_preskill_matrix_is_flagged_complex(tmp_path):
     assert matrices, "deveria sinalizar ao menos 1 região matriz/multi-linha como complexa"
 
 
+@pytest.mark.skipif(not PRESKILL.exists(), reason="Preskill zcache ausente (Z: não montado)")
+def test_crop_inverted_page_range_raises(tmp_path):
+    # page_range fora de faixa (lo>hi após clamp) → ValueError, não [] silencioso
+    with pytest.raises(ValueError):
+        crop_formulas(PRESKILL, tmp_path, page_range=(900, 999))
+
+
 def test_crop_empty_pdf_raises(tmp_path, monkeypatch):
     class FakeDoc:
         def __len__(self): return 0

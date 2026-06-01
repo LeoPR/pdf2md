@@ -70,14 +70,16 @@ PROFILES: dict[str, dict] = {
     "pix2tex": {
         "role": REFINER,
         "hardware": "cpu",
-        "needs": ["formula_cropper"],   # BURACO #3: cropper CPU não existe; só via marker
+        "needs": ["pix2tex_runtime"],   # cropper agora é built-in (formula_cropper, e21);
+                                        # só falta o runtime torch (externo, venv próprio)
         "granularity": "recorte",
         "unit_speed_s": 6.5, "unit": "formula",
         "vram_mb": 0, "ram_mb": 800, "cold_s": 11.9,
         "refines": "math_display",
+        "math_quality": {"display_linha_unica": 0.80, "matriz": 0.50},  # e21 (N=6 / N=3)
         "wins": ["math_semantico", "alucinacao", "offline", "cpu"],
-        "measured_in": ["e18"],
-        "note": "granularidade=recorte; precisa de cropper de fórmula (só marker hoje).",
+        "measured_in": ["e18", "e21"],
+        "note": "cropper CPU resolvido (e21); fronteira: linha-única 0.80, matriz 0.50.",
     },
     "gemma3-4b-small-image": {
         "role": REFINER,

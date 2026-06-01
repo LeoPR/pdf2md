@@ -33,10 +33,15 @@ def host_small_gpu():  # marker instalado MAS VRAM insuficiente (<4096)
     return HostInfo(cpu_cores=8, ram_gb=16, gpu_vram_mb=2048,
                     has_ollama=False, has_marker=True, has_tesseract=True)
 
+def host_cpu_pix2tex():  # CPU + runtime pix2tex (cropper é built-in)
+    return HostInfo(cpu_cores=4, ram_gb=8, gpu_vram_mb=0,
+                    has_marker=False, has_tesseract=True, has_pix2tex=True)
+
 
 # ---- fixtures de doc ----
 def doc_text():       return DocInfo(n_pages=50, has_text_layer=True, math_density=0.0)
 def doc_math():       return DocInfo(n_pages=50, has_text_layer=True, math_density=3.0)
+def doc_matrix():     return DocInfo(n_pages=50, has_text_layer=True, math_density=3.0, matrix_density=1.5)
 def doc_logos():      return DocInfo(n_pages=10, has_text_layer=True, has_raster_logos=True)
 def doc_math_logos(): return DocInfo(n_pages=50, has_text_layer=True, math_density=3.0, has_raster_logos=True)
 def doc_scan():       return DocInfo(n_pages=30, has_text_layer=False)
@@ -118,14 +123,29 @@ def test_scan_no_ocr_raises_for_all_intents():
 # REFINERs (math precisa cropper; logo precisa ollama)
 # ---------------------------------------------------------------------------
 
-def test_qualidade_marker_math_adds_pix2tex():
+def test_qualidade_marker_math_no_pix2tex():
+    # marker é PRIMARY → math nativo (Texify); pix2tex seria redundante → não entra
     p = route(QUALIDADE, host_gpu_full(), doc_math())
-    assert "pix2tex" in _algos(p)   # cropper via marker disponível
+    assert p.primary == "marker"
+    assert "pix2tex" not in _algos(p)
 
-def test_qualidade_cpu_math_no_cropper_keeps_math_cru():
+def test_qualidade_cpu_math_no_runtime_keeps_math_cru():
+    # CPU sem runtime pix2tex (cropper é built-in, mas falta o torch) → math cru
     p = route(QUALIDADE, host_cpu(), doc_math())
     assert "pix2tex" not in _algos(p)
-    assert any("BURACO #3" in r or "cru" in r for r in p.rationale)
+    assert any("cru" in r or "runtime pix2tex ausente" in r for r in p.rationale)
+
+def test_qualidade_cpu_math_with_runtime_adds_pix2tex():
+    # gate VIRADO (e21): CPU + runtime pix2tex + math → pix2tex entra (primary=pdftotext)
+    p = route(QUALIDADE, host_cpu_pix2tex(), doc_math())
+    assert p.primary == "pdftotext"
+    assert "pix2tex" in _algos(p)
+
+def test_qualidade_cpu_matrix_flags_low_confidence():
+    # fronteira medida: matriz presente → pix2tex entra MAS rationale rebaixa confiança
+    p = route(QUALIDADE, host_cpu_pix2tex(), doc_matrix())
+    assert "pix2tex" in _algos(p)
+    assert any("matriz" in r and "0.50" in r for r in p.rationale)
 
 def test_qualidade_logos_with_ollama_adds_gemma3():
     p = route(QUALIDADE, host_gpu_full(), doc_logos())

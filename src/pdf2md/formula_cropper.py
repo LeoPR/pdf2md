@@ -36,6 +36,8 @@ from PIL import Image
 DPI = 300               # sweet spot p/ pix2tex (e21): nítido sem upscaling
 MARGIN_PT = 4.0         # folga pequena: +grande captura a linha vizinha → array-lixo
 YBAND_EPS = 1.0         # tolerância vertical p/ absorver peças na mesma banda-y
+MAX_BAND_GROWTH_PT = 120.0  # teto de crescimento vertical do absorb (matriz alta ok;
+                            # backstop contra fundir equações display consecutivas)
 INDENT_PT = 16.0        # x0 do bloco > margem-corpo + isto (display é offset)
 MIN_WIDTH_PT = 28.0     # largura mínima da região (mata glifo solto de diagrama)
 MIN_CHARS = 4           # texto mínimo da região (idem)
@@ -132,6 +134,7 @@ def _absorb_band(region: dict, blocks) -> None:
     """Cresce a bbox p/ incluir blocos NÃO-prosa na mesma banda-y (brackets grandes,
     coeficientes, metades de matriz que os filtros de anchor excluíram). Conserta o
     clipping horizontal de matriz (e21 onda 2)."""
+    max_h = (region["bbox"][3] - region["bbox"][1]) + MAX_BAND_GROWTH_PT
     changed = True
     while changed:
         changed = False
@@ -145,13 +148,17 @@ def _absorb_band(region: dict, blocks) -> None:
                 continue
             nb = [min(region["bbox"][0], bb[0]), min(region["bbox"][1], bb[1]),
                   max(region["bbox"][2], bb[2]), max(region["bbox"][3], bb[3])]
+            if nb[3] - nb[1] > max_h:        # backstop: não cresce além do teto → não funde eqs distantes
+                continue
             if nb != region["bbox"]:
                 region["bbox"] = nb
                 changed = True
 
 
 def _trim_label(region: dict, label_boxes) -> None:
-    """Tira o label de equação (N.NN) à direita do crop e registra o número."""
+    """Tira o label de equação (N.NN) à direita do crop e registra o número.
+    LIMITE: trata só label À DIREITA (o caso validado em CM/pdfTeX). Label à esquerda
+    ou múltiplos labels na mesma banda (eqs fundidas) não são tratados — fora de escopo."""
     for lab, lbox in label_boxes:
         lcy = (lbox[1] + lbox[3]) / 2
         if region["bbox"][1] <= lcy <= region["bbox"][3] and lbox[0] >= region["bbox"][0]:
@@ -247,6 +254,8 @@ def crop_formulas(pdf_path: str | Path, out_dir: str | Path, *,
             raise ValueError(f"PDF sem páginas: {pdf_path}")
         lo, hi = (0, n - 1) if page_range is None else page_range
         lo, hi = max(0, lo), min(n - 1, hi)
+        if lo > hi:
+            raise ValueError(f"page_range inválido {page_range} p/ doc de {n}pg")
         scale = dpi / 72.0
         regions: list[FormulaRegion] = []
         for idx in range(lo, hi + 1):

@@ -58,6 +58,7 @@ class HostInfo:
     has_ollama: bool = False
     has_marker: bool = False
     has_tesseract: bool = False
+    has_pix2tex: bool = False     # runtime torch externo (cropper é built-in)
 
     @classmethod
     def detect(cls) -> "HostInfo":
@@ -74,6 +75,7 @@ class HostInfo:
             has_ollama=_detect_ollama(),
             has_marker=_detect_marker(),
             has_tesseract=_detect_tesseract(),
+            has_pix2tex=_detect_pix2tex(),
         )
 
     def marker_available(self) -> bool:
@@ -86,6 +88,7 @@ class DocInfo:
     n_pages: int = 1
     has_text_layer: bool = True
     math_density: float = 0.0     # regiões equation-like / página (heurística)
+    matrix_density: float = 0.0   # regiões matriz/multi-linha / página (formula_cropper)
     has_raster_logos: bool = False
 
     @classmethod
@@ -102,34 +105,44 @@ class DocInfo:
         """
         import re
         import fitz
+        from pdf2md.formula_cropper import detect_formula_regions
         doc = fitz.open(str(pdf_path))
-        n = len(doc)
-        if n == 0:
-            doc.close()
-            raise ValueError(f"PDF sem páginas: {pdf_path}")
-        idxs = list(range(min(sample, n)))
-        if n > sample:
-            idxs += [n // 2, n - 1]
         text_chars = 0
         math_hits = 0
+        matrix_hits = 0
         has_logos = False
         seen = 0
-        for i in sorted(set(idxs)):
-            page = doc[i]
-            t = page.get_text()
-            text_chars += len(t.strip())
-            math_hits += len(re.findall(r"[=∑∫√≤≥≠αβγδλΣΦΨΩ]|\b\d+/\d+\b|\^|\\[a-zA-Z]+", t))
-            for img in page.get_images(full=True):
-                w = img[2] if len(img) > 2 else 0
-                if 0 < w < 200:        # imagem raster pequena = candidata a logo
-                    has_logos = True
-            seen += 1
-        doc.close()
+        try:
+            n = len(doc)
+            if n == 0:
+                raise ValueError(f"PDF sem páginas: {pdf_path}")
+            idxs = list(range(min(sample, n)))
+            if n > sample:
+                idxs += [n // 2, n - 1]
+            for i in sorted(set(idxs)):
+                page = doc[i]
+                t = page.get_text()
+                text_chars += len(t.strip())
+                math_hits += len(re.findall(r"[=∑∫√≤≥≠αβγδλΣΦΨΩ]|\b\d+/\d+\b|\^|\\[a-zA-Z]+", t))
+                # matrix_density: regiões display que o cropper marca complexas (matriz/
+                # multi-linha). Uma página patológica NÃO pode derrubar a caracterização.
+                try:
+                    matrix_hits += sum(1 for r in detect_formula_regions(page, i) if r.is_complex)
+                except Exception:
+                    pass
+                for img in page.get_images(full=True):
+                    w = img[2] if len(img) > 2 else 0
+                    if 0 < w < 200:        # imagem raster pequena = candidata a logo
+                        has_logos = True
+                seen += 1
+        finally:
+            doc.close()
         seen = max(seen, 1)
         return cls(
             n_pages=n,
             has_text_layer=(text_chars / seen) > 30,   # >30 chars/pg amostrado = tem text-layer
             math_density=round(math_hits / seen, 2),
+            matrix_density=round(matrix_hits / seen, 2),
             has_raster_logos=has_logos,
         )
 
@@ -170,7 +183,7 @@ class Pipeline:
 # Disponibilidade PROFILE-DRIVEN (lê o mapa medido, não hardcode)
 # ---------------------------------------------------------------------------
 
-def _available(algo: str, host: HostInfo, profiles: dict, primary: str | None = None) -> bool:
+def _available(algo: str, host: HostInfo, profiles: dict) -> bool:
     """Algo roda neste host? Deriva de profile.hardware + profile.needs."""
     p = profiles.get(algo)
     if p is None:
@@ -184,8 +197,8 @@ def _available(algo: str, host: HostInfo, profiles: dict, primary: str | None = 
             return False
         if need == "ollama" and not host.has_ollama:
             return False
-        if need == "formula_cropper" and primary != "marker":
-            return False   # BURACO #3: único cropper de fórmula é o Marker (GPU)
+        if need == "pix2tex_runtime" and not host.has_pix2tex:
+            return False   # cropper é built-in (formula_cropper); falta só o runtime torch
     return True
 
 
@@ -234,8 +247,9 @@ def route(intent: str, host: HostInfo, doc: DocInfo, profiles: dict | None = Non
             if intent == QUALIDADE:
                 pipe.degraded = True
                 pipe.rationale.append(
-                    f"--qualidade pediu marker mas indisponível ({cause}); "
-                    f"degradando p/ pdftotext (prose). Math fica cru — falta cropper CPU (BURACO #3)."
+                    f"--qualidade pediu marker mas indisponível ({cause}); degradando p/ pdftotext "
+                    f"(prose). Math display recuperado via cropper CPU + pix2tex se houver runtime "
+                    f"(ver refiners); sem layout nativo do marker."
                 )
             else:
                 pipe.rationale.append(f"marker indisponível ({cause}); adaptando p/ pdftotext (CPU).")
@@ -271,14 +285,22 @@ def route(intent: str, host: HostInfo, doc: DocInfo, profiles: dict | None = Non
 
 
 def _add_refiners(pipe: Pipeline, host: HostInfo, doc: DocInfo, primary: str, profiles: dict) -> None:
-    # math: pix2tex (recorte) precisa de cropper de fórmula — _available checa o need
-    # 'formula_cropper', que só é satisfeito com primary==marker (BURACO #3).
-    if doc.math_density > 0:
-        if _available("pix2tex", host, profiles, primary):
-            pipe.steps.append(Step("pix2tex", REFINER, "refina fórmulas (marker já faz math nativo)"))
+    # math: cropper de fórmula é built-in (formula_cropper, CPU); pix2tex precisa só do
+    # runtime torch (need 'pix2tex_runtime'). Com marker como PRIMARY o math já é nativo,
+    # então pix2tex é redundante; faz diferença real quando PRIMARY=pdftotext (CPU).
+    if doc.math_density > 0 and primary != "marker":
+        if _available("pix2tex", host, profiles):
+            reason = "extrai math display → LaTeX (cropper CPU + pix2tex)"
+            if doc.matrix_density > 0:
+                reason += " [matriz: baixa confiança ~0.50]"
+                pipe.rationale.append(
+                    f"matriz/multi-linha presente (matrix_density={doc.matrix_density}): pix2tex "
+                    f"em matriz é fraco (e21: ~0.50, trunca/embaralha). marker/GPU recomendado p/ matriz."
+                )
+            pipe.steps.append(Step("pix2tex", REFINER, reason))
         else:
             pipe.rationale.append(
-                "math presente mas sem cropper de fórmula (PRIMARY não-marker; BURACO #3) → math fica cru."
+                "math presente mas runtime pix2tex ausente (set PDF2MD_PIX2TEX_PYTHON) → math fica cru."
             )
     # logo: gemma3 via Ollama
     if doc.has_raster_logos:
@@ -328,9 +350,9 @@ def _indexacao_pass2(host: HostInfo, doc: DocInfo, profiles: dict) -> Pipeline |
     if not _available("marker", host, profiles):
         return None  # sem marker, sem ganho de math sem cropper
     p2 = Pipeline(intent="indexacao-pass2")
+    # marker é PRIMARY no pass2 → math nativo (Texify); pix2tex seria redundante (e
+    # conflitaria com o OPTIMIZER ao varrer crops). Consistente com _add_refiners.
     p2.steps.append(Step("marker", PRIMARY, "reprocessa docs math-heavy / baixa qualidade"))
-    if doc.math_density > 0 and _available("pix2tex", host, profiles, "marker"):
-        p2.steps.append(Step("pix2tex", REFINER, "refina fórmulas"))
     p2.steps.append(Step("pdf2md-optimize", OPTIMIZER, "otimização"))
     return p2
 
@@ -366,6 +388,17 @@ def _detect_tesseract() -> bool:
     if shutil.which("tesseract"):
         return True
     return Path(r"C:/Program Files/Tesseract-OCR/tesseract.exe").exists()
+
+
+def _detect_pix2tex() -> bool:
+    """Runtime pix2tex (torch) — externo. O cropper é built-in; só o math-OCR é externo.
+    PDF2MD_PIX2TEX_PYTHON = python de um venv com pix2tex (igual marker em venv próprio);
+    fallback: CLI pix2tex/latexocr no PATH."""
+    import os
+    env = os.environ.get("PDF2MD_PIX2TEX_PYTHON")
+    if env:
+        return Path(env).exists()
+    return bool(shutil.which("pix2tex") or shutil.which("latexocr"))
 
 
 def _detect_ollama() -> bool:

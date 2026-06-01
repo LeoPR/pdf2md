@@ -5,16 +5,18 @@ EXECUTA os steps implementados, devolvendo o md produzido + o que rodou/pulou.
 
 Steps implementados:
   - PRIMARY: pdftotext, tesseract (CPU, em pdf2md.extractors) e marker (subprocess externo)
+  - REFINER pix2tex: cropper de fórmula built-in (formula_cropper, CPU) + pix2tex externo
+    (runtime torch via subprocess). Emite as fórmulas como LaTeX (matriz flagada baixa-conf).
   - OPTIMIZER: pdf2md-optimize (só faz sentido quando há imagens — i.e. saída do marker)
 
 Steps AINDA não implementados (pulam com nota honesta):
-  - REFINER pix2tex (BURACO #3: falta cropper de fórmula CPU)
   - REFINER gemma3/qwen (T180: pipeline small-image decompose não promovido)
 
-O marker_runner é injetável → as paths CPU (pdftotext/tesseract) são testáveis sem GPU.
+marker_runner e pix2tex_runner são injetáveis → paths CPU testáveis sem GPU/torch.
 """
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -24,9 +26,11 @@ from typing import Callable
 
 from pdf2md._profiles import OPTIMIZER, PRIMARY, REFINER
 from pdf2md.extractors import extract_pdftotext, extract_tesseract
+from pdf2md.formula_cropper import crop_formulas
 from pdf2md.routing import Pipeline
 
-MarkerRunner = Callable[[Path, Path], Path]   # (pdf, out_dir) -> caminho do .md gerado
+MarkerRunner = Callable[[Path, Path], Path]      # (pdf, out_dir) -> caminho do .md gerado
+Pix2texRunner = Callable[[Path], dict]           # (crop_dir) -> {png_name: latex}
 
 
 @dataclass
@@ -46,7 +50,8 @@ class ExecResult:
 
 
 def run_pipeline(pipeline: Pipeline, pdf_path: str | Path, out_dir: str | Path,
-                 *, marker_runner: MarkerRunner | None = None) -> ExecResult:
+                 *, marker_runner: MarkerRunner | None = None,
+                 pix2tex_runner: Pix2texRunner | None = None) -> ExecResult:
     pdf_path = Path(pdf_path)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -71,11 +76,18 @@ def run_pipeline(pipeline: Pipeline, pdf_path: str | Path, out_dir: str | Path,
                 continue
             res.ran.append(step.algo)
 
+        elif step.role == REFINER and step.algo == "pix2tex":
+            new_md, ran_ok, note = _run_pix2tex(
+                pdf_path, out_dir, md_text, res.output_md, pix2tex_runner)
+            if ran_ok:
+                md_text = new_md
+                res.output_md = _write_md(out_dir, pdf_path, md_text)
+                res.ran.append("pix2tex")
+            else:
+                res.skipped.append(("pix2tex", note))
+
         elif step.role == REFINER:
-            why = ("pix2tex: falta cropper de fórmula CPU (BURACO #3)"
-                   if step.algo == "pix2tex"
-                   else "VLM small-image decompose não promovido (T180)")
-            res.skipped.append((step.algo, why))
+            res.skipped.append((step.algo, "VLM small-image decompose não promovido (T180)"))
 
         elif step.role == OPTIMIZER:
             # optimize opera sobre imagens extraídas. Só o marker (único PRIMARY que
@@ -106,8 +118,95 @@ def _write_md(out_dir: Path, pdf_path: Path, md: str) -> Path:
 
 
 def _list_images(out_dir: Path) -> list[Path]:
+    # exclui dirs/arquivos com prefixo '_' (relatórios + _formula_crops do pix2tex) —
+    # o OPTIMIZER não deve otimizar os crops de fórmula como se fossem imagens do doc.
     exts = {".png", ".jpg", ".jpeg", ".webp"}
-    return [p for p in out_dir.rglob("*") if p.suffix.lower() in exts]
+    return [p for p in out_dir.rglob("*")
+            if p.suffix.lower() in exts
+            and not any(part.startswith("_") for part in p.relative_to(out_dir).parts)]
+
+
+def _run_pix2tex(pdf_path: Path, out_dir: Path, md_text: str | None,
+                 output_md: Path | None, runner: Pix2texRunner | None):
+    """Cropa as fórmulas display (built-in, CPU) e roda pix2tex (externo) sobre os
+    crops, anexando o LaTeX ao md. Devolve (novo_md|None, rodou?, nota_de_skip)."""
+    if md_text is None and output_md is not None:
+        md_text = Path(output_md).read_text(encoding="utf-8")
+    if md_text is None:
+        return None, False, "sem markdown base p/ anexar fórmulas"
+
+    crop_dir = Path(out_dir) / "_formula_crops"
+    if crop_dir.exists():                       # limpa crops stale (out_dir reusado → evita re-OCR)
+        for old in crop_dir.glob("*.png"):
+            old.unlink()
+    try:
+        regions = crop_formulas(pdf_path, crop_dir)
+    except Exception as exc:
+        return None, False, f"cropper falhou: {exc}"
+    if not regions:
+        return None, False, "nenhuma fórmula display detectada"
+
+    if runner is None and _discover_pix2tex_python() is None \
+            and not (shutil.which("pix2tex") or shutil.which("latexocr")):
+        return None, False, (f"{len(regions)} fórmulas cropadas mas runtime pix2tex ausente "
+                             f"(set PDF2MD_PIX2TEX_PYTHON)")
+    run = runner or _default_pix2tex_runner
+    try:
+        latex_by_crop = run(crop_dir)
+    except Exception as exc:
+        return None, False, f"runtime pix2tex falhou: {exc}"
+    new_md, n_appended = _append_formulas(md_text, regions, latex_by_crop)
+    if n_appended == 0:
+        return None, False, f"{len(regions)} fórmulas cropadas mas 0 legíveis (pix2tex vazio)"
+    return new_md, True, ""
+
+
+def _append_formulas(md: str, regions, latex_by_crop: dict) -> tuple[str, int]:
+    """Anexa seção de fórmulas (LaTeX). Matriz/multi-linha flagada baixa-confiança.
+    Devolve (md, n_anexadas). Posição inline no corpo = futuro (exige alinhamento
+    com a saída pdftotext)."""
+    out = ["", "## Fórmulas extraídas (LaTeX)", "",
+           "<!-- formula_cropper (CPU) + pix2tex. Posição inline no corpo = trabalho futuro. -->", ""]
+    n = 0
+    for r in regions:
+        latex = (latex_by_crop.get(r.crop_path.name, "") if r.crop_path else "").strip()
+        if not latex:
+            continue
+        tag = f"({r.label})" if r.label else f"pg{r.page_index}"
+        warn = " ⚠️ matriz/multi-linha (baixa confiança CPU ~0.50; marker/GPU recomendado)" \
+            if r.is_complex else ""
+        out += [f"- **{tag}**{warn}", f"  $$ {latex} $$"]
+        n += 1
+    return (md.rstrip() + "\n" + "\n".join(out) + "\n", n) if n else (md, 0)
+
+
+def _discover_pix2tex_python() -> str | None:
+    env = os.environ.get("PDF2MD_PIX2TEX_PYTHON")
+    return env if env and Path(env).exists() else None
+
+
+def _default_pix2tex_runner(crop_dir: Path) -> dict:
+    """Roda pix2tex no venv externo (torch). Preferência: python do venv + runner
+    standalone; fallback: CLI pix2tex/latexocr por imagem."""
+    crop_dir = Path(crop_dir)
+    crops = sorted(crop_dir.glob("*.png"))
+    py = _discover_pix2tex_python()
+    if py:
+        runner_script = Path(__file__).parent / "_pix2tex_runner.py"
+        out_json = crop_dir / "_pix2tex.json"
+        timeout_s = 120 + len(crops) * 30        # cold-start ~12s + ~6.5s/formula + folga
+        subprocess.run([py, str(runner_script), str(crop_dir), str(out_json)],
+                       check=True, timeout=timeout_s,
+                       capture_output=True, text=True)   # não polui o stdout do CLI
+        return json.loads(out_json.read_text(encoding="utf-8"))
+    cli = shutil.which("pix2tex") or shutil.which("latexocr")
+    if not cli:
+        raise RuntimeError("runtime pix2tex não encontrado (set PDF2MD_PIX2TEX_PYTHON).")
+    out = {}
+    for png in crops:
+        r = subprocess.run([cli, str(png)], capture_output=True, text=True, timeout=120)
+        out[png.name] = r.stdout.strip()
+    return out
 
 
 def _discover_marker() -> str | None:

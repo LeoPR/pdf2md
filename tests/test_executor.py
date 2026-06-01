@@ -66,8 +66,8 @@ def test_marker_runner_injected(tmp_path):
     assert "marker" in res.ran
 
 
-def test_refiners_skip_with_honest_reason(tmp_path):
-    # pipeline com pix2tex + gemma3 → pulam com nota (BURACO #3 / T180)
+def test_refiners_skip_honestly_when_unavailable(tmp_path):
+    # pix2tex: cropper falha em pdf inexistente; gemma3: T180. Ambos pulam com nota honesta.
     pipe = Pipeline(intent=QUALIDADE, steps=[
         Step("marker", PRIMARY, ""),
         Step("pix2tex", REFINER, ""),
@@ -75,9 +75,52 @@ def test_refiners_skip_with_honest_reason(tmp_path):
     ])
     res = run_pipeline(pipe, "dummy.pdf", tmp_path,
                        marker_runner=lambda p, o: _touch(tmp_path / "m.md"))
-    skipped_algos = {a for a, _ in res.skipped}
-    assert "pix2tex" in skipped_algos and "gemma3-4b-small-image" in skipped_algos
-    assert any("BURACO #3" in why for a, why in res.skipped if a == "pix2tex")
+    skipped = {a: why for a, why in res.skipped}
+    assert "pix2tex" in skipped and "cropper" in skipped["pix2tex"]
+    assert "gemma3-4b-small-image" in skipped and "T180" in skipped["gemma3-4b-small-image"]
+
+
+@pytest.mark.skipif(not ARXIV.exists(), reason="exemplo arxiv ausente")
+def test_pix2tex_runs_and_appends_formulas(tmp_path, monkeypatch):
+    # gate VIRADO: cropper built-in (mockado) + pix2tex (runner injetado) → anexa LaTeX.
+    from pdf2md.formula_cropper import FormulaRegion
+    import pdf2md.executor as ex
+
+    def fake_crop(pdf, out_dir, **kw):
+        d = Path(out_dir); d.mkdir(parents=True, exist_ok=True)
+        (d / "pg00_5-12.png").write_bytes(b"x")
+        (d / "pg00_5-32.png").write_bytes(b"x")
+        return [
+            FormulaRegion(0, (0, 0, 1, 1), "5.12", False, {}, d / "pg00_5-12.png"),
+            FormulaRegion(0, (0, 0, 1, 1), "5.32", True, {}, d / "pg00_5-32.png"),  # matriz
+        ]
+    monkeypatch.setattr(ex, "crop_formulas", fake_crop)
+    runner = lambda crop_dir: {"pg00_5-12.png": "a=b", "pg00_5-32.png": "M=I"}
+
+    pipe = Pipeline(intent=QUALIDADE, steps=[
+        Step("pdftotext", PRIMARY, ""), Step("pix2tex", REFINER, ""),
+    ])
+    res = run_pipeline(pipe, ARXIV, tmp_path, pix2tex_runner=runner)
+    assert "pix2tex" in res.ran
+    md = res.output_md.read_text(encoding="utf-8")
+    assert "Fórmulas extraídas" in md and "a=b" in md and "M=I" in md
+    assert "baixa confiança" in md            # 5.32 (is_complex) é flagada
+
+
+def test_pix2tex_skips_when_no_runtime(tmp_path, monkeypatch):
+    # cropou fórmulas mas sem runner injetado e sem runtime descoberto → pula honesto
+    from pdf2md.formula_cropper import FormulaRegion
+    import pdf2md.executor as ex
+    monkeypatch.setattr(ex, "crop_formulas",
+                        lambda pdf, out_dir, **kw: [FormulaRegion(0, (0, 0, 1, 1), "1", False, {}, None)])
+    monkeypatch.setattr(ex, "_discover_pix2tex_python", lambda: None)
+    monkeypatch.setattr(ex.shutil, "which", lambda *a, **k: None)
+    pipe = Pipeline(intent=QUALIDADE, steps=[Step("pdftotext", PRIMARY, "")])
+    # injeta um step pix2tex à mão p/ exercer o caminho sem runtime
+    pipe.steps.append(Step("pix2tex", REFINER, ""))
+    if ARXIV.exists():
+        res = run_pipeline(pipe, ARXIV, tmp_path)
+        assert any(a == "pix2tex" and "runtime pix2tex ausente" in why for a, why in res.skipped)
 
 
 @pytest.mark.skipif(not ARXIV.exists(), reason="exemplo arxiv ausente")
