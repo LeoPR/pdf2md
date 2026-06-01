@@ -5,8 +5,8 @@ algoritmo:
   tipo: extractor
   estado: testado
   particao: ativo
-  lab_origem: lab/e18_vlm_formula_isolada
-  medido_em: 2026-05-18
+  lab_origem: [lab/e18_vlm_formula_isolada, lab/e21_cpu_formula_cropper]
+  medido_em: 2026-05-31
   licenca: MIT
   dependencias_externas: offline   # ~150MB pesos baixados 1x, depois offline
 
@@ -45,11 +45,15 @@ dimensoes:
     notas: "Não extrai prose — só math"
 
   qualidade_math_semantica:
-    valor: 1.0
-    unidade: precision_semantica
+    valor: 0.80
+    unidade: frac_eqs_usaveis
     confianca: medido
-    contexto: "Eq (4.12) N&C: matriz 2×2 com expoentes complexos, 100% semanticamente correto"
-    notas: "WER-LaTeX texto-level 0.279 (estilo bmatrix vs array), mas elementos da matriz exatos"
+    contexto: "e21: 6 eqs display Preskill (crop estrutural CPU @300dpi/4pt) → 5/6 usáveis, sim médio 0.80"
+    notas: |
+      CORRIGIDO de 1.0 (era N=1: só a matriz 4.12 do N&C em e18 — não generalizou).
+      Em N=6, erros residuais reais do MODELO: 'f' itálico do Computer Modern lido como
+      \int (5.17) / J (5.27). Qualidade governada tanto pelo crop (DPI/margem) quanto pelo
+      modelo — sweet spot medido: DPI=300, margem 4pt (e21).
 
   qualidade_tabelas:
     valor: N-A
@@ -122,18 +126,19 @@ notas: |
   Vencedor para T134 (math image → LaTeX). Modelo dedicado treinado em corpus
   matemático. VLM general-purpose perdeu em todas dimensões nesta categoria (e18).
 
-  Para pipeline híbrido: Marker extrai doc completo → detector de fórmula
-  identifica regiões → pix2tex extrai cada região como LaTeX. Granularidade
-  "recorte" habilita essa composição.
+  Para pipeline híbrido CPU (e21): cropper ESTRUTURAL (pymupdf, sem torch/marker)
+  detecta regiões display por fonte de delimitador grande (CMEX) + densidade-math +
+  indentação → pix2tex extrai cada região como LaTeX. Granularidade "recorte" habilita
+  isso SEM Marker — fecha o caminho `pdftotext + cropper + pix2tex` 100% CPU.
 
   Limitação conhecida:
-  - Inclui label "(4.12)" no output (não respeita prompt-engineering)
-    → pós-processar com regex
+  - Inclui label "(N.NN)" no output → o cropper já EXCLUI o span do label (e21).
+  - `f` itálico do Computer Modern lido como \int / J (e21, 5.17/5.27) — frailty do modelo.
   - WER-LaTeX texto-level enganoso: pix2tex usa `\\left[\\begin{array}` em vez
     de `\\begin{bmatrix}` (equivalente semantico). Grade por render+SSIM seria mais justo.
 
 evidencias:
   - path: lab/e18_vlm_formula_isolada/notes.md
-    quote: "pix2tex semanticamente 100% correto, 4 VLMs falharam"
-  - path: lab/e18_vlm_formula_isolada/out/pix2tex.tex
-    quote: "U=\\left[\\begin{array}{c c c}{{e^{i(\\alpha-\\beta/2-\\delta/2)}\\cos\\frac{\\gamma}{2}}}..."
+    quote: "pix2tex semanticamente 100% correto, 4 VLMs falharam (N=1 — não generalizou)"
+  - path: lab/e21_cpu_formula_cropper/notes.md
+    quote: "N=6: recall detecção 6/6, sim médio 0.80, 5/6 usáveis; crop @300dpi/4pt é a alavanca"
