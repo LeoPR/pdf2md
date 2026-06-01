@@ -45,15 +45,18 @@ dimensoes:
     notas: "Não extrai prose — só math"
 
   qualidade_math_semantica:
-    valor: 0.80
-    unidade: frac_eqs_usaveis
+    valor_display_linha_unica: 0.80
+    valor_matriz: 0.50
+    unidade: sim_latex_normalizado
     confianca: medido
-    contexto: "e21: 6 eqs display Preskill (crop estrutural CPU @300dpi/4pt) → 5/6 usáveis, sim médio 0.80"
+    contexto: "e21: display linha-única N=6 sim 0.80 (5/6 usáveis); matriz N=3 (onda 2) sim 0.50"
     notas: |
       CORRIGIDO de 1.0 (era N=1: só a matriz 4.12 do N&C em e18 — não generalizou).
-      Em N=6, erros residuais reais do MODELO: 'f' itálico do Computer Modern lido como
-      \int (5.17) / J (5.27). Qualidade governada tanto pelo crop (DPI/margem) quanto pelo
-      modelo — sweet spot medido: DPI=300, margem 4pt (e21).
+      FRONTEIRA medida: bom em display linha-única (0.80), FRACO em matriz (0.50).
+      - linha-única: erro residual do modelo ('f' itálico CM lido como \int/J — 5.17/5.27).
+      - matriz: pix2tex TRUNCA eq longa (5.32: 3/6 matrizes ok depois corta) e embaralha
+        2×2 (5.123 lida como \frac). Gargalo é o MODELO, não o cropper (detecção 3/3, crop limpo).
+      Qualidade governada tb pelo crop — sweet spot medido: DPI=300, margem 4pt (e21).
 
   qualidade_tabelas:
     valor: N-A
