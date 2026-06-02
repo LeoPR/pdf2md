@@ -10,9 +10,11 @@ from pathlib import Path
 
 import pytest
 
+import re
+
 from pdf2md.formula_cropper import (
-    FormulaRegion, _is_complex, _overlap, crop_formulas,
-    detect_formula_regions, merge_regions,
+    FORMULA_TOKEN_RE, FormulaRegion, _is_complex, _overlap, crop_formulas,
+    detect_formula_regions, formula_token, merge_regions,
 )
 
 PRESKILL = Path("Z:/caches/corpus/pdf2md/preskill_ph219_ch5.pdf")
@@ -48,6 +50,29 @@ def test_merge_disjoint_stay_separate():
     assert len(merge_regions(regs)) == 2
 
 
+def test_merge_unions_block_indices():
+    regs = [
+        {"bbox": [0, 0, 10, 10], "label": None, "block_indices": [7],
+         "signals": {"cmex": True, "density": 1.0, "n_lines": 1}},
+        {"bbox": [5, 2, 15, 12], "label": "5.1", "block_indices": [8],
+         "signals": {"cmex": False, "density": 0.5, "n_lines": 1}},
+    ]
+    merged = merge_regions(regs)
+    assert len(merged) == 1
+    assert merged[0]["block_indices"] == [7, 8]
+
+
+def test_formula_token_survives_processing():
+    from pdf2md.extractors import join_hyphenation, normalize_chars
+    r = FormulaRegion(4, (0, 0, 1, 1), "5.12", False, {}, Path("d/pg04_5-12.png"), (7,))
+    t = formula_token(r)
+    assert normalize_chars(t) == t                 # ligaduras/aspas/NFC não tocam ⟦⟧
+    assert join_hyphenation(t) == t                # sem hífen-com-espaço/quebra
+    assert re.sub(r"\n{3,}", "\n\n", f"a\n\n{t}\n\nb") == f"a\n\n{t}\n\nb"   # imune ao colapso
+    assert FORMULA_TOKEN_RE.search(t).group(1) == "pg04_5-12"   # chave = stem do crop
+    assert not t.startswith("#") and not t[0].isdigit()         # nunca vira heading
+
+
 def test_is_complex_matrix_vs_single_line():
     assert _is_complex({"merged_from": 3, "cmex": True, "n_lines": 6})       # matriz merged
     assert _is_complex({"merged_from": 1, "cmex": True, "n_lines": 7})       # tall cmex (cases)
@@ -72,6 +97,25 @@ def test_crop_preskill_pg07_three_eqs(tmp_path):
     regions = crop_formulas(PRESKILL, tmp_path, page_range=(6, 6))   # pg07 = índice 6
     labels = {r.label for r in regions}
     assert {"5.16", "5.17", "5.18"} <= labels                # recall das 3 display
+
+
+@pytest.mark.skipif(not PRESKILL.exists(), reason="Preskill zcache ausente (Z: não montado)")
+def test_no_duplicate_regions_on_fragmented_page(tmp_path):
+    # pg idx5: eqs 5.13/5.14 que o PyMuPDF quebra em âncoras DISJUNTAS não podem duplicar
+    # (revisão adversarial e21-inline: merge antes do absorb gerava 3x a mesma região).
+    regions = crop_formulas(PRESKILL, tmp_path, page_range=(5, 5))
+    keys = [r.block_indices for r in regions]
+    assert len(keys) == len(set(keys)), f"block_indices duplicados: {keys}"
+    labels = [r.label for r in regions]
+    assert labels.count("5.13") <= 1 and labels.count("5.14") <= 1
+
+
+@pytest.mark.skipif(not PRESKILL.exists(), reason="Preskill zcache ausente (Z: não montado)")
+def test_region_block_indices_populated(tmp_path):
+    # block_indices (chave de alinhamento com o extrator) deve vir preenchido
+    regions = crop_formulas(PRESKILL, tmp_path, page_range=(4, 4))
+    r = next(r for r in regions if r.label == "5.12")
+    assert r.block_indices and all(isinstance(i, int) for i in r.block_indices)
 
 
 @pytest.mark.skipif(not PRESKILL.exists(), reason="Preskill zcache ausente (Z: não montado)")

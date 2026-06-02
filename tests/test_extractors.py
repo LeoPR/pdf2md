@@ -64,3 +64,27 @@ def test_tesseract_ocrs_printed_page():
     r = extract_tesseract(CDC, page_range=(0, 0))
     assert r.backend == "tesseract"
     assert len(r.markdown.split()) > 20          # OCR de página impressa produz texto
+
+
+# --- formula-aware (posição inline): placeholders por block_index -----------
+PRESKILL = Path("Z:/caches/corpus/pdf2md/preskill_ph219_ch5.pdf")
+
+
+@pytest.mark.skipif(not ARXIV.exists(), reason="exemplo arxiv ausente")
+def test_pdftotext_no_regions_is_unchanged():
+    # formula_regions=None → byte-idêntico + placeholders vazio (zero regressão no --rapido)
+    a = extract_pdftotext(ARXIV)
+    b = extract_pdftotext(ARXIV, formula_regions=None)
+    assert a.markdown == b.markdown
+    assert a.placeholders == {} and b.placeholders == {}
+
+
+@pytest.mark.skipif(not PRESKILL.exists(), reason="Preskill zcache ausente (Z: não montado)")
+def test_pdftotext_emits_placeholder_for_region(tmp_path):
+    from pdf2md.formula_cropper import crop_formulas, formula_token
+    regions = crop_formulas(PRESKILL, tmp_path, page_range=(4, 4))   # pg05 = índice 4, eq 5.12
+    res = extract_pdftotext(PRESKILL, page_range=(4, 4), formula_regions=regions)
+    tok = formula_token(regions[0])
+    assert tok in res.markdown                         # placeholder na posição do math
+    assert "Ncircuit" not in res.markdown              # math display cru foi substituído
+    assert "circuit" in res.placeholders[tok].lower()  # raw original capturado p/ fallback

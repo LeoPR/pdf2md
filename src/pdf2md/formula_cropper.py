@@ -58,6 +58,27 @@ class FormulaRegion:
     is_complex: bool = False                   # matriz/multi-linha → pix2tex baixa confiança
     signals: dict = field(default_factory=dict)
     crop_path: Path | None = None
+    # índices dos blocos PyMuPDF (array CRU get_text("dict")["blocks"]) que formaram a
+    # região (âncora + absorvidos). Chave EXATA de alinhamento com o extrator, que itera
+    # o mesmo array determinístico — substitui casamento geométrico frágil (T090/e21).
+    block_indices: tuple[int, ...] = ()
+
+
+# token de placeholder inline emitido pelo extrator e substituído pelo executor.
+FORMULA_TOKEN_RE = re.compile(r"⟦PDF2MD:FORMULA:([^⟧]+)⟧")
+
+
+def formula_token(region: "FormulaRegion") -> str:
+    """Placeholder de 1 linha p/ a posição da fórmula no markdown. Chave = stem do crop
+    (liga região↔crop↔latex). ⟦⟧ (U+27E6/7) não colidem com texto/LaTeX, são NFC-estáveis
+    (normalize_chars não toca) e sem '\\n' nem hífen-com-espaço (join_hyphenation/colapso-\\n
+    não tocam). Não começa com '#'/dígito → nunca vira heading."""
+    if region.crop_path is not None:
+        key = region.crop_path.stem
+    else:
+        first = region.block_indices[0] if region.block_indices else 0
+        key = f"p{region.page_index}b{first}"
+    return f"⟦PDF2MD:FORMULA:{key}⟧"
 
 
 # ---------------------------------------------------------------------------
@@ -122,6 +143,7 @@ def merge_regions(regions: list[dict]) -> list[dict]:
             "bbox": [min(b[0] for b in bx), min(b[1] for b in bx),
                      max(b[2] for b in bx), max(b[3] for b in bx)],
             "label": next((r["label"] for r in g if r["label"]), None),
+            "block_indices": sorted({i for r in g for i in r.get("block_indices", ())}),
             "signals": {"cmex": any(r["signals"]["cmex"] for r in g),
                         "density": max(r["signals"]["density"] for r in g),
                         "n_lines": sum(r["signals"]["n_lines"] for r in g),
@@ -130,16 +152,18 @@ def merge_regions(regions: list[dict]) -> list[dict]:
     return merged
 
 
-def _absorb_band(region: dict, blocks) -> None:
+def _absorb_band(region: dict, indexed_blocks) -> None:
     """Cresce a bbox p/ incluir blocos NÃO-prosa na mesma banda-y (brackets grandes,
     coeficientes, metades de matriz que os filtros de anchor excluíram). Conserta o
-    clipping horizontal de matriz (e21 onda 2)."""
+    clipping horizontal de matriz (e21 onda 2). `indexed_blocks` = [(raw_idx, block)];
+    cada bloco coberto entra em region["block_indices"] (consistência crop↔extrator)."""
     max_h = (region["bbox"][3] - region["bbox"][1]) + MAX_BAND_GROWTH_PT
+    bi = set(region.get("block_indices", ()))
     changed = True
     while changed:
         changed = False
         ry0, ry1 = region["bbox"][1], region["bbox"][3]
-        for b in blocks:
+        for idx, b in indexed_blocks:
             if _is_prose_block(b):
                 continue
             bb = b["bbox"]
@@ -150,9 +174,13 @@ def _absorb_band(region: dict, blocks) -> None:
                   max(region["bbox"][2], bb[2]), max(region["bbox"][3], bb[3])]
             if nb[3] - nb[1] > max_h:        # backstop: não cresce além do teto → não funde eqs distantes
                 continue
+            if idx not in bi:                # bloco coberto pelo crop → registra (mesmo sem crescer)
+                bi.add(idx)
+                changed = True
             if nb != region["bbox"]:
                 region["bbox"] = nb
                 changed = True
+    region["block_indices"] = tuple(sorted(bi))
 
 
 def _trim_label(region: dict, label_boxes) -> None:
@@ -177,16 +205,19 @@ def _is_complex(signals: dict) -> bool:
 # ---------------------------------------------------------------------------
 
 def detect_formula_regions(page, page_index: int = 0) -> list[FormulaRegion]:
-    """Regiões de fórmula display de UMA página (bbox em pt, label excluído)."""
-    blocks = [b for b in page.get_text("dict")["blocks"]
-              if b.get("type", 0) == 0 and b.get("lines")]
-    if not blocks:
+    """Regiões de fórmula display de UMA página (bbox em pt, label excluído).
+    Itera o array CRU de blocos com enumerate → o índice é chave compartilhada exata
+    com o extrator (mesma chamada get_text('dict'), determinística)."""
+    raw_blocks = page.get_text("dict").get("blocks", [])
+    indexed = [(i, b) for i, b in enumerate(raw_blocks)
+               if b.get("type", 0) == 0 and b.get("lines")]
+    if not indexed:
         return []
-    body_left = _body_left(blocks)
+    body_left = _body_left([b for _, b in indexed])
 
     label_boxes = []   # (label, bbox) de TODO span eq-number
     anchors = []
-    for b in blocks:
+    for idx, b in indexed:
         sp = _spans(b)
         label_ids = {id(s) for s in sp if EQNUM_RE.match(s["text"].strip())}
         for s in sp:
@@ -216,23 +247,33 @@ def detect_formula_regions(page, page_index: int = 0) -> list[FormulaRegion]:
             "bbox": [min(c[0] for c in bx), min(c[1] for c in bx),
                      max(c[2] for c in bx), max(c[3] for c in bx)],
             "label": label,
+            "block_indices": [idx],
             "signals": {"cmex": has_cmex, "density": round(density, 2),
                         "n_lines": n_lines},
         })
 
     anchors = merge_regions(anchors)
-    out = []
+    out, seen = [], set()
     for r in anchors:
-        _absorb_band(r, blocks)
+        _absorb_band(r, indexed)
         r["bbox"] = [r["bbox"][0] - MARGIN_PT, r["bbox"][1] - MARGIN_PT,
                      r["bbox"][2] + MARGIN_PT, r["bbox"][3] + MARGIN_PT]
         _trim_label(r, label_boxes)
+        # DEDUPE: âncoras irmãs de UMA eq de linha-única que o PyMuPDF quebrou em
+        # fragmentos horizontalmente DISJUNTOS não se fundem em merge_regions (bboxes
+        # crus não sobrepõem), mas convergem ao MESMO bbox/block_indices após _absorb_band.
+        # Matriz (âncoras sobrepostas) já funde no merge → não duplica. (revisão e21 inline)
+        key = tuple(r.get("block_indices", ()))
+        if key and key in seen:
+            continue
+        seen.add(key)
         out.append(FormulaRegion(
             page_index=page_index,
             bbox=tuple(r["bbox"]),
             label=r["label"],
             is_complex=_is_complex(r["signals"]),
             signals=r["signals"],
+            block_indices=key,
         ))
     return out
 
@@ -269,8 +310,11 @@ def crop_formulas(pdf_path: str | Path, out_dir: str | Path, *,
                 x0, y0, x1, y1 = (int(v * scale) for v in r.bbox)
                 crop = img.crop((max(0, x0), max(0, y0),
                                  min(x1, pix.width), min(y1, pix.height)))
+                # nome único por (página, 1º bloco): evita colisão entre eqs de mesmo
+                # label/None na mesma página (o block_index desambigua sempre).
                 tag = (r.label or f"eq{i}").replace(".", "-")
-                p = out_dir / f"pg{idx:02d}_{tag}.png"
+                first = r.block_indices[0] if r.block_indices else i
+                p = out_dir / f"pg{idx:02d}_b{first:02d}_{tag}.png"
                 crop.save(p)
                 r.crop_path = p
                 regions.append(r)

@@ -26,7 +26,7 @@ from typing import Callable
 
 from pdf2md._profiles import OPTIMIZER, PRIMARY, REFINER
 from pdf2md.extractors import extract_pdftotext, extract_tesseract
-from pdf2md.formula_cropper import crop_formulas
+from pdf2md.formula_cropper import FORMULA_TOKEN_RE, crop_formulas, formula_token
 from pdf2md.routing import Pipeline
 
 MarkerRunner = Callable[[Path, Path], Path]      # (pdf, out_dir) -> caminho do .md gerado
@@ -78,7 +78,7 @@ def run_pipeline(pipeline: Pipeline, pdf_path: str | Path, out_dir: str | Path,
 
         elif step.role == REFINER and step.algo == "pix2tex":
             new_md, ran_ok, note = _run_pix2tex(
-                pdf_path, out_dir, md_text, res.output_md, pix2tex_runner)
+                pdf_path, out_dir, md_text, res.output_md, pix2tex_runner, res.primary)
             if ran_ok:
                 md_text = new_md
                 res.output_md = _write_md(out_dir, pdf_path, md_text)
@@ -127,9 +127,10 @@ def _list_images(out_dir: Path) -> list[Path]:
 
 
 def _run_pix2tex(pdf_path: Path, out_dir: Path, md_text: str | None,
-                 output_md: Path | None, runner: Pix2texRunner | None):
-    """Cropa as fórmulas display (built-in, CPU) e roda pix2tex (externo) sobre os
-    crops, anexando o LaTeX ao md. Devolve (novo_md|None, rodou?, nota_de_skip)."""
+                 output_md: Path | None, runner: Pix2texRunner | None, primary: str | None):
+    """Cropa as fórmulas display (built-in, CPU) e roda pix2tex (externo) sobre os crops.
+    Com primary=pdftotext, INSERE o LaTeX na POSIÇÃO da fórmula (placeholder por block_index);
+    com marker/tesseract (sem essa estrutura) anexa ao fim. Devolve (novo_md|None, rodou?, nota)."""
     if md_text is None and output_md is not None:
         md_text = Path(output_md).read_text(encoding="utf-8")
     if md_text is None:
@@ -155,10 +156,58 @@ def _run_pix2tex(pdf_path: Path, out_dir: Path, md_text: str | None,
         latex_by_crop = run(crop_dir)
     except Exception as exc:
         return None, False, f"runtime pix2tex falhou: {exc}"
-    new_md, n_appended = _append_formulas(md_text, regions, latex_by_crop)
-    if n_appended == 0:
+
+    if primary == "pdftotext":
+        new_md, n = _inline_formulas(pdf_path, regions, latex_by_crop)
+    else:                                       # marker/tesseract: sem placeholders → anexa ao fim
+        new_md, n = _append_formulas(md_text, regions, latex_by_crop)
+    if n == 0:
         return None, False, f"{len(regions)} fórmulas cropadas mas 0 legíveis (pix2tex vazio)"
     return new_md, True, ""
+
+
+def _clean_latex(s: str) -> str:
+    """Tira espaços e delimitadores $ das pontas (evita '$$ $a=b$ $$')."""
+    return (s or "").strip().strip("$").strip()
+
+
+def _display_block(latex: str, r) -> str:
+    """Bloco display '$$...$$'. label vira \\tag (convenção GT); matriz (is_complex)
+    ganha comentário HTML de baixa-confiança acima (delta-E: aviso é metadado, não conteúdo)."""
+    tag = f" \\tag{{{r.label}}}" if r.label else ""
+    block = f"$$ {latex}{tag} $$"
+    if r.is_complex:
+        block = ("<!-- pdf2md: matriz/multi-linha, baixa confiança CPU (~0.50); "
+                 "marker/GPU recomendado -->\n" + block)
+    return block
+
+
+def _inline_formulas(pdf_path: Path, regions, latex_by_crop: dict) -> tuple[str, int]:
+    """Re-extrai o pdftotext FORMULA-AWARE (placeholders por block_index) e substitui cada
+    placeholder pelo '$$latex$$' na posição original. Invariante: nenhuma fórmula legível
+    perdida — região sem placeholder no corpo (órfã) cai na seção-ao-fim; nenhum token vaza."""
+    res = extract_pdftotext(pdf_path, formula_regions=regions)
+    md, raw_by_token = res.markdown, res.placeholders
+    inlined = 0
+    orphans = []
+    for r in regions:
+        token = formula_token(r)
+        latex = _clean_latex(latex_by_crop.get(r.crop_path.name, "") if r.crop_path else "")
+        if token not in md:
+            if latex:
+                orphans.append(r)                  # sem âncora no corpo → rede ao fim
+            continue
+        if not latex:
+            md = md.replace(token, raw_by_token.get(token, ""), 1)   # restaura raw (baseline)
+            continue
+        md = md.replace(token, _display_block(latex, r), 1)
+        inlined += 1
+    n = inlined
+    if orphans:
+        md, n_app = _append_formulas(md, orphans, latex_by_crop)
+        n += n_app
+    md = FORMULA_TOKEN_RE.sub("", md)              # blindagem: nenhum token remanescente vaza
+    return md, n
 
 
 def _append_formulas(md: str, regions, latex_by_crop: dict) -> tuple[str, int]:
@@ -169,7 +218,7 @@ def _append_formulas(md: str, regions, latex_by_crop: dict) -> tuple[str, int]:
            "<!-- formula_cropper (CPU) + pix2tex. Posição inline no corpo = trabalho futuro. -->", ""]
     n = 0
     for r in regions:
-        latex = (latex_by_crop.get(r.crop_path.name, "") if r.crop_path else "").strip()
+        latex = _clean_latex(latex_by_crop.get(r.crop_path.name, "") if r.crop_path else "")
         if not latex:
             continue
         tag = f"({r.label})" if r.label else f"pg{r.page_index}"

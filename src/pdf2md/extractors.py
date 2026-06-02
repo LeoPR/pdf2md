@@ -15,7 +15,7 @@ import re
 import shutil
 import unicodedata
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import fitz  # PyMuPDF
@@ -34,6 +34,9 @@ class ExtractResult:
     n_pages: int          # comprimento do DOCUMENTO fonte (não nº de páginas extraídas)
     backend: str
     n_headings: int = 0
+    # token de placeholder -> texto cru original do bloco (fallback se pix2tex vier vazio).
+    # Só populado quando extract_pdftotext recebe formula_regions (caminho pix2tex inline).
+    placeholders: dict = field(default_factory=dict)
 
 
 def normalize_chars(s: str) -> str:
@@ -80,10 +83,51 @@ def _heading_level(raw: str, max_size: float, body: float) -> int:
     return 0
 
 
-def _page_to_md(page: fitz.Page, body: float) -> tuple[str, int]:
+def _blocks_raw_text(raw_blocks, idxs) -> str:
+    """Texto cru normalizado dos blocos de uma região (fallback se pix2tex vier vazio)."""
+    parts = []
+    for i in idxs:
+        if not (0 <= i < len(raw_blocks)):
+            continue
+        texts = ["".join(sp.get("text", "") for sp in ln.get("spans", []))
+                 for ln in raw_blocks[i].get("lines", [])]
+        joined = " ".join(t.strip() for t in texts if t.strip())
+        if joined:
+            parts.append(joined)
+    return normalize_chars(join_hyphenation(" ".join(parts))).strip()
+
+
+def _page_to_md(page: fitz.Page, body: float, regions=None) -> tuple[str, int, dict]:
+    """Markdown de UMA página. Se `regions` (FormulaRegion já cropadas desta página)
+    dado, emite um placeholder no lugar do math cru — alinhado por ÍNDICE de bloco
+    (region.block_indices referem o mesmo array cru que enumeramos aqui)."""
+    raw_blocks = page.get_text("dict").get("blocks", [])
+    emit_at: dict[int, str] = {}      # raw_idx do 1º bloco da região -> token
+    suppress: set[int] = set()        # raw_idx dos demais blocos da região (matriz)
+    placeholders: dict[str, str] = {}
+    if regions:
+        from pdf2md.formula_cropper import formula_token   # lazy: fast-path (--rapido) sem PIL
+        for r in regions:
+            idxs = [i for i in r.block_indices if 0 <= i < len(raw_blocks)]
+            if not idxs:
+                continue
+            emit_idx = min(idxs)
+            if emit_idx in emit_at:       # colisão (2 regiões compartilham o 1º bloco): suprime
+                suppress.update(idxs)     # do corpo e deixa a 2ª virar órfã (sem token) → ao fim
+                continue
+            token = formula_token(r)
+            emit_at[emit_idx] = token
+            suppress.update(i for i in idxs if i != emit_idx)
+            placeholders[token] = _blocks_raw_text(raw_blocks, idxs)
+
     out: list[str] = []
     headings = 0
-    for block in page.get_text("dict").get("blocks", []):
+    for idx, block in enumerate(raw_blocks):
+        if idx in emit_at:                # math cru -> placeholder (pula heading/pagenum)
+            out.append(emit_at[idx])
+            continue
+        if idx in suppress:               # bloco coberto pelo crop → fora do corpo (consistente)
+            continue
         lines = block.get("lines", [])
         if not lines:
             continue
@@ -103,12 +147,23 @@ def _page_to_md(page: fitz.Page, body: float) -> tuple[str, int]:
             headings += 1
         else:
             out.append(raw)
-    return "\n\n".join(out), headings
+    return "\n\n".join(out), headings, placeholders
 
 
-def extract_pdftotext(pdf_path: str | Path, page_range: tuple[int, int] | None = None) -> ExtractResult:
-    """Extração estruturada via PyMuPDF text-layer (CPU). Prose fiel, math cru."""
+def extract_pdftotext(pdf_path: str | Path, page_range: tuple[int, int] | None = None,
+                      formula_regions=None) -> ExtractResult:
+    """Extração estruturada via PyMuPDF text-layer (CPU). Prose fiel, math cru.
+
+    `formula_regions` (FormulaRegion já cropadas, do caminho pix2tex inline) é OPCIONAL:
+    quando None (default) o comportamento é byte-idêntico ao histórico; quando dado, o
+    math cru de cada região vira um placeholder (posição inline) e ExtractResult.placeholders
+    mapeia token->texto-cru-original p/ fallback. Alinhamento por block_indices (exato).
+    """
+    by_page: dict[int, list] = {}
+    for r in (formula_regions or []):
+        by_page.setdefault(r.page_index, []).append(r)
     doc = fitz.open(str(pdf_path))
+    placeholders: dict = {}
     try:
         n = len(doc)
         if n == 0:
@@ -119,14 +174,16 @@ def extract_pdftotext(pdf_path: str | Path, page_range: tuple[int, int] | None =
         body = _dominant_size(doc[idxs.start])
         parts, headings = [], 0
         for i in idxs:
-            md, h = _page_to_md(doc[i], body)
+            md, h, ph = _page_to_md(doc[i], body, regions=by_page.get(i))
             headings += h
+            placeholders.update(ph)
             if md.strip():
                 parts.append(md)
     finally:
         doc.close()
     full = re.sub(r"\n{3,}", "\n\n", "\n\n".join(parts)).strip() + "\n"
-    return ExtractResult(markdown=full, n_pages=n, backend="pdftotext", n_headings=headings)
+    return ExtractResult(markdown=full, n_pages=n, backend="pdftotext", n_headings=headings,
+                         placeholders=placeholders)
 
 
 def tesseract_cmd() -> str | None:

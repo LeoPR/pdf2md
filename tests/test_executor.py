@@ -81,8 +81,8 @@ def test_refiners_skip_honestly_when_unavailable(tmp_path):
 
 
 @pytest.mark.skipif(not ARXIV.exists(), reason="exemplo arxiv ausente")
-def test_pix2tex_runs_and_appends_formulas(tmp_path, monkeypatch):
-    # gate VIRADO: cropper built-in (mockado) + pix2tex (runner injetado) → anexa LaTeX.
+def test_pix2tex_orphan_regions_fall_to_end(tmp_path, monkeypatch):
+    # regiões SEM block_indices (não casam bloco no extrator) → rede de segurança: seção-ao-fim.
     from pdf2md.formula_cropper import FormulaRegion
     import pdf2md.executor as ex
 
@@ -91,8 +91,8 @@ def test_pix2tex_runs_and_appends_formulas(tmp_path, monkeypatch):
         (d / "pg00_5-12.png").write_bytes(b"x")
         (d / "pg00_5-32.png").write_bytes(b"x")
         return [
-            FormulaRegion(0, (0, 0, 1, 1), "5.12", False, {}, d / "pg00_5-12.png"),
-            FormulaRegion(0, (0, 0, 1, 1), "5.32", True, {}, d / "pg00_5-32.png"),  # matriz
+            FormulaRegion(0, (0, 0, 1, 1), "5.12", False, {}, d / "pg00_5-12.png"),     # block_indices=()
+            FormulaRegion(0, (0, 0, 1, 1), "5.32", True, {}, d / "pg00_5-32.png"),      # matriz
         ]
     monkeypatch.setattr(ex, "crop_formulas", fake_crop)
     runner = lambda crop_dir: {"pg00_5-12.png": "a=b", "pg00_5-32.png": "M=I"}
@@ -103,8 +103,71 @@ def test_pix2tex_runs_and_appends_formulas(tmp_path, monkeypatch):
     res = run_pipeline(pipe, ARXIV, tmp_path, pix2tex_runner=runner)
     assert "pix2tex" in res.ran
     md = res.output_md.read_text(encoding="utf-8")
-    assert "Fórmulas extraídas" in md and "a=b" in md and "M=I" in md
-    assert "baixa confiança" in md            # 5.32 (is_complex) é flagada
+    assert "Fórmulas extraídas" in md and "a=b" in md and "M=I" in md   # órfãs ao fim
+    assert "baixa confiança" in md and "PDF2MD:FORMULA" not in md       # 5.32 flagada; sem token vazado
+
+
+def test_inline_formulas_substitutes_in_position(monkeypatch, tmp_path):
+    # unit hermético: token no corpo → $$latex$$ na posição; complexo→comentário; vazio→raw; órfã→fim.
+    from pdf2md.formula_cropper import FormulaRegion, formula_token
+    from pdf2md.extractors import ExtractResult
+    import pdf2md.executor as ex
+
+    r1 = FormulaRegion(0, (0, 0, 1, 1), "5.12", False, {}, tmp_path / "pg00_5-12.png", (7,))
+    r2 = FormulaRegion(0, (0, 0, 1, 1), "5.32", True, {}, tmp_path / "pg00_5-32.png", (9,))   # matriz
+    t1, t2 = formula_token(r1), formula_token(r2)
+    fake_md = f"before\n\n{t1}\n\nmiddle\n\n{t2}\n\nafter\n"
+    fake = ExtractResult(markdown=fake_md, n_pages=1, backend="pdftotext",
+                         placeholders={t1: "GARB1", t2: "GARB2"})
+    monkeypatch.setattr(ex, "extract_pdftotext", lambda *a, **k: fake)
+
+    md, n = ex._inline_formulas("x.pdf", [r1, r2], {"pg00_5-12.png": "a=b", "pg00_5-32.png": "M=I"})
+    assert n == 2
+    assert "$$ a=b \\tag{5.12} $$" in md and "$$ M=I \\tag{5.32} $$" in md
+    assert "baixa confiança" in md                                  # r2 complexa
+    assert "PDF2MD:FORMULA" not in md                               # nenhum token vaza
+    assert md.index("a=b") < md.index("middle") < md.index("M=I")   # posição preservada
+    assert "Fórmulas extraídas" not in md                           # tudo inline, sem órfã
+
+
+def test_inline_formulas_empty_latex_restores_raw(monkeypatch, tmp_path):
+    from pdf2md.formula_cropper import FormulaRegion, formula_token
+    from pdf2md.extractors import ExtractResult
+    import pdf2md.executor as ex
+    r1 = FormulaRegion(0, (0, 0, 1, 1), "5.12", False, {}, tmp_path / "pg00_5-12.png", (7,))
+    t1 = formula_token(r1)
+    fake = ExtractResult(markdown=f"a\n\n{t1}\n\nb\n", n_pages=1, backend="pdftotext",
+                         placeholders={t1: "RAWGARBLE"})
+    monkeypatch.setattr(ex, "extract_pdftotext", lambda *a, **k: fake)
+    md, n = ex._inline_formulas("x.pdf", [r1], {})       # pix2tex devolveu vazio
+    assert n == 0 and "RAWGARBLE" in md and "PDF2MD:FORMULA" not in md   # baseline restaurado, sem token
+
+
+def test_inline_formulas_orphan_appended(monkeypatch, tmp_path):
+    from pdf2md.formula_cropper import FormulaRegion
+    from pdf2md.extractors import ExtractResult
+    import pdf2md.executor as ex
+    r1 = FormulaRegion(0, (0, 0, 1, 1), "9.9", False, {}, tmp_path / "pg00_9-9.png", (3,))
+    fake = ExtractResult(markdown="prose sem token\n", n_pages=1, backend="pdftotext", placeholders={})
+    monkeypatch.setattr(ex, "extract_pdftotext", lambda *a, **k: fake)
+    md, n = ex._inline_formulas("x.pdf", [r1], {"pg00_9-9.png": "x=1"})
+    assert n == 1 and "Fórmulas extraídas" in md and "x=1" in md   # sem placeholder → rede ao fim
+
+
+@pytest.mark.skipif(not (Path("Z:/caches/corpus/pdf2md/preskill_ph219_ch5.pdf")).exists(),
+                    reason="Preskill zcache ausente")
+def test_inline_real_preskill_position(tmp_path):
+    # integração: crop real + extract real + latex fake → $$ na POSIÇÃO, prosa intacta, sem token.
+    from pdf2md.formula_cropper import crop_formulas
+    import pdf2md.executor as ex
+    PRESKILL = Path("Z:/caches/corpus/pdf2md/preskill_ph219_ch5.pdf")
+    regions = crop_formulas(PRESKILL, tmp_path, page_range=(4, 4))   # eq 5.12
+    fake_latex = {r.crop_path.name: "X=Y" for r in regions}
+    md, n = ex._inline_formulas(PRESKILL, regions, fake_latex)
+    assert n == len(regions)
+    assert "$$ X=Y \\tag{5.12} $$" in md
+    assert "PDF2MD:FORMULA" not in md
+    assert "bounded as" in md and md.index("bounded as") < md.index("X=Y")   # posição original
 
 
 def test_pix2tex_skips_when_no_runtime(tmp_path, monkeypatch):
