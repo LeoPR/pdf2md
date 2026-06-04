@@ -60,9 +60,9 @@ def _page_indices(n: int, page_range: tuple[int, int] | None) -> range:
     return range(max(0, a), min(n, b + 1))
 
 
-def _dominant_size(page: fitz.Page) -> float:
+def _dominant_size(blocks: list) -> float:
     sizes: Counter = Counter()
-    for block in page.get_text("dict").get("blocks", []):
+    for block in blocks:
         for line in block.get("lines", []):
             for span in line.get("spans", []):
                 sizes[round(span["size"], 1)] += len(span.get("text", ""))
@@ -97,11 +97,10 @@ def _blocks_raw_text(raw_blocks, idxs) -> str:
     return normalize_chars(join_hyphenation(" ".join(parts))).strip()
 
 
-def _page_to_md(page: fitz.Page, body: float, regions=None) -> tuple[str, int, dict]:
-    """Markdown de UMA página. Se `regions` (FormulaRegion já cropadas desta página)
-    dado, emite um placeholder no lugar do math cru — alinhado por ÍNDICE de bloco
-    (region.block_indices referem o mesmo array cru que enumeramos aqui)."""
-    raw_blocks = page.get_text("dict").get("blocks", [])
+def _page_to_md(raw_blocks: list, body: float, regions=None) -> tuple[str, int, dict]:
+    """Markdown de UMA página, a partir do array CRU de blocos (get_text('dict')['blocks']).
+    Se `regions` (FormulaRegion já cropadas desta página) dado, emite um placeholder no lugar
+    do math cru — alinhado por ÍNDICE de bloco (region.block_indices referem ESTE array cru)."""
     emit_at: dict[int, str] = {}      # raw_idx do 1º bloco da região -> token
     suppress: set[int] = set()        # raw_idx dos demais blocos da região (matriz)
     placeholders: dict[str, str] = {}
@@ -151,17 +150,25 @@ def _page_to_md(page: fitz.Page, body: float, regions=None) -> tuple[str, int, d
 
 
 def extract_pdftotext(pdf_path: str | Path, page_range: tuple[int, int] | None = None,
-                      formula_regions=None) -> ExtractResult:
+                      formula_regions=None, page_blocks: dict | None = None) -> ExtractResult:
     """Extração estruturada via PyMuPDF text-layer (CPU). Prose fiel, math cru.
 
     `formula_regions` (FormulaRegion já cropadas, do caminho pix2tex inline) é OPCIONAL:
     quando None (default) o comportamento é byte-idêntico ao histórico; quando dado, o
     math cru de cada região vira um placeholder (posição inline) e ExtractResult.placeholders
     mapeia token->texto-cru-original p/ fallback. Alinhamento por block_indices (exato).
+
+    `page_blocks` (opcional): {page_index: raw_blocks} já parseado — tipicamente pelo
+    formula_cropper, que parseia O MESMO get_text('dict') que block_indices referencia.
+    Quando dado, reusa esses blocos em vez de re-parsear cada página: elimina o parse
+    redundante do caminho pix2tex inline E torna o alinhamento por índice garantido por
+    CONSTRUÇÃO (mesmo array), não só por determinismo. Cobertura parcial é segura — página
+    ausente do cache cai no parse normal.
     """
     by_page: dict[int, list] = {}
     for r in (formula_regions or []):
         by_page.setdefault(r.page_index, []).append(r)
+    cache = page_blocks or {}
     doc = fitz.open(str(pdf_path))
     placeholders: dict = {}
     try:
@@ -171,10 +178,15 @@ def extract_pdftotext(pdf_path: str | Path, page_range: tuple[int, int] | None =
         idxs = _page_indices(n, page_range)
         if len(idxs) == 0:
             raise ValueError(f"page_range {page_range} vazio/fora do documento ({n}pg)")
-        body = _dominant_size(doc[idxs.start])
+
+        def blocks_for(i: int) -> list:
+            b = cache.get(i)
+            return b if b is not None else doc[i].get_text("dict").get("blocks", [])
+
+        body = _dominant_size(blocks_for(idxs.start))
         parts, headings = [], 0
         for i in idxs:
-            md, h, ph = _page_to_md(doc[i], body, regions=by_page.get(i))
+            md, h, ph = _page_to_md(blocks_for(i), body, regions=by_page.get(i))
             headings += h
             placeholders.update(ph)
             if md.strip():

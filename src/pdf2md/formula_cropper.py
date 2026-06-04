@@ -204,11 +204,16 @@ def _is_complex(signals: dict) -> bool:
 # detecção
 # ---------------------------------------------------------------------------
 
-def detect_formula_regions(page, page_index: int = 0) -> list[FormulaRegion]:
+def detect_formula_regions(page, page_index: int = 0, raw_blocks=None) -> list[FormulaRegion]:
     """Regiões de fórmula display de UMA página (bbox em pt, label excluído).
     Itera o array CRU de blocos com enumerate → o índice é chave compartilhada exata
-    com o extrator (mesma chamada get_text('dict'), determinística)."""
-    raw_blocks = page.get_text("dict").get("blocks", [])
+    com o extrator (mesma chamada get_text('dict'), determinística).
+
+    `raw_blocks` (opcional): reusa esse array já parseado em vez de chamar get_text('dict').
+    Deixa o cropper parsear UMA vez e compartilhar O MESMO array (que block_indices
+    referencia) com o extrator — alinhamento por construção, sem re-parse."""
+    if raw_blocks is None:
+        raw_blocks = page.get_text("dict").get("blocks", [])
     indexed = [(i, b) for i, b in enumerate(raw_blocks)
                if b.get("type", 0) == 0 and b.get("lines")]
     if not indexed:
@@ -280,11 +285,17 @@ def detect_formula_regions(page, page_index: int = 0) -> list[FormulaRegion]:
 
 def crop_formulas(pdf_path: str | Path, out_dir: str | Path, *,
                   page_range: tuple[int, int] | None = None,
-                  dpi: int = DPI) -> list[FormulaRegion]:
+                  dpi: int = DPI, page_blocks_out: dict | None = None) -> list[FormulaRegion]:
     """Detecta e recorta as fórmulas display de um PDF em PNGs (out_dir).
 
     page_range = (lo, hi) 0-based inclusivo; None = doc inteiro. Devolve as
     `FormulaRegion` com `crop_path` preenchido. Fecha o doc no fim.
+
+    page_blocks_out (opcional): se um dict for passado, é preenchido com
+    {page_index: raw_blocks} de TODA página escaneada — O MESMO array que block_indices
+    referencia — p/ o extrator reusar no caminho inline (sem re-parsear o doc). Os
+    text-dicts são puro-Python (válidos após o close); custo = segurá-los em memória
+    (ok p/ capítulos, o escopo do caminho inline).
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -301,7 +312,10 @@ def crop_formulas(pdf_path: str | Path, out_dir: str | Path, *,
         regions: list[FormulaRegion] = []
         for idx in range(lo, hi + 1):
             page = doc[idx]
-            page_regs = detect_formula_regions(page, idx)
+            raw_blocks = page.get_text("dict").get("blocks", [])
+            if page_blocks_out is not None:        # compartilha o array c/ o extrator (sem re-parse)
+                page_blocks_out[idx] = raw_blocks
+            page_regs = detect_formula_regions(page, idx, raw_blocks=raw_blocks)
             if not page_regs:
                 continue
             pix = page.get_pixmap(dpi=dpi)

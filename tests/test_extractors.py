@@ -88,3 +88,42 @@ def test_pdftotext_emits_placeholder_for_region(tmp_path):
     assert tok in res.markdown                         # placeholder na posição do math
     assert "Ncircuit" not in res.markdown              # math display cru foi substituído
     assert "circuit" in res.placeholders[tok].lower()  # raw original capturado p/ fallback
+
+
+# --- page_blocks compartilhado (Opção A: cropper parseia, extrator reusa) ----
+def _page_blocks_of(pdf) -> dict:
+    """{page_index: raw_blocks} via o MESMO get_text('dict') que o cropper usa."""
+    import fitz
+    doc = fitz.open(str(pdf))
+    try:
+        return {i: doc[i].get_text("dict").get("blocks", []) for i in range(len(doc))}
+    finally:
+        doc.close()
+
+
+@pytest.mark.skipif(not ARXIV.exists(), reason="exemplo arxiv ausente")
+def test_pdftotext_page_blocks_cache_is_identical():
+    # INVARIANTE central de A: reusar os blocos parseados == parsear do zero (byte-idêntico).
+    pb = _page_blocks_of(ARXIV)
+    assert extract_pdftotext(ARXIV, page_blocks=pb).markdown == extract_pdftotext(ARXIV).markdown
+
+
+@pytest.mark.skipif(not ARXIV.exists(), reason="exemplo arxiv ausente")
+def test_pdftotext_partial_cache_falls_back():
+    # cobertura PARCIAL é segura: páginas ausentes do cache caem no parse normal → idêntico.
+    only0 = {0: _page_blocks_of(ARXIV)[0]}
+    assert extract_pdftotext(ARXIV, page_blocks=only0).markdown == extract_pdftotext(ARXIV).markdown
+
+
+@pytest.mark.skipif(not PRESKILL.exists(), reason="Preskill zcache ausente (Z: não montado)")
+def test_pdftotext_cache_matches_fresh_with_regions(tmp_path):
+    # caminho formula-aware: o page_blocks vindo do cropper produz markdown E placeholders
+    # idênticos ao parse-do-zero (prova que o objeto-array compartilhado não altera nada).
+    from pdf2md.formula_cropper import crop_formulas
+    pb: dict = {}
+    regions = crop_formulas(PRESKILL, tmp_path, page_blocks_out=pb)
+    assert pb, "page_blocks_out deveria vir preenchido"
+    fresh = extract_pdftotext(PRESKILL, formula_regions=regions)
+    cached = extract_pdftotext(PRESKILL, formula_regions=regions, page_blocks=pb)
+    assert fresh.markdown == cached.markdown
+    assert fresh.placeholders == cached.placeholders

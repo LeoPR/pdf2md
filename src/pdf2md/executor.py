@@ -140,8 +140,9 @@ def _run_pix2tex(pdf_path: Path, out_dir: Path, md_text: str | None,
     if crop_dir.exists():                       # limpa crops stale (out_dir reusado → evita re-OCR)
         for old in crop_dir.glob("*.png"):
             old.unlink()
+    page_blocks: dict = {}                       # cropper preenche → extrator inline reusa (sem re-parse)
     try:
-        regions = crop_formulas(pdf_path, crop_dir)
+        regions = crop_formulas(pdf_path, crop_dir, page_blocks_out=page_blocks)
     except Exception as exc:
         return None, False, f"cropper falhou: {exc}"
     if not regions:
@@ -158,7 +159,7 @@ def _run_pix2tex(pdf_path: Path, out_dir: Path, md_text: str | None,
         return None, False, f"runtime pix2tex falhou: {exc}"
 
     if primary == "pdftotext":
-        new_md, n = _inline_formulas(pdf_path, regions, latex_by_crop)
+        new_md, n = _inline_formulas(pdf_path, regions, latex_by_crop, page_blocks)
     else:                                       # marker/tesseract: sem placeholders → anexa ao fim
         new_md, n = _append_formulas(md_text, regions, latex_by_crop)
     if n == 0:
@@ -182,11 +183,14 @@ def _display_block(latex: str, r) -> str:
     return block
 
 
-def _inline_formulas(pdf_path: Path, regions, latex_by_crop: dict) -> tuple[str, int]:
-    """Re-extrai o pdftotext FORMULA-AWARE (placeholders por block_index) e substitui cada
-    placeholder pelo '$$latex$$' na posição original. Invariante: nenhuma fórmula legível
-    perdida — região sem placeholder no corpo (órfã) cai na seção-ao-fim; nenhum token vaza."""
-    res = extract_pdftotext(pdf_path, formula_regions=regions)
+def _inline_formulas(pdf_path: Path, regions, latex_by_crop: dict,
+                     page_blocks: dict | None = None) -> tuple[str, int]:
+    """Extrai o pdftotext FORMULA-AWARE (placeholders por block_index) e substitui cada
+    placeholder pelo '$$latex$$' na posição original. Reusa os blocos já parseados pelo
+    cropper (page_blocks) — mesmo array que block_indices referencia, sem re-parse.
+    Invariante: nenhuma fórmula legível perdida — região sem placeholder no corpo (órfã)
+    cai na seção-ao-fim; nenhum token vaza."""
+    res = extract_pdftotext(pdf_path, formula_regions=regions, page_blocks=page_blocks)
     md, raw_by_token = res.markdown, res.placeholders
     inlined = 0
     orphans = []
