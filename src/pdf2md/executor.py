@@ -27,7 +27,7 @@ from typing import Callable
 from pdf2md._profiles import OPTIMIZER, PRIMARY, REFINER
 from pdf2md.extractors import extract_pdftotext, extract_tesseract
 from pdf2md.formula_cropper import FORMULA_TOKEN_RE, crop_formulas, formula_token
-from pdf2md.routing import Pipeline
+from pdf2md.routing import Pipeline, pass2_warranted
 
 MarkerRunner = Callable[[Path, Path], Path]      # (pdf, out_dir) -> caminho do .md gerado
 Pix2texRunner = Callable[[Path], dict]           # (crop_dir) -> {png_name: latex}
@@ -41,6 +41,7 @@ class ExecResult:
     skipped: list[tuple[str, str]] = field(default_factory=list)
     degraded: bool = False
     rationale: list[str] = field(default_factory=list)
+    needs_pass2: bool | None = None   # --indexacao: doc merece pass2? (None = N/A ou não medido)
 
     def summary(self) -> str:
         chain = " + ".join(self.ran) or "(nada)"
@@ -58,12 +59,14 @@ def run_pipeline(pipeline: Pipeline, pdf_path: str | Path, out_dir: str | Path,
     res = ExecResult(output_md=None, primary=None,
                      degraded=pipeline.degraded, rationale=list(pipeline.rationale))
     md_text: str | None = None
+    src_pages: int | None = None        # nº de páginas do doc (p/ gatilho de pass2)
 
     for step in pipeline.steps:
         if step.role == PRIMARY:
             res.primary = step.algo
             if step.algo == "pdftotext":
-                md_text = extract_pdftotext(pdf_path).markdown
+                _r = extract_pdftotext(pdf_path)
+                md_text, src_pages = _r.markdown, _r.n_pages
                 res.output_md = _write_md(out_dir, pdf_path, md_text)
             elif step.algo == "tesseract":
                 md_text = extract_tesseract(pdf_path).markdown
@@ -101,12 +104,24 @@ def run_pipeline(pipeline: Pipeline, pdf_path: str | Path, out_dir: str | Path,
             else:
                 res.skipped.append((step.algo, "sem imagens extraídas (extrator texto-puro)"))
 
-    # pass2 (--indexacao) é um artefato ENFILEIRÁVEL, não executado agora — o spec
-    # define pass2 como passada diferida (worker/cron). Surfaçamos em vez de dropar.
+    # pass2 (--indexacao): SELETIVO + ENFILEIRÁVEL. route() anexou o template (capacidade do
+    # host); aqui decidimos POR DOC se vale a fila, medindo o output do pass1. Não executamos
+    # agora (passada diferida p/ worker/cron) — só marcamos (needs_pass2 + rationale).
     if pipeline.pass2 is not None:
-        res.rationale.append(
-            f"pass2 enfileirável (deferido p/ worker, NÃO executado agora): {pipeline.pass2.summary()}"
-        )
+        if md_text is not None and src_pages:
+            sig = pass2_warranted(md_text, src_pages)
+            res.needs_pass2 = sig.warranted
+            if sig.warranted:
+                res.rationale.append(
+                    f"pass2 ENFILEIRADO ({'; '.join(sig.reasons)}) → {pipeline.pass2.summary()}"
+                )
+            else:
+                res.rationale.append(f"pass2 dispensado: pass1 cobre o doc ({sig.summary()})")
+        else:
+            # primary não-pdftotext (sem md p/ medir): mantém o template como enfileirável
+            res.rationale.append(
+                f"pass2 enfileirável (sem output de pass1 p/ medir): {pipeline.pass2.summary()}"
+            )
 
     return res
 

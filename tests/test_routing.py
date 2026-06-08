@@ -241,3 +241,63 @@ def test_profiles_param_actually_drives_routing():
     p = route(QUALIDADE, host_gpu_full(), doc_text(), profiles=prof)
     assert p.primary == "pdftotext"   # marker bloqueado via profile override
     assert p.degraded is True
+
+
+# ---------------------------------------------------------------------------
+# Gatilho de pass2 (pass2_warranted) — seletivo, medido no OUTPUT do pass1
+# ---------------------------------------------------------------------------
+from pathlib import Path
+
+from pdf2md.routing import pass2_warranted
+
+_EXAMPLES = Path(__file__).resolve().parents[1] / "corpus" / "examples"
+
+
+def test_pass2_math_arm_fires():
+    # math denso + densidade saudável (n_pages=1, md grande) → dispara SÓ o braço math
+    md = "Attention(Q,K,V) = softmax(QK^T/\\sqrt{d_k})V where d_k is the model dim. " * 60
+    sig = pass2_warranted(md, n_pages=1)
+    assert sig.warranted
+    assert any("math" in r for r in sig.reasons)
+    assert not any("densidade" in r for r in sig.reasons)
+
+
+def test_pass2_density_arm_fires():
+    # text-layer esparso (poucos chars / muitas páginas), sem math → braço densidade
+    sig = pass2_warranted("a b c d e f g h", n_pages=5)
+    assert sig.warranted
+    assert any("densidade" in r for r in sig.reasons)
+    assert not any("math denso" in r for r in sig.reasons)
+
+
+def test_pass2_healthy_prose_not_warranted():
+    md = "lorem ipsum dolor sit amet consectetur " * 300   # prosa densa, sem math
+    sig = pass2_warranted(md, n_pages=2)
+    assert not sig.warranted and sig.reasons == []
+
+
+@pytest.mark.skipif(not _EXAMPLES.exists(), reason="corpus/examples ausente")
+def test_pass2_selectivity_on_free_corpus():
+    """Promoção T090: pass1 indexa TODOS; pass2 marca só os de perda recuperável
+    (math-denso OU text-layer esparso). Validação e2e nos docs livres in-repo."""
+    from pdf2md.extractors import extract_pdftotext
+    expected = {
+        "arxiv_1706_03762_math_excerpt.pdf": True,    # braço math (eqs attention)
+        "wilson_mathematics_excerpt.pdf": True,        # braço densidade (text-layer ruim)
+        "arxiv_1706_03762_excerpt.pdf": False,         # prosa (intro do mesmo paper)
+        "cdc_mmwr_73_35_a1.pdf": False,                # gov prosa
+        "irs_f1040_2025.pdf": False,                   # form (AcroForm)
+    }
+    checked = {}
+    for name, want in expected.items():
+        pdf = _EXAMPLES / name
+        if not pdf.exists():
+            continue
+        r = extract_pdftotext(pdf)
+        assert r.markdown.strip(), f"{name}: pass1 não indexou (md vazio)"   # pass1 indexa todos
+        sig = pass2_warranted(r.markdown, r.n_pages)
+        checked[name] = sig
+        assert sig.warranted is want, \
+            f"{name}: warranted={sig.warranted} (esperado {want}) — {sig.summary()}"
+    assert checked, "nenhum exemplo presente p/ validar"
+    assert any(s.warranted for s in checked.values())     # cobriu os braços positivos, não só negativos

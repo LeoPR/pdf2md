@@ -17,6 +17,7 @@ qual intent) é a lógica deste módulo.
 """
 from __future__ import annotations
 
+import re
 import shutil
 import socket
 import subprocess
@@ -355,6 +356,66 @@ def _indexacao_pass2(host: HostInfo, doc: DocInfo, profiles: dict) -> Pipeline |
     p2.steps.append(Step("marker", PRIMARY, "reprocessa docs math-heavy / baixa qualidade"))
     p2.steps.append(Step("pdf2md-optimize", OPTIMIZER, "otimização"))
     return p2
+
+
+# ---------------------------------------------------------------------------
+# Gatilho de pass2 (--indexacao) — SELETIVO, medido NO OUTPUT do pass1
+# ---------------------------------------------------------------------------
+# route() anexa o TEMPLATE do pass2 quando o host comporta marker (capacidade do host).
+# pass2_warranted() é a outra metade: decide, POR DOC, se vale ENFILEIRAR o reprocessamento
+# — medindo o markdown que o pass1 (pdftotext) já produziu, conforme o critério do spec
+# (T090, "mensurável no output do pdftotext"). Dois sinais de PERDA recuperável pelo marker:
+#   - math denso: pdftotext entrega math como Unicode cru; marker recupera LaTeX (Texify).
+#   - densidade de texto anômala (chars/página baixíssima): text-layer esparso/garbage
+#     (scan de OCR ruim que passou a guarda) — marker re-OCR/layout recupera estrutura.
+# Thresholds calibrados no corpus livre in-repo (N=5): separam com folga ampla (math-arm
+# arxiv-math 3.57 vs prosa ≤0.14; density-arm wilson 261 vs sãos ≥3079). HONESTO quanto ao
+# escopo: N=5 não generaliza — revisitar num corpus maior (relacionado ao BURACO cross-doc).
+PASS2_MATH_PER_KCHAR = 1.0       # ≥ ⇒ math-heavy (folga: arxiv-math 3.57; prosa ≤0.14)
+PASS2_DENSITY_FLOOR_CPP = 800    # chars/pág < ⇒ text-layer esparso/garbage (wilson 261; sãos ≥3079)
+
+# math no markdown cru (símbolos + frações + super/subscrito + comandos LaTeX-like).
+# Mais amplo que o de DocInfo.probe de propósito: aqui medimos o OUTPUT, não amostra do PDF.
+_PASS2_MATH_RE = re.compile(r"[=∑∫√≤≥≠αβγδλμνπσφψωΣΦΨΩ∇∂±×·→]|\b\d+/\d+\b|\^|_\{|\\[a-zA-Z]+")
+
+
+@dataclass
+class Pass2Signal:
+    warranted: bool
+    math_per_kchar: float
+    chars_per_page: float
+    reasons: list[str] = field(default_factory=list)
+
+    def summary(self) -> str:
+        verdict = "PASS2" if self.warranted else "ok-pass1"
+        return (f"{verdict} (math={self.math_per_kchar}/kchar, dens={self.chars_per_page}c/pg)"
+                + (f": {'; '.join(self.reasons)}" if self.reasons else ""))
+
+
+def pass2_warranted(pass1_md: str, n_pages: int) -> Pass2Signal:
+    """Decide se um doc indexado pelo pass1 (pdftotext) merece pass2 (marker, enfileirável).
+
+    PURO e medido NO OUTPUT do pass1 (não re-proba o PDF). warranted = math denso OU
+    densidade de texto anômala — os dois casos em que o pass1 perde algo que o marker
+    recupera. Para o `--indexacao`: pass1 indexa TODOS; só estes vão pra fila do pass2."""
+    chars = len(pass1_md)
+    n_pages = max(n_pages, 1)
+    math = len(_PASS2_MATH_RE.findall(pass1_md))
+    math_per_kc = 1000 * math / max(chars, 1)
+    cpp = chars / n_pages
+    reasons: list[str] = []
+    if math_per_kc >= PASS2_MATH_PER_KCHAR:
+        reasons.append(
+            f"math denso ({math_per_kc:.1f}/kchar ≥ {PASS2_MATH_PER_KCHAR}): "
+            f"pdftotext entrega Unicode cru, marker recupera LaTeX"
+        )
+    if cpp < PASS2_DENSITY_FLOOR_CPP:
+        reasons.append(
+            f"densidade de texto anômala ({cpp:.0f} chars/pág < {PASS2_DENSITY_FLOOR_CPP}): "
+            f"text-layer esparso/garbage, marker re-OCR/layout recupera estrutura"
+        )
+    return Pass2Signal(warranted=bool(reasons), math_per_kchar=round(math_per_kc, 2),
+                       chars_per_page=round(cpp, 1), reasons=reasons)
 
 
 # ---------------------------------------------------------------------------

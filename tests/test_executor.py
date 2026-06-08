@@ -9,12 +9,13 @@ import pytest
 
 from pdf2md.executor import run_pipeline
 from pdf2md.routing import (
-    AUTO, QUALIDADE, RAPIDO, DocInfo, HostInfo, Pipeline, Step, route,
+    AUTO, INDEXACAO, QUALIDADE, RAPIDO, DocInfo, HostInfo, Pipeline, Step, route,
 )
 from pdf2md._profiles import OPTIMIZER, PRIMARY, REFINER
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "corpus" / "examples"
 ARXIV = EXAMPLES / "arxiv_1706_03762_excerpt.pdf"
+ARXIV_MATH = EXAMPLES / "arxiv_1706_03762_math_excerpt.pdf"
 WILSON = EXAMPLES / "wilson_mathematics_excerpt.pdf"
 
 
@@ -47,6 +48,27 @@ def test_optimizer_noop_on_text_extractor(tmp_path):
     res = run_pipeline(pipe, ARXIV, tmp_path)
     assert any(a == "pdf2md-optimize" for a, _ in res.skipped)
     assert any("sem imagens" in why for a, why in res.skipped if a == "pdf2md-optimize")
+
+
+@pytest.mark.skipif(not ARXIV_MATH.exists(), reason="exemplo math ausente")
+def test_indexacao_marks_pass2_on_math_doc(tmp_path):
+    # --indexacao: pass1 (pdftotext) indexa; o gatilho marca pass2 no doc math-heavy.
+    pipe = route(INDEXACAO, _host_gpu(), DocInfo.probe(ARXIV_MATH))
+    res = run_pipeline(pipe, ARXIV_MATH, tmp_path)
+    assert res.primary == "pdftotext"
+    assert res.output_md and res.output_md.exists()        # pass1 indexou
+    assert res.needs_pass2 is True
+    assert any("ENFILEIRADO" in r for r in res.rationale)
+
+
+@pytest.mark.skipif(not ARXIV.exists(), reason="exemplo arxiv ausente")
+def test_indexacao_skips_pass2_on_prose_doc(tmp_path):
+    # intro do MESMO paper = prosa (densidade sã, math ínfimo) → pass1 cobre, pass2 dispensado.
+    pipe = route(INDEXACAO, _host_gpu(), DocInfo.probe(ARXIV))
+    res = run_pipeline(pipe, ARXIV, tmp_path)
+    assert res.primary == "pdftotext"
+    assert res.needs_pass2 is False
+    assert any("dispensado" in r for r in res.rationale)
 
 
 def test_marker_runner_injected(tmp_path):
@@ -207,12 +229,14 @@ def _touch(p: Path) -> Path:
 
 @pytest.mark.skipif(not ARXIV.exists(), reason="exemplo arxiv ausente")
 def test_indexacao_pass2_surfaced_not_dropped(tmp_path):
-    # pass2 não é executado agora, mas DEVE aparecer na rationale (não dropar em silêncio)
+    # pass2 não é executado agora, mas o VEREDITO do gatilho DEVE aparecer na rationale
+    # (não dropar em silêncio) — seja ENFILEIRADO (warranted) ou dispensado (pass1 cobre).
     pipe = route("indexacao", _host_gpu(), DocInfo.probe(ARXIV))
     assert pipe.pass2 is not None      # host com marker → pass2 construído
     res = run_pipeline(pipe, ARXIV, tmp_path)  # pass1 = pdftotext (real)
     assert res.primary == "pdftotext"
-    assert any("pass2 enfileir" in r for r in res.rationale)
+    assert res.needs_pass2 is not None                        # gatilho foi avaliado
+    assert any("pass2" in r.lower() for r in res.rationale)   # surfaçado, não dropado
 
 def test_tesseract_dispatch_through_executor(tmp_path):
     from pdf2md.extractors import tesseract_cmd

@@ -29,6 +29,9 @@ except Exception:
 EXAMPLES = [
     ("arxiv_1706_03762", "arxiv_1706_03762_excerpt.pdf", (0, 2),
      "arXiv non-exclusive", "Vaswani et al. — 2 págs (título+abstract+intro)"),
+    ("arxiv_1706_03762", "arxiv_1706_03762_math_excerpt.pdf", (3, 6),
+     "arXiv non-exclusive", "Vaswani et al. — págs 4-6 (eqs attention/multi-head/positional; "
+     "math-heavy, text-layer bom — exemplar do gatilho de pass2 do T090)"),
     ("ia_mathematics00wils", "wilson_mathematics_excerpt.pdf", (40, 42),
      "public domain (pré-1928)", "Wilson, Mathematics — 2 págs (scan PD, math típica)"),
     ("cdc_mmwr_73_35_a1", "cdc_mmwr_73_35_a1.pdf", None,

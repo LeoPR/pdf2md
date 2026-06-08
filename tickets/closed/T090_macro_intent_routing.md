@@ -1,10 +1,10 @@
 ---
 id: T090
 titulo: Macro-intent + roteador profile-aware (--rapido/--qualidade/--auto/--indexacao)
-status: research
+status: closed
 criado_em: 2026-05-16
 reescrito_em: 2026-05-31
-fechado_em:
+fechado_em: 2026-06-08
 fase: 4
 depende_de: [T085, T060]
 blocks: []
@@ -107,6 +107,12 @@ thresholds *load-bearing* (gate GPU 4096 ← VRAM 3400 medido; teto
 dos valores estimados.
 
 ### Insight-chave (e seu limite honesto)
+
+> **SUPERSEDIDO em parte (2026-06-01):** o BURACO #3 (cropper CPU) foi RESOLVIDO — há
+> um cropper estrutural CPU built-in (`formula_cropper`). As frases abaixo "sem GPU →
+> math cru / bloqueado por BURACO #3" valem **só quando o runtime pix2tex está ausente**.
+> Com runtime, `--qualidade`/`--auto` CPU recuperam math display → LaTeX. Ver "Integração
+> do cropper" acima e BURACO #3 (resolvido) embaixo.
 
 A medição mostra que o monopólio do Marker em **math** *poderia* evaporar sem
 GPU: `pix2tex` roda em CPU e acertou 100% semântico uma matriz 2×2 complexa.
@@ -285,27 +291,64 @@ executar pass2 (cron/fila) fica fora do escopo.
   determinístico e `alucinacao_risco: zero` — não tem sinal de baixa-confiança
   próprio como o `bloat_ratio` do marker.)
 
-## Critérios de aceitação
+**IMPLEMENTADO (2026-06-08)** como `routing.pass2_warranted(md, n_pages)` — PURO, medido no
+output do pass1: braço **math** (`math/kchar ≥ 1.0`) OU braço **densidade-anômala**
+(`chars/pág < 800` ⇒ text-layer esparso/garbage). `executor.run_pipeline` o aplica por doc
+(`ExecResult.needs_pass2`) e surfaça o veredito (ENFILEIRADO / dispensado), nunca dropa em
+silêncio. Thresholds calibrados no corpus livre in-repo (N=5) — honestos quanto ao escopo
+(separam com folga ampla, mas N=5 não generaliza). Ver "Promoção" abaixo.
 
-- [ ] CLI flags `--rapido`/`--qualidade`/`--balanceado`/`--auto`/`--indexacao`/
-      `--low-resource` mutuamente exclusivos (typer); substituem `--quick`/`--best`.
-- [ ] `HostInfo.detect()` (psutil + torch.cuda + ollama ping + which); `doctor` usa.
-- [ ] `DocInfo.probe(pdf)` barato (amostra de páginas via fitz), incluindo `has_text_layer`.
-- [ ] `pdf2md/_profiles.py` dep-free com os 7 perfis ativos (route-relevant subset).
-- [ ] `pdf2md/routing.py::route()` implementa: guarda de scan → gates de intent → degradação.
-- [ ] `route()` devolve `.degraded` + `.rationale` e levanta erro explícito em scan-sem-OCR.
-- [ ] Tests: cada intent × {com-marker, sem-marker-c/GPU, sem-GPU, scan, math-heavy, logo}
-      → pipeline esperado (mock de HostInfo/DocInfo). Cobre: degrade-por-sem-GPU,
-      degrade-por-sem-marker, ERRO-scan-sem-marker (todos os intents), teto RAM `--low-resource`.
+## Critérios de aceitação — TODOS ATENDIDOS (2026-06-08)
 
-## Critério de promoção (research → fazer)
+- [x] CLI realizado como **`--intent <nome>`** (cli.py:283/653) — `rapido|qualidade|
+      balanceado|auto|indexacao|low-resource`, exclusivo com `--quick`/`--best` legados.
+- [x] `HostInfo.detect()` (psutil + nvidia-smi + ollama ping + which); `doctor` usa.
+- [x] `DocInfo.probe(pdf)` barato (amostra de páginas via fitz), incluindo `has_text_layer`.
+- [x] `pdf2md/_profiles.py` dep-free com os 7 perfis ativos (route-relevant subset).
+- [x] `pdf2md/routing.py::route()` implementa: guarda de scan → gates de intent → degradação.
+- [x] `route()` devolve `.degraded` + `.rationale` e levanta `ScanNoOCR` explícito.
+- [x] Tests: cada intent × {com-marker, sem-marker-c/GPU, sem-GPU, scan, math-heavy, logo}
+      (test_routing) + degrade-por-sem-GPU/sem-marker + ERRO-scan-sem-marker (todos os intents)
+      + teto RAM `--low-resource`. **Suite 187 passed.**
+
+## Critério de promoção (research → fazer) — TODOS SATISFEITOS (2026-06-08)
 
 - [x] 7 perfis no mapa com dados reais (era "3+"). **Satisfeito.**
-- [ ] `--rapido` mensuravelmente mais rápido que `--qualidade`: medido **~630×**
+- [x] `--rapido` mensuravelmente mais rápido que `--qualidade`: medido **~630×**
       (pdftotext 0.02s/pg vs marker 12.9s/pg) — supera de longe o alvo "2×+".
-- [ ] `--auto` adapta corretamente: com-marker→qualidade, sem-GPU→CPU, scan-sem-GPU→erro.
-- [ ] `--indexacao` valida em `corpus/examples/` (4 docs livres in-repo): pass1 indexa
-      todos; pass2 marca os math-heavy.
+- [x] `--auto` adapta corretamente: com-marker→qualidade, sem-GPU→CPU, scan-sem-GPU→erro
+      (test_auto_*, test_scan_* em test_routing).
+- [x] `--indexacao` valida em `corpus/examples/` (5 docs livres in-repo): pass1 indexa
+      **TODOS**; pass2 marca os de **perda recuperável** — reframe honesto de "math-heavy",
+      ver Promoção. (test_pass2_selectivity_on_free_corpus, hermético.)
+
+## Promoção (2026-06-08) — gatilho de pass2 + validação e2e → FECHADO
+
+Último portão aberto (`--indexacao` validado em corpus livre) fechado nesta sessão:
+
+1. **Lacuna achada por medição:** `route()` anexava o *template* do pass2 por `has_marker`
+   (capacidade do host), **não** por mérito do doc → não-seletivo. O gatilho que decide
+   QUAIS docs reprocessar não existia.
+2. **Gatilho construído:** `routing.pass2_warranted(pass1_md, n_pages)` — puro, medido no
+   output do pass1: **math denso** (`math/kchar ≥ 1.0`) **OU densidade-anômala**
+   (`chars/pág < 800`). `executor` aplica por doc (`ExecResult.needs_pass2`), surfaçando o
+   veredito (ENFILEIRADO / dispensado).
+3. **Reframe honesto do critério** (era "pass2 marca os math-heavy"): o corpus livre **não
+   tem doc math-heavy de text-layer bom** — o único livro de math (wilson) tem text-layer
+   garbage (`math_density=0`) e o arxiv era só intro. Então o critério vira **"marca PERDA
+   recuperável pelo marker"** = math-denso OU text-layer esparso. Para validar o braço math
+   trouxe-se um exemplar livre: `arxiv_1706_03762_math_excerpt.pdf` (págs 4-6 do mesmo paper,
+   eqs attention/positional, math 3.57/kchar, text-layer bom).
+4. **Validação e2e (hermética, `test_pass2_selectivity_on_free_corpus`):** pass1 indexa os 5;
+   pass2 marca **arxiv-math** (braço math) e **wilson** (braço densidade), dispensa
+   **arxiv-intro / cdc / irs** (prosa/forma). Separação com folga ampla (math 3.57 vs ≤0.14;
+   densidade 261 vs ≥3079). **Suite 187 passed.**
+5. **Honestidade de escopo:** thresholds calibrados em N=5 — não generalizam; revisitar em
+   corpus maior (ligado ao BURACO #4 cross-doc/cross-hardware). [[feedback_escopo_de_conclusao]]
+
+Com isto, todos os critérios de aceitação e de promoção estão satisfeitos → **status: closed**.
+BURACOS remanescentes (#1 scan-manuscrito, #2 tabela-TEDS, #4 cross-hardware/T091) são
+limitações mapeadas, fora do escopo do roteador — não bloqueiam o fechamento.
 
 ## Não-objetivos
 
@@ -323,10 +366,15 @@ executar pass2 (cron/fila) fica fora do escopo.
    alucina) e scan ruim (baixo DPI/multi-coluna/tabela) — não medidos.
 2. **tabela**: TEDS não medido em nenhum extrator (marker `tabela: medio` estimado) —
    nenhuma gate diferencia qualidade de tabela ainda.
-3. **cropper de fórmula CPU**: sem ele, `pix2tex` só compõe atrás do Marker (GPU), e o
-   caminho "`--qualidade` CPU com math-LaTeX" fica bloqueado. Candidato a lab dedicado.
+3. **cropper de fórmula CPU**: ~~sem ele, `pix2tex` só compõe atrás do Marker~~ **RESOLVIDO**
+   (Lab e21 + integração marcos 1-2, 2026-06-01): cropper estrutural CPU dep-free
+   (`formula_cropper`) é built-in; o gate do pix2tex virou `pix2tex_runtime` (só o torch é
+   externo). Sem GPU + runtime pix2tex, `--qualidade`/`--auto` recuperam math display → LaTeX
+   (matriz flagada baixa-conf ~0.50 — fronteira medida e21 onda 2). Limite remanescente: só o
+   *runtime* pix2tex (torch) é externo, não o cropper.
 4. **cross-hardware**: perfis medidos em 1 host (RTX 3060). Gates de VRAM/velocidade
-   não generalizam para outras GPUs sem os pontos f(n) do T091.
+   não generalizam para outras GPUs sem os pontos f(n) do T091. (Também afeta os thresholds
+   do `pass2_warranted`, calibrados em N=5 — revisitar em corpus maior.)
 
 ## Conexão
 
