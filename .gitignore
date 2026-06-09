@@ -42,8 +42,14 @@ corpus/nielsen_chuang/
 /tmp_*/
 /temp_*/
 
-# outputs de experimentos da bancada suja (cada lab/eNN/.gitignore pode override)
-lab/*/out/
+# bancada de experimentos: INTERNA, fica só local. Nunca pública — contém inputs
+# com copyright (rasters/crops de fontes proprietárias) e logs com paths de máquina.
+# Removida do working tree e do histórico em 2026-06-09 (git filter-repo). Os arquivos
+# continuam no disco do autor; só não são rastreados/publicados.
+lab/
+
+# estado local do agente (Claude Code) — não versionar
+.claude/
 
 # build / dist
 dist/
