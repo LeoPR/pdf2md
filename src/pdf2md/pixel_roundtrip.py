@@ -34,10 +34,20 @@ from pathlib import Path
 from typing import Callable
 
 import fitz
-import numpy as np
 from PIL import Image
-from scipy.optimize import linear_sum_assignment
-from skimage.metrics import structural_similarity as _ssim
+
+# numpy/scipy/scikit-image vivem no extra [rtpixel] — o validador visual é OPCIONAL e não
+# deve inflar o core de quem só quer pdf->md. cli importa este módulo lazy (só nos comandos
+# rt-pixel), então um base-install funciona; este guard dá erro CLARO se o extra faltar.
+try:
+    import numpy as np
+    from scipy.optimize import linear_sum_assignment
+    from skimage.metrics import structural_similarity as _ssim
+except ModuleNotFoundError as _e:  # pragma: no cover
+    raise ModuleNotFoundError(
+        f"pixel-roundtrip (validador visual L0.5) requer o extra [rtpixel]: "
+        f"pip install 'pdf2md[rtpixel]' (faltou: {_e.name})"
+    ) from _e
 
 
 DEFAULT_DPI = 150

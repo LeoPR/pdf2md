@@ -239,9 +239,12 @@ def test_indexacao_pass2_surfaced_not_dropped(tmp_path):
     assert any("pass2" in r.lower() for r in res.rationale)   # surfaçado, não dropado
 
 def test_tesseract_dispatch_through_executor(tmp_path):
+    import importlib.util
+
     from pdf2md.extractors import tesseract_cmd
-    if tesseract_cmd() is None or not WILSON.exists():
-        pytest.skip("tesseract ou exemplo wilson ausente")
+    if (tesseract_cmd() is None or importlib.util.find_spec("pytesseract") is None
+            or not WILSON.exists()):
+        pytest.skip("tesseract bin / wrapper pytesseract / exemplo wilson ausente")
     pipe = Pipeline(intent="rapido", steps=[Step("tesseract", PRIMARY, "scan")])
     res = run_pipeline(pipe, WILSON, tmp_path)
     assert res.primary == "tesseract"

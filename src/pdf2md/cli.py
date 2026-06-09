@@ -199,70 +199,103 @@ def _sha256_short(path: Path) -> str | None:
 # ---------------------------------------------------------------------------
 
 @app.command()
-def doctor():
-    """Diagnostica o ambiente: ferramentas externas e GPU.
+def doctor(intent: str = typer.Option(
+        None, "--intent", "-i",
+        help="mostra o pipeline que o roteador (T090) escolheria p/ ESTE intent neste host")):
+    """Diagnostica o ambiente: core, extras pip e capabilities externas. Não modifica nada.
 
-    Verifica marker_single, pandoc, Chrome, PyMuPDF e CUDA. Não modifica nada.
+    Core (PyMuPDF/Pillow) e extras pip ([rtpixel]/[ocr]) são do pacote; marker/pix2tex/
+    ollama/pandoc/chrome são EXTERNOS (venv/binário/server) — opcionais. Com `--intent`,
+    mostra o que aquele intent usaria aqui (com a degradação honesta se faltar algo).
     """
+    import importlib.util as _ilu
+
+    from pdf2md.extractors import tesseract_cmd
+    from pdf2md.routing import MARKER_VRAM_MIN_MB, HostInfo
+
     typer.secho("pdf2md doctor — diagnóstico do ambiente", bold=True)
     typer.echo("")
-
+    host = HostInfo.detect()
     rows: list[tuple[str, str, str]] = []
 
-    # Marker
-    if Path(DEFAULT_MARKER).exists() or shutil.which(DEFAULT_MARKER):
-        rows.append(("marker_single", "OK", DEFAULT_MARKER))
-    else:
-        rows.append(("marker_single", "MISSING", "instalar marker-pdf (veja install em https://github.com/datalab-to/marker)"))
+    # --- core (sempre instalado: é o pacote base) ---
+    try:
+        import fitz  # noqa: F401
+        rows.append(("PyMuPDF (core)", "OK", "extração CPU pdftotext / probe"))
+    except ImportError:
+        rows.append(("PyMuPDF (core)", "MISSING", "pip install pymupdf"))
+    try:
+        from PIL import Image as _img  # noqa: F401
+        rows.append(("Pillow (core)", "OK", f"v{__import__('PIL').__version__} — optimize de imagens"))
+    except ImportError:
+        rows.append(("Pillow (core)", "MISSING", "pip install pillow"))
 
-    # Pandoc
+    # --- extras pip (opcionais, deste pacote) ---
+    rt_ok = all(_ilu.find_spec(m) is not None for m in ("numpy", "scipy", "skimage"))
+    rows.append(("[rtpixel] visual", "OK" if rt_ok else "—",
+                 "validador SSIM/align" if rt_ok else "pip install 'pdf2md[rtpixel]'"))
+    twrap = _ilu.find_spec("pytesseract") is not None
+
+    # --- capabilities EXTERNAS (venv/binário/server; nunca pip deste pacote) ---
+    marker_ok = host.has_marker and host.gpu_vram_mb >= MARKER_VRAM_MIN_MB
+    rows.append(("marker_single (GPU)", "OK" if marker_ok else "—",
+                 f"VRAM {host.gpu_vram_mb}MB ok ({DEFAULT_MARKER})" if marker_ok
+                 else "venv próprio + GPU≥4GB — math/layout nativo (https://github.com/datalab-to/marker)"))
+    tbin = tesseract_cmd()
+    if tbin and twrap:
+        rows.append(("tesseract (OCR)", "OK", f"{tbin} + pytesseract"))
+    elif tbin or twrap:
+        rows.append(("tesseract (OCR)", "PARCIAL",
+                     f"engine {'OK' if tbin else 'FALTA'} / wrapper [ocr] {'OK' if twrap else 'FALTA'}"))
+    else:
+        rows.append(("tesseract (OCR)", "—", "engine UB-Mannheim + pip install 'pdf2md[ocr]'"))
+    rows.append(("pix2tex (math)", "OK" if host.has_pix2tex else "—",
+                 "runtime torch" if host.has_pix2tex else "set PDF2MD_PIX2TEX_PYTHON (venv com pix2tex)"))
+    rows.append(("ollama (VLM logos)", "OK" if host.has_ollama else "—",
+                 "daemon :11434" if host.has_ollama else "(opcional) ollama daemon + pull gemma3/qwen"))
     if shutil.which(DEFAULT_PANDOC):
         try:
             v = subprocess.run([DEFAULT_PANDOC, "--version"], capture_output=True, text=True, timeout=5)
-            ver = v.stdout.splitlines()[0] if v.stdout else "?"
-            rows.append(("pandoc", "OK", ver))
+            rows.append(("pandoc", "OK", v.stdout.splitlines()[0] if v.stdout else DEFAULT_PANDOC))
         except Exception:
             rows.append(("pandoc", "OK", DEFAULT_PANDOC))
     else:
-        rows.append(("pandoc", "MISSING", "https://pandoc.org/installing.html"))
-
-    # Chrome
-    if Path(DEFAULT_CHROME).exists() or shutil.which(DEFAULT_CHROME):
+        rows.append(("pandoc", "—", "MD→HTML — https://pandoc.org/installing.html"))
+    if available(DEFAULT_CHROME):
         rows.append(("chrome (headless)", "OK", DEFAULT_CHROME))
     else:
-        rows.append(("chrome (headless)", "MISSING", "Chrome necessário para MD→PDF (renderiza KaTeX)"))
+        rows.append(("chrome (headless)", "—", "HTML→PDF (KaTeX) — chrome/chromium no PATH ou PDF2MD_CHROME"))
 
-    # PyMuPDF
-    try:
-        import fitz  # noqa: F401
-        rows.append(("PyMuPDF (fitz)", "OK", f"{__import__('fitz').__doc__.splitlines()[0] if __import__('fitz').__doc__ else 'instalado'}"))
-    except ImportError:
-        rows.append(("PyMuPDF", "MISSING", "pip install pymupdf"))
-
-    # Pillow
-    try:
-        from PIL import Image as _img  # noqa: F401
-        rows.append(("Pillow (PIL)", "OK", f"v{__import__('PIL').__version__}"))
-    except ImportError:
-        rows.append(("Pillow", "MISSING", "pip install pillow"))
-
-    # CUDA (opcional)
-    try:
-        import torch
-        if torch.cuda.is_available():
-            rows.append(("CUDA torch", "OK", f"{torch.cuda.get_device_name(0)} (torch {torch.__version__})"))
-        else:
-            rows.append(("CUDA torch", "CPU-only", f"torch {torch.__version__} sem GPU"))
-    except ImportError:
-        rows.append(("CUDA torch", "MISSING", "(opcional) sem torch — marker rodará só em CPU se tiver acelerador próprio"))
-
-    # Print table
+    # --- Print table ---
     w = max(len(r[0]) for r in rows)
     for name, status, detail in rows:
-        color = typer.colors.GREEN if status == "OK" else (typer.colors.YELLOW if status == "CPU-only" else typer.colors.RED)
+        color = (typer.colors.GREEN if status == "OK"
+                 else typer.colors.RED if status == "MISSING"
+                 else typer.colors.YELLOW)
         typer.echo(f"  {name:<{w}}  ", nl=False)
-        typer.secho(f"{status:<9}", fg=color, nl=False)
+        typer.secho(f"{status:<8}", fg=color, nl=False)
         typer.echo(f"  {detail}")
+
+    # --- --intent: o que o roteador faria NESTE host (ponte capabilities↔intent) ---
+    if intent:
+        from pdf2md.routing import INTENTS, DocInfo, RoutingError, route
+        typer.echo("")
+        if intent not in INTENTS:
+            typer.secho(f"intent inválido: {intent!r}. Válidos: {', '.join(INTENTS)}", fg=typer.colors.RED)
+            raise typer.Exit(1)
+        # doc genérico (text-layer, com math e logos) p/ revelar os refiners possíveis
+        doc = DocInfo(n_pages=10, has_text_layer=True, math_density=1.0,
+                      matrix_density=0.0, has_raster_logos=True)
+        typer.secho(f"Para --intent {intent} neste host:", bold=True)
+        try:
+            pipe = route(intent, host, doc)
+            typer.echo(f"  pipeline: {pipe.summary()}")   # summary() já inclui [DEGRADADO]
+            for r in pipe.rationale:
+                typer.echo(f"    · {r}")
+            if pipe.pass2:
+                typer.echo(f"  pass2 (enfileirável): {pipe.pass2.summary()}")
+        except RoutingError as exc:
+            typer.secho(f"  sem caminho viável: {exc}", fg=typer.colors.RED)
 
 
 @app.command()

@@ -6,10 +6,16 @@ end-to-end com PDFs sintéticos gerados via PyMuPDF.
 from pathlib import Path
 
 import fitz
-import numpy as np
 import pytest
 
-from pdf2md.pixel_roundtrip import (
+# pixel_roundtrip puxa numpy/scipy/scikit-image (extra [rtpixel]). Sem o extra (base
+# install), pula o módulo inteiro em vez de erro de coleta.
+pytest.importorskip("scipy", reason="pixel-roundtrip requer o extra [rtpixel]")
+pytest.importorskip("skimage", reason="pixel-roundtrip requer o extra [rtpixel]")
+
+import numpy as np  # noqa: E402
+
+from pdf2md.pixel_roundtrip import (  # noqa: E402
     PageMetrics,
     PixelRoundtripResult,
     align_dtw,

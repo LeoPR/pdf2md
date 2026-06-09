@@ -3,6 +3,7 @@
 Hermetic: usa os PDFs livres in-repo (corpus/examples/). Tesseract pula se o
 binário não estiver instalado.
 """
+import importlib.util
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,8 @@ from pdf2md.extractors import (
     ExtractResult, extract_pdftotext, extract_tesseract, join_hyphenation,
     normalize_chars, tesseract_cmd,
 )
+
+_PYTESSERACT = importlib.util.find_spec("pytesseract") is not None  # wrapper do extra [ocr]
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "corpus" / "examples"
 ARXIV = EXAMPLES / "arxiv_1706_03762_excerpt.pdf"     # text-layer (paper)
@@ -58,7 +61,8 @@ def test_pdftotext_empty_pdf_raises(monkeypatch):
         extract_pdftotext("whatever.pdf")
 
 
-@pytest.mark.skipif(tesseract_cmd() is None, reason="tesseract não instalado")
+@pytest.mark.skipif(tesseract_cmd() is None or not _PYTESSERACT,
+                    reason="tesseract bin ou wrapper pytesseract (extra [ocr]) ausente")
 @pytest.mark.skipif(not CDC.exists(), reason="exemplo cdc ausente")
 def test_tesseract_ocrs_printed_page():
     r = extract_tesseract(CDC, page_range=(0, 0))
