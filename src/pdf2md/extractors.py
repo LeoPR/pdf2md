@@ -12,13 +12,14 @@ Medição de fidelidade: ver lab/e19 (WER-prosa) e lab/e20 (scan WER 0.052 impre
 from __future__ import annotations
 
 import re
-import shutil
 import unicodedata
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import fitz  # PyMuPDF
+
+from pdf2md.discovery import available, find_tesseract
 
 _LIGATURES = {"ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl", "ﬃ": "ffi", "ﬄ": "ffl"}
 _CURLY = {"“": '"', "”": '"', "‘": "'", "’": "'", "–": "-", "−": "-"}
@@ -199,11 +200,9 @@ def extract_pdftotext(pdf_path: str | Path, page_range: tuple[int, int] | None =
 
 
 def tesseract_cmd() -> str | None:
-    """Caminho do binário tesseract (PATH ou install padrão Windows)."""
-    if shutil.which("tesseract"):
-        return "tesseract"
-    win = Path(r"C:/Program Files/Tesseract-OCR/tesseract.exe")
-    return str(win) if win.exists() else None
+    """Comando/caminho do tesseract (env → PATH → local padrão do SO), ou None se ausente."""
+    t = find_tesseract()
+    return t if available(t) else None
 
 
 def extract_tesseract(pdf_path: str | Path, page_range: tuple[int, int] | None = None,

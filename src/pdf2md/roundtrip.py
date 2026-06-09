@@ -19,11 +19,12 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 from pdf2md.normalize import normalize_md
+from pdf2md.discovery import find_chrome, find_marker, find_pandoc
 
-# Defaults configuráveis via env vars (mesmo padrão do cli.py)
-DEFAULT_PANDOC = os.environ.get("PDF2MD_PANDOC") or "pandoc"
-DEFAULT_CHROME = os.environ.get("PDF2MD_CHROME") or r"C:/Program Files/Google/Chrome/Application/chrome.exe"
-DEFAULT_MARKER = os.environ.get("PDF2MD_MARKER") or r"Z:/venvs/marker/Scripts/marker_single.exe"
+# Descoberta portável (env PDF2MD_* → PATH → local do SO → nome do comando)
+DEFAULT_PANDOC = find_pandoc()
+DEFAULT_CHROME = find_chrome()
+DEFAULT_MARKER = find_marker()
 
 
 @dataclass(frozen=True)

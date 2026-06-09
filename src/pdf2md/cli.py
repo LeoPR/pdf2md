@@ -39,15 +39,17 @@ from pdf2md.provenance import (
     apply_to_dir as _apply_provenance_dir,
     detect_current_commit,
 )
+from pdf2md.discovery import available, find_chrome, find_marker, find_pandoc
 
 # ---------------------------------------------------------------------------
 # Defaults e descoberta de ferramentas externas
 # ---------------------------------------------------------------------------
 
-# Ferramentas externas: PATH primeiro, depois fallbacks históricos do projeto
-DEFAULT_MARKER = os.environ.get("PDF2MD_MARKER") or shutil.which("marker_single") or r"Z:\venvs\marker\Scripts\marker_single.exe"
-DEFAULT_PANDOC = os.environ.get("PDF2MD_PANDOC") or shutil.which("pandoc") or "pandoc"
-DEFAULT_CHROME = os.environ.get("PDF2MD_CHROME") or shutil.which("chrome") or r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+# Ferramentas externas: descoberta portável (env PDF2MD_* → PATH multi-SO → local do SO).
+# Ver pdf2md/discovery.py; `pdf2md doctor` reporta o que falta (nunca aponta p/ drive do autor).
+DEFAULT_MARKER = find_marker()
+DEFAULT_PANDOC = find_pandoc()
+DEFAULT_CHROME = find_chrome()
 
 # Path do diretório `src/` para invocar scripts standalone via subprocess.
 # Quando `pdf2md` for instalado via `pip`, esses scripts serão movidos para
@@ -93,13 +95,12 @@ def _detect_marker_version() -> str | None:
         marker_exe = Path(DEFAULT_MARKER)
         if not marker_exe.exists():
             return None
-        # Z:\venvs\marker\Scripts\marker_single.exe → Z:\venvs\marker\Lib\site-packages
+        # venv: <root>/Scripts/marker_single.exe (Win) ou <root>/bin/marker_single (POSIX).
+        # site-packages: Lib/site-packages (Win) ou lib/pythonX.Y/site-packages (POSIX).
         venv = marker_exe.parent.parent
-        site_pkgs = venv / "Lib" / "site-packages"
-        for d in site_pkgs.glob("marker_pdf-*.dist-info"):
-            # marker_pdf-1.10.2.dist-info → "1.10.2"
-            name = d.name
-            return name.replace("marker_pdf-", "").replace(".dist-info", "")
+        for site_pkgs in [venv / "Lib" / "site-packages", *venv.glob("lib/python*/site-packages")]:
+            for d in site_pkgs.glob("marker_pdf-*.dist-info"):
+                return d.name.replace("marker_pdf-", "").replace(".dist-info", "")
     except Exception:
         pass
     return None

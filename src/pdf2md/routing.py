@@ -25,6 +25,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from pdf2md._profiles import OPTIMIZER, PRIMARY, REFINER, load_active_profiles
+from pdf2md.discovery import available, find_marker, find_tesseract
 
 # Intents macro (mutuamente exclusivos no CLI)
 RAPIDO = "rapido"
@@ -437,18 +438,11 @@ def _detect_gpu_vram_mb() -> int:
 
 
 def _detect_marker() -> bool:
-    import os
-    if os.environ.get("PDF2MD_MARKER"):
-        return Path(os.environ["PDF2MD_MARKER"]).exists()
-    if shutil.which("marker_single"):
-        return True
-    return Path(r"Z:\venvs\marker\Scripts\marker_single.exe").exists()
+    return available(find_marker())
 
 
 def _detect_tesseract() -> bool:
-    if shutil.which("tesseract"):
-        return True
-    return Path(r"C:/Program Files/Tesseract-OCR/tesseract.exe").exists()
+    return available(find_tesseract())
 
 
 def _detect_pix2tex() -> bool:

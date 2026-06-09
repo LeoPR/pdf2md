@@ -12,8 +12,10 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-DEFAULT_PANDOC = os.environ.get("PDF2MD_PANDOC") or "pandoc"
-DEFAULT_CHROME = os.environ.get("PDF2MD_CHROME") or r"C:/Program Files/Google/Chrome/Application/chrome.exe"
+from pdf2md.discovery import find_chrome, find_pandoc
+
+DEFAULT_PANDOC = find_pandoc()
+DEFAULT_CHROME = find_chrome()
 
 # CSS embutido — print-friendly: KaTeX legível, code blocks, tabelas, page breaks.
 CSS_INLINE = """

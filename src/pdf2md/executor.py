@@ -27,6 +27,7 @@ from typing import Callable
 from pdf2md._profiles import OPTIMIZER, PRIMARY, REFINER
 from pdf2md.extractors import extract_pdftotext, extract_tesseract
 from pdf2md.formula_cropper import FORMULA_TOKEN_RE, crop_formulas, formula_token
+from pdf2md.discovery import available, find_marker
 from pdf2md.routing import Pipeline, pass2_warranted
 
 MarkerRunner = Callable[[Path, Path], Path]      # (pdf, out_dir) -> caminho do .md gerado
@@ -278,12 +279,8 @@ def _default_pix2tex_runner(crop_dir: Path) -> dict:
 
 
 def _discover_marker() -> str | None:
-    if os.environ.get("PDF2MD_MARKER"):
-        return os.environ["PDF2MD_MARKER"]
-    if shutil.which("marker_single"):
-        return "marker_single"
-    win = Path(r"Z:\venvs\marker\Scripts\marker_single.exe")
-    return str(win) if win.exists() else None
+    m = find_marker()
+    return m if available(m) else None
 
 
 def _default_marker_runner(pdf_path: Path, out_dir: Path) -> Path:

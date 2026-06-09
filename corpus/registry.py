@@ -20,17 +20,20 @@ cruzada de schema/proveniência; ESTE arquivo é o canônico para código.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CORPUS = PROJECT_ROOT / "corpus"
 EXAMPLES = CORPUS / "examples"
 
-# Drives externos (não versionados)
-ZCACHE = Path("Z:/caches/corpus/pdf2md")
+# Drives externos (não versionados) — configuráveis por env p/ portabilidade.
+# O default é o setup do autor; outra máquina aponta via PDF2MD_ZCACHE / PDF2MD_AULAQUANTUM
+# (ou simplesmente não tem o tier, e resolve() cai no excerto in-repo / instrui o download).
+ZCACHE = Path(os.environ.get("PDF2MD_ZCACHE") or "Z:/caches/corpus/pdf2md")
 AULAQUANTUM = Path(
-    "C:/Users/leona/OneDrive/Documents/Projects/Acadêmicos/"
-    "AulaQuantum/pesquisa_geral/_sources"
+    os.environ.get("PDF2MD_AULAQUANTUM")
+    or "C:/Users/leona/OneDrive/Documents/Projects/Acadêmicos/AulaQuantum/pesquisa_geral/_sources"
 )
 
 # doc_id -> entrada. Chaves batem com os doc_ids já usados em labs e em corpus/_gt/.

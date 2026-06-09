@@ -39,10 +39,6 @@ include = ["pdf2md*"]
 line-length = 100
 target-version = "py311"
 
-[tool.pytest.ini_options]
-# pytest é exceção — não tem env var oficial; explicitamos
-cache_dir = "Z:\\caches\\pytest"
-
 [dependency-groups]
 dev = [
     "pip>=26.1.1",
