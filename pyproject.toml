@@ -1,8 +1,10 @@
 [project]
-# Nome de DISTRIBUIÇÃO no PyPI. O slug "pdf2md" estava reservado por outra conta
-# (registrado sem releases), então o pacote publica como "pdftomd". O nome de
-# import (pdf2md) e o comando CLI (pdf2md) permanecem inalterados.
-name = "pdftomd"
+# Nome de DISTRIBUIÇÃO no PyPI. O slug "pdf2md" está reservado por outra conta
+# (registrado sem releases). Além disso o PyPI rejeita nomes "muito similares" por
+# ultranormalização (remove ._- e mapeia o->0, i/l->1): p.ex. "pdftomd" colidiria
+# com "pdf-to-md" (ambos -> pdft0md). "pdf2md-tool" tem chave "pdf2mdt001", distinta
+# de tudo (verificado, 81 grafias 404). Import e comando CLI permanecem "pdf2md".
+name = "pdf2md-tool"
 version = "0.8.0"
 description = "Conversor PDF→MD CPU-first: roteamento por intent (rápido/qualidade), núcleo offline e round-trip mensurável"
 authors = [
@@ -43,7 +45,7 @@ dependencies = [
 # `pdf2md doctor`. Ver tickets/closed/T090 + docs. (publish-prep marco B)
 rtpixel = ["numpy>=1.26", "scipy>=1.14", "scikit-image>=0.22"]   # validador visual L0.5 (SSIM/align)
 ocr = ["pytesseract>=0.3"]                                        # wrapper; engine tesseract é externo (doctor)
-all = ["pdftomd[rtpixel,ocr]"]                                   # tudo que é pip-puro seguro (auto-ref: nome de distribuição)
+all = ["pdf2md-tool[rtpixel,ocr]"]                               # tudo que é pip-puro seguro (auto-ref: nome de distribuição)
 
 [project.scripts]
 pdf2md = "pdf2md.cli:app"

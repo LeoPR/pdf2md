@@ -7,7 +7,7 @@ Releases do `pdf2md` por ordem decrescente. Formato inspirado em
 ## [0.8.0] — 2026-06-09
 
 Primeiro release no PyPI. Roteador macro-intent + preparação para publicação.
-Publicado sob o nome de distribuição **`pdftomd`** (`pip install pdftomd`) — o slug
+Publicado sob o nome de distribuição **`pdf2md-tool`** (`pip install pdf2md-tool`) — o slug
 `pdf2md` estava reservado por outra conta (registrado sem releases). Comando CLI e
 nome de import permanecem `pdf2md`.
 

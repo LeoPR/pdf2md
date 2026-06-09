@@ -12,10 +12,10 @@ As capacidades pesadas (marker/GPU, pix2tex, OCR, VLM) são **opcionais** e
 detectadas em runtime por `pdf2md doctor`.
 
 ```bash
-pip install pdftomd           # núcleo CPU — nada externo
+pip install pdf2md-tool           # núcleo CPU — nada externo
 pdf2md convert paper.pdf --intent rapido
 ```
-> No PyPI o pacote chama-se **`pdftomd`** (o slug `pdf2md` estava reservado por
+> No PyPI o pacote chama-se **`pdf2md-tool`** (o slug `pdf2md` estava reservado por
 > outra conta). O **comando** e o **import** continuam `pdf2md`. Do código-fonte:
 > `git clone … && pip install -e .`.
 
@@ -24,7 +24,7 @@ pdf2md convert paper.pdf --intent rapido
 ## Quickstart sem GPU (o caminho portável)
 
 ```bash
-pip install pdftomd
+pip install pdf2md-tool
 pdf2md doctor                       # o que você tem (core sempre OK; resto opcional)
 pdf2md convert paper.pdf --intent rapido --out out/
 ```
@@ -92,7 +92,7 @@ pip install -e '.[all]'          # tudo que é pip-puro seguro
 | **pandoc + Chrome** (MD→PDF) | no PATH | binários de sistema |
 | **ollama + gemma3/qwen** (logos) | daemon `:11434` + `ollama pull` | server + modelos fora do pip |
 
-> `pip install pdftomd[gpu]` **não existe de propósito**: marker fixa `Pillow<11` e é
+> `pip install pdf2md-tool[gpu]` **não existe de propósito**: marker fixa `Pillow<11` e é
 > impossível co-instalar no mesmo ambiente. A interface honesta para a stack pesada é o
 > `doctor`, não um extra pip. Dev roda a suíte com `uv sync --all-extras`.
 >

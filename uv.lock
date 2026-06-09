@@ -177,7 +177,7 @@ wheels = [
 ]
 
 [[package]]
-name = "pdftomd"
+name = "pdf2md-tool"
 version = "0.8.0"
 source = { editable = "." }
 dependencies = [
@@ -214,7 +214,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "numpy", marker = "extra == 'rtpixel'", specifier = ">=1.26" },
-    { name = "pdftomd", extras = ["rtpixel", "ocr"], marker = "extra == 'all'" },
+    { name = "pdf2md-tool", extras = ["rtpixel", "ocr"], marker = "extra == 'all'" },
     { name = "pillow", specifier = ">=10" },
     { name = "psutil", specifier = ">=5.9" },
     { name = "pymupdf", specifier = ">=1.24" },
