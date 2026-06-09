@@ -51,7 +51,7 @@ host+doc — não faz I/O na decisão.
 ## Capabilities por comando
 
 - **convert/route/extract/stats/norm/prov/aggr** no caminho `--rapido`: só o **core**
-  (pdftotext/PyMuPDF) — funciona com `pip install pdf2md` puro, sem GPU.
+  (pdftotext/PyMuPDF) — funciona com `pip install pdftomd` puro, sem GPU.
 - **rt-pixel** (e `--rt-pixel`/`--best`): extra **`[rtpixel]`** (numpy/scipy/scikit-image).
 - **OCR de scan** (`stats`/`route` em scan sem GPU): extra **`[ocr]`** + engine `tesseract`.
 - **extract/convert `--qualidade`** com marker: **externo** (venv + GPU + `PDF2MD_MARKER`).

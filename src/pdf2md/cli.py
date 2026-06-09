@@ -233,7 +233,7 @@ def doctor(intent: str = typer.Option(
     # --- extras pip (opcionais, deste pacote) ---
     rt_ok = all(_ilu.find_spec(m) is not None for m in ("numpy", "scipy", "skimage"))
     rows.append(("[rtpixel] visual", "OK" if rt_ok else "—",
-                 "validador SSIM/align" if rt_ok else "pip install 'pdf2md[rtpixel]'"))
+                 "validador SSIM/align" if rt_ok else "pip install 'pdftomd[rtpixel]'"))
     twrap = _ilu.find_spec("pytesseract") is not None
 
     # --- capabilities EXTERNAS (venv/binário/server; nunca pip deste pacote) ---
@@ -248,7 +248,7 @@ def doctor(intent: str = typer.Option(
         rows.append(("tesseract (OCR)", "PARCIAL",
                      f"engine {'OK' if tbin else 'FALTA'} / wrapper [ocr] {'OK' if twrap else 'FALTA'}"))
     else:
-        rows.append(("tesseract (OCR)", "—", "engine UB-Mannheim + pip install 'pdf2md[ocr]'"))
+        rows.append(("tesseract (OCR)", "—", "engine UB-Mannheim + pip install 'pdftomd[ocr]'"))
     rows.append(("pix2tex (math)", "OK" if host.has_pix2tex else "—",
                  "runtime torch" if host.has_pix2tex else "set PDF2MD_PIX2TEX_PYTHON (venv com pix2tex)"))
     rows.append(("ollama (VLM logos)", "OK" if host.has_ollama else "—",

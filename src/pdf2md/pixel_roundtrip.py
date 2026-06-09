@@ -46,7 +46,7 @@ try:
 except ModuleNotFoundError as _e:  # pragma: no cover
     raise ModuleNotFoundError(
         f"pixel-roundtrip (validador visual L0.5) requer o extra [rtpixel]: "
-        f"pip install 'pdf2md[rtpixel]' (faltou: {_e.name})"
+        f"pip install 'pdftomd[rtpixel]' (faltou: {_e.name})"
     ) from _e
 
 
