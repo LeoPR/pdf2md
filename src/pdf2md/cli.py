@@ -38,6 +38,7 @@ from pdf2md.provenance import (
     Provenance,
     apply_to_dir as _apply_provenance_dir,
     detect_current_commit,
+    pkg_version as _pkg_version,
 )
 from pdf2md.discovery import available, find_chrome, find_marker, find_pandoc
 
@@ -301,12 +302,7 @@ def doctor(intent: str = typer.Option(
 @app.command()
 def version():
     """Versão do pacote + commit git (se aplicável)."""
-    try:
-        from importlib.metadata import version as _v
-        pkg_ver = _v("pdf2md")
-    except Exception:
-        pkg_ver = "0.7.0 (uninstalled)"
-
+    pkg_ver = _pkg_version()
     commit = detect_current_commit() or "—"
     typer.echo(f"pdf2md {pkg_ver}  (commit {commit})")
 
@@ -410,12 +406,7 @@ def prov(
     Insere após primeiro heading. Re-aplicar substitui em vez de duplicar.
     """
     if not pkg_version:
-        try:
-            v = subprocess.run(["git", "describe", "--tags", "--always"],
-                               capture_output=True, text=True, check=True, timeout=5)
-            pkg_version = v.stdout.strip() or "unknown"
-        except Exception:
-            pkg_version = "unknown"
+        pkg_version = _pkg_version()
 
     # Se --sha256 for caminho, calcula
     if sha256 and Path(sha256).exists():

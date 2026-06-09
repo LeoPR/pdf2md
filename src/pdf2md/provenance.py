@@ -80,6 +80,20 @@ def detect_current_commit() -> str | None:
         return None
 
 
+def pkg_version() -> str:
+    """Versão do pdf2md: metadata do install (dist `pdf2md-tool`) > `__version__`.
+
+    NÃO usa `git describe` do diretório atual — isso vazaria o estado do repo
+    onde o usuário roda o comando, não a versão do conversor que gerou o MD.
+    """
+    try:
+        from importlib.metadata import version as _v
+        return _v("pdf2md-tool")
+    except Exception:
+        from pdf2md import __version__
+        return __version__
+
+
 def apply_to_text(text: str, prov: Provenance) -> str:
     """Insere/substitui o bloco de proveniência logo após o primeiro heading.
 
@@ -141,16 +155,7 @@ def _cli() -> int:
     parser.add_argument("--extractor", default=None, help="Ex: 'marker-pdf 1.10.2'")
     args = parser.parse_args()
 
-    version = args.version
-    if not version:
-        try:
-            v = subprocess.run(
-                ["git", "describe", "--tags", "--always"],
-                capture_output=True, text=True, check=True, timeout=5,
-            )
-            version = v.stdout.strip() or "unknown"
-        except Exception:
-            version = "unknown"
+    version = args.version or pkg_version()
 
     prov = Provenance(
         version=version,
