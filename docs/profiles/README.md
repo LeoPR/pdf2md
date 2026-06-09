@@ -2,6 +2,12 @@
 
 *Criado 2026-05-19 pós workflow `revisao-visao-macro-multi-algoritmo`.*
 
+> **Atualização 2026-06-09:** o roteador `route()` (T090) está **implementado e fechado**.
+> Ele consome [`src/pdf2md/_profiles.py`](../../src/pdf2md/_profiles.py) — espelho Python
+> *route-relevant* destes YAMLs, mantido à mão (o código deliberadamente NÃO usa pyyaml em
+> runtime). Onde este doc disser "quando T090 for implementado / futuro", leia como **já
+> entregue** — ver [`tickets/closed/T090…`](../../tickets/closed/T090_macro_intent_routing.md).
+
 Estrutura consumível por código (`yaml.safe_load`) que serializa o catálogo de
 algoritmos testados ou previstos no projeto, organizados por dimensão segundo a
 visão macro "vários algoritmos por perspectiva, não um único vencedor"

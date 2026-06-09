@@ -1,183 +1,153 @@
 # pdf2md
 
-Conversor PDF ↔ MD com round-trip mensurável e otimização adaptativa de imagens.
+Conversor PDF → Markdown que **mede cada extrator em vértices primitivos**
+(velocidade, memória, VRAM, latência, qualidade por elemento, footprint de
+instalação) e deixa um **roteador escolher o caminho mais barato que ainda
+satisfaz o seu intent**. Em vez de "o melhor extrator universal", entrega a
+decisão: `--rapido` usa um caminho CPU puro (offline, determinístico, ~0.02 s/pg);
+`--qualidade` gasta GPU/marker só quando você pede e o host comporta.
 
-Projeto autônomo nascido do `AulaQuantum` (faixa T400) quando o conversor
-amadureceu além do escopo daquela disciplina. Mora em
-`Acadêmicos/transmutos/pdf2md/` por convenção da máquina (ver
-[`Z:\caches\README.md`](Z:\caches\README.md) para padrões locais).
+O **núcleo roda em qualquer máquina** — só `pip`, sem GPU, sem modelos, sem rede.
+As capacidades pesadas (marker/GPU, pix2tex, OCR, VLM) são **opcionais** e
+detectadas em runtime por `pdf2md doctor`.
 
-## Status (v0.7.0, 2026-05-16)
+```bash
+pip install pdf2md            # núcleo CPU — nada externo
+pdf2md convert paper.pdf --intent rapido
+```
+> Ainda não publicado no PyPI: por ora `git clone … && pip install -e .`.
 
-| Camada / capacidade | Estado | Versão | Notas |
-|---|---|---|---|
-| **Extração** marker-pdf 1.10.2 (GPU) | Estável | v0.1+ | 95.09% round-trip em N&C cap 4 |
-| **MD → PDF** pandoc 3.9 + Chrome + KaTeX | Estável | v0.1+ | |
-| **Round-trip textual** MD → PDF → MD' | Estável | v0.1+ | mediana sim 95% LaTeX nativo |
-| **Multi-iteration round-trip** | Estável | v0.2+ | 97.4% após 5 iter em paper |
-| **CLI unificado `pdf2md`** | Estável | v0.4 | macro convert + 10 subcomandos, sem subprocess |
-| **Telemetria por extração + agregada** | Estável | v0.4 | `_stats.json`, `_OVERVIEW.json` |
-| **Otimização adaptativa de imagens** | Estável (níveis 1-2) | v0.4 | PNG paleta lossy + 1-bit + JPEG mantido; -38.6% em N&C |
-| **Marcador de proveniência idempotente** | Estável | v0.4 | `pdf2md prov`, HTML comment + blockquote |
-| **Telemetria por step** (wall/cpu/mem/gpu/io) | Estável | v0.5 | `pdf2md.telemetry` (psutil + nvidia-smi) |
-| **Pixel-roundtrip visual L0.5** | Estável | v0.6 | `pdf2md rt-pixel`: align Hungarian/DTW + SSIM + WER |
-| **rt-pixel integrado no convert** | Estável | v0.7 | `--rt-pixel` ou `--best` ativam automaticamente |
-| Vetorização SVG (potrace) | Roadmap | — | T132 |
-| Detecção + extração fórmula → LaTeX | Roadmap | — | T133/T134 (pix2tex) |
-| Reconstrução vetorial de logos | Roadmap | — | T180 (texto+fonte+brasão) |
-| Macro-intent CLI (`--rapido`/`--auto`) | Roadmap | — | T090 (depende mapa de perfis) |
-| Mini-corpus GT humano | Roadmap | — | T060 (destrava T072 calibração) |
-| Alt-tools (Nougat/MinerU/olmOCR/Docling) | Pesquisa | — | T410, e06/e07/e08 descartados — ver [`docs/reference/tecnologias.md`](docs/reference/tecnologias.md) |
+---
 
-**Documentação:**
-- Arquitetura completa: [`docs/explanation/arquitetura.md`](docs/explanation/arquitetura.md)
-- Filosofia de design: [`docs/explanation/philosophy.md`](docs/explanation/philosophy.md)
-- Tese da família transmutos: [`docs/explanation/transmutos.md`](docs/explanation/transmutos.md)
-- Schema do MD canônico: [`docs/reference/md_canonical.md`](docs/reference/md_canonical.md)
-- **Perfis de tecnologias (tempo/mem/gpu)**: [`docs/reference/tecnologias.md`](docs/reference/tecnologias.md)
-- **Análise crítica do curso**: [`docs/explanation/analise_critica.md`](docs/explanation/analise_critica.md)
-- Painel de métricas: [`docs/reference/metricas.md`](docs/reference/metricas.md)
-- Revisão de literatura: [`docs/explanation/literatura.md`](docs/explanation/literatura.md) · [`v2`](docs/explanation/literatura.md)
-- Bancada experimental: [`docs/how-to/criar_novo_lab.md`](docs/how-to/criar_novo_lab.md)
+## Quickstart sem GPU (o caminho portável)
+
+```bash
+pip install pdf2md
+pdf2md doctor                       # o que você tem (core sempre OK; resto opcional)
+pdf2md convert paper.pdf --intent rapido --out out/
+```
+
+`--rapido` roteia para **pdftotext (PyMuPDF)**: prosa fiel, math como Unicode cru,
+0 VRAM, ~63 MB RAM, ~0.1 s de cold-start, determinístico. Não precisa instalar
+mais nada. Para recuperar math em LaTeX, layout e tabelas, use `--qualidade` (que
+quer marker/GPU) — `pdf2md doctor --intent qualidade` diz exatamente o que falta.
+
+---
+
+## Por que vale a pena — vértices medidos (RTX 3060, N pequeno)
+
+| Vértice | Como o roteador fecha | Âncora medida |
+|---|---|---|
+| **Velocidade** | `--rapido`/`--low-resource`/`--indexacao` → pdftotext | **0.02 s/pg** vs marker 12.9 (~**630×**) |
+| **RAM** | teto duro 160 MB em `--low-resource`; degrada, não estoura | pdftotext **63 MB** vs marker ~1500 (est.) |
+| **CPU-only** | pipeline 100% CPU (pdftotext + cropper built-in + pix2tex) | math display **0.80** sem GPU |
+| **Latência** | default sem warm-up; refiners caros só quando o intent paga | pdftotext **0.1 s** vs marker ~30 s (est.) |
+| **Qualidade** | roteada por **sub-elemento** (prosa/math/matriz/logo) | prosa 0.95 · scan impresso WER 0.052 · matriz 0.50 ⚠️ |
+| **Footprint** | core offline; pesado é opt-in (`doctor`) | core = só wheels do pyproject |
+
+> **Escopo honesto:** perfis medidos em **1 host** (RTX 3060) e N pequeno; RAM/cold-start
+> de marker/VLM são **estimados**. É "roteamento medido para este corpus", não benchmark
+> universal. Ver [`docs/profiles/`](docs/profiles/) (os 7 perfis) e
+> [`tickets/closed/T090…`](tickets/closed/T090_macro_intent_routing.md).
+
+---
+
+## Status
+
+| Camada / capacidade | Estado | Notas |
+|---|---|---|
+| **Roteador macro-intent** `--rapido/--qualidade/--balanceado/--auto/--indexacao/--low-resource` | Estável (T090) | `route()` puro profile-driven; degradação honesta |
+| **Extração CPU** pdftotext (PyMuPDF) + Tesseract (scan) | Estável | offline, determinístico |
+| **Cropper de fórmula CPU + pix2tex** (math display → LaTeX) | Estável | cropper built-in; runtime pix2tex externo (torch) |
+| **Extração GPU** marker-pdf (Surya+Texify) | Estável | venv próprio + GPU; math/layout nativo |
+| **MD → PDF** pandoc + Chrome + KaTeX | Estável | |
+| **Round-trip textual + multi-iteração** | Estável | validador sem ground-truth |
+| **Pixel-roundtrip visual L0.5** (SSIM + align) | Estável | extra `[rtpixel]` |
+| **Otimização adaptativa de imagens** | Estável | −38.6% em N&C, sem perda visual |
+| **Telemetria por step + agregada** | Estável | `psutil` + `nvidia-smi` |
+| Reconstrução vetorial de logos (VLM small-image) | Pesquisa | T180 (não promovido) |
+| Vetorização SVG (potrace) · tabelas (TEDS) · cross-hardware | Pesquisa | T132 · BURACO #2 · T091 |
 
 ---
 
 ## Instalação
 
-```powershell
-# 1. Venv (convenção da máquina: junction em Z:\)
-py -m venv Z:\venvs\pdf2md --prompt pdf2md
-cmd /c mklink /J .venv Z:\venvs\pdf2md
-
-# 2. Instalar pdf2md (editable, para desenvolvimento)
-.venv\Scripts\python.exe -m pip install -e .
-
-# 3. Ferramentas externas (marker, pandoc, Chrome — não-pip)
-# Cada uma vive no seu venv/PATH. `pdf2md doctor` valida.
-.venv\Scripts\pdf2md.exe doctor
+```bash
+git clone https://github.com/leonardomdesouza/pdf2md && cd pdf2md
+pip install -e .                 # núcleo CPU (typer, pymupdf, pillow, psutil)
+pip install -e '.[rtpixel]'      # + validador visual (numpy/scipy/scikit-image)
+pip install -e '.[ocr]'          # + wrapper pytesseract (engine é externo)
+pip install -e '.[all]'          # tudo que é pip-puro seguro
 ```
 
-Pandoc e Chrome precisam estar no PATH. Marker pode viver em outro venv
-(`Z:\venvs\marker\Scripts\marker_single.exe` é o fallback default).
+**Capacidades externas (NÃO instaláveis por pip deste pacote — `pdf2md doctor` valida):**
+
+| Capacidade | Como obter | Por que externo |
+|---|---|---|
+| **marker/GPU** (math+layout nativo) | venv próprio + `PDF2MD_MARKER` | conflito `pillow<11` + torch/CUDA |
+| **pix2tex** (math→LaTeX CPU) | venv com torch + `PDF2MD_PIX2TEX_PYTHON` | torch é pesado/OS-específico |
+| **tesseract** (OCR scan) | engine UB-Mannheim no PATH + extra `[ocr]` | binário de sistema |
+| **pandoc + Chrome** (MD→PDF) | no PATH | binários de sistema |
+| **ollama + gemma3/qwen** (logos) | daemon `:11434` + `ollama pull` | server + modelos fora do pip |
+
+> `pip install pdf2md[gpu]` **não existe de propósito**: marker fixa `Pillow<11` e é
+> impossível co-instalar no mesmo ambiente. A interface honesta para a stack pesada é o
+> `doctor`, não um extra pip. Dev roda a suíte com `uv sync --all-extras`.
+>
+> *Setup do autor (não é requisito):* venv junction em `Z:\venvs\pdf2md`; ver
+> [`docs/reference/conventions.md`](docs/reference/conventions.md).
 
 ---
 
-## Uso — manual de comandos
+## Uso
 
 ```
-$ pdf2md --help
+  MACRO por intent (roteador T090 — escolhe a stack por host+doc)
+    pdf2md convert FILE.pdf --intent rapido       # CPU puro, velocidade máxima
+    pdf2md convert FILE.pdf --intent qualidade    # marker/GPU se houver; senão degrada
+    pdf2md convert FILE.pdf --intent auto          # melhor stack que CABE no host
+    pdf2md convert FILE.pdf --intent indexacao     # pass1 indexa tudo; pass2 enfileira math-heavy
+    pdf2md route   FILE.pdf --intent qualidade     # dry-run: mostra o pipeline (--execute roda)
 
-  MACRO (one-shot inteligente)
-  ─────────────────────────────
-    pdf2md convert FILE.pdf                # auto-detect layout via TOC
-    pdf2md convert FILE.pdf --quick        # rápido (sem otimização + sem rt)
-    pdf2md convert FILE.pdf --best         # tudo + multi-roundtrip 3 iter
-    pdf2md convert FILE.pdf --book/--paper # forçar layout
+  LEGADO (mantido; --intent substitui)
+    pdf2md convert FILE.pdf --quick / --best
 
-  SUBCOMANDOS (controle granular)
-  ────────────────────────────────
-    pdf2md extract  FILE.pdf  --out DIR        # só marker_single
-    pdf2md restruct DIR --pdf FILE  --marker-out RAW    # split por TOC
-    pdf2md optimize DIR  [--dry-run]           # PNG-paleta + JPEG adaptativo
-    pdf2md stats    DIR  [--source-pdf FILE]   # telemetria + round-trip
-    pdf2md rt       FILE.md --work DIR         # round-trip single
-    pdf2md rt-multi FILE.md --work DIR -n 5    # round-trip iterativo
-    pdf2md aggr     ROOT [--out DIR]           # OVERVIEW de múltiplos PDFs
-    pdf2md prov     DIR --source PDF [...]     # marcador proveniência
-    pdf2md norm     FILE.md [-i]               # normalize_md canônico
-    pdf2md pdfs     DIR                        # MD → PDF (pandoc+Chrome)
+  SUBCOMANDOS FINOS (controle granular / retomar pipeline parcial)
+    pdf2md extract · restruct · optimize · stats · rt · rt-multi · aggr · prov · norm · pdfs
 
   META
-  ────
-    pdf2md doctor      # status: marker / pandoc / chrome / PyMuPDF / CUDA
-    pdf2md version     # versão + commit
-    pdf2md help <cmd>  # ajuda detalhada por subcomando
+    pdf2md doctor [--intent N]   # capabilities do host (+ o que um intent usaria aqui)
+    pdf2md version · help <cmd>
 ```
 
-### Caso 1: livro com TOC (default inteligente)
+### Os 6 intents (resumo; detalhes em [how-to/escolher_intent](docs/how-to/escolher_intent.md))
 
-```bash
-pdf2md convert Nielsen_Chuang_QCQI.pdf --out nc_extraido/
-```
+| Intent | PRIMARY | Para quê |
+|---|---|---|
+| `--rapido` | pdftotext (mesmo com GPU) | indexar/pré-processar em massa; wall-time mínimo |
+| `--low-resource` | pdftotext (teto RAM 160 MB) | máquinas magras; optimize desliga se estourar |
+| `--indexacao` | pdftotext (pass1) + marker (pass2 enfileirável) | milhares de docs; pass2 só nos de perda recuperável |
+| `--balanceado` (default) | marker se houver, senão pdftotext | uso geral |
+| `--qualidade` | marker (degrada p/ pdftotext+pix2tex sem GPU) | máxima fidelidade; math LaTeX, layout |
+| `--auto` | melhor que o host comporta | "faça a melhor coisa possível aqui" |
 
-Detecta TOC (PyMuPDF `get_toc`) → split por capítulo automático. Saída:
-
-```
-nc_extraido/
-├── 00_front_matter/00_front_matter.md
-├── 01_introduction/01_introduction.md
-├── ...
-├── 12_quantum_information_theory/...
-├── app_*/
-├── index.md
-├── _stats.md           (agregado)
-└── _image_optimization.md
-```
-
-Cada `.md` inclui o marcador de proveniência (`<!-- pdf2md-provenance v1 ... -->`).
-
-### Caso 2: paper curto (sem TOC, output flat)
-
-```bash
-pdf2md convert paper.pdf --paper --out paper_md/
-```
-
-Output flat (todos os arquivos no diretório raiz). Útil para arXiv preprints.
-
-### Caso 3: rápido (sem otimização nem round-trip)
-
-```bash
-pdf2md convert paper.pdf --quick
-```
-
-Pula otimização de imagens (compressão demora em PDFs com muitas figuras) e
-não roda round-trip. ~3-5× mais rápido que default em livros.
-
-### Caso 4: máxima qualidade (com convergência mensurada)
-
-```bash
-pdf2md convert paper.pdf --best
-```
-
-Tudo do default + multi-roundtrip 3 iterações para medir estabilidade. Útil
-quando o documento é para distribuição pública.
-
-### Caso 5: pipeline manual (cada etapa isolada)
-
-```bash
-# Útil quando algo no macro falhou e você quer retomar do meio
-pdf2md extract paper.pdf --out _raw/
-pdf2md restruct paper_out/ --pdf paper.pdf --marker-out _raw/
-pdf2md optimize paper_out/
-pdf2md stats paper_out/ --source-pdf paper.pdf
-pdf2md prov paper_out/ --source paper.pdf --extractor "marker-pdf 1.10.2"
-```
-
-### Caso 6: medir só round-trip de um MD existente
-
-```bash
-pdf2md rt corpus/nc/04_quantum_circuits/04_quantum_circuits.md --work /tmp/rt
-# ou para detectar drift / blow-up:
-pdf2md rt-multi 04_quantum_circuits.md --work /tmp/mrt -n 5
-```
-
-### Caso 7: normalização ad-hoc
-
-```bash
-pdf2md norm file.md > normalized.md
-pdf2md norm file.md -i                  # in-place
-pdf2md norm file.md --strip-escapes     # Q11.b (form-fields)
-```
+Sem GPU, `--qualidade` **degrada com aviso honesto** (`.rationale` vai pra proveniência),
+nunca finge qualidade nem quebra em silêncio.
 
 ---
 
 ## Variáveis de ambiente
 
-| Variável | Default | Função |
-|---|---|---|
-| `PDF2MD_MARKER` | `marker_single` no PATH, ou `Z:\venvs\marker\Scripts\marker_single.exe` | path do marker |
-| `PDF2MD_PANDOC` | `pandoc` no PATH | path do pandoc |
-| `PDF2MD_CHROME` | `chrome` no PATH, ou `C:\Program Files\Google\Chrome\Application\chrome.exe` | path do Chrome |
+| Variável | Função |
+|---|---|
+| `PDF2MD_MARKER` | path do `marker_single` (sem fallback de máquina — **necessária** p/ usar marker) |
+| `PDF2MD_PIX2TEX_PYTHON` | python de um venv com `pix2tex` (runtime math→LaTeX CPU) |
+| `PDF2MD_TESSERACT` | path do `tesseract` (senão PATH → local padrão do SO) |
+| `PDF2MD_PANDOC` / `PDF2MD_CHROME` | paths de pandoc / Chrome (senão PATH → local padrão do SO) |
+| `PDF2MD_ZCACHE` / `PDF2MD_AULAQUANTUM` | raízes de corpus zcache / source privado (default = drives do autor) |
+
+Descoberta (em `pdf2md/discovery.py`): `env → PATH (multi-nome, multi-SO) → local padrão
+do SO → nome do comando`. Sem paths absolutos presos a uma máquina.
 
 ---
 
@@ -185,66 +155,58 @@ pdf2md norm file.md --strip-escapes     # Q11.b (form-fields)
 
 ```
 pdf2md/
-├── README.md          overview + uso rápido (este arquivo)
-├── ROADMAP.md         frentes A-E + fases
-├── CHANGELOG.md       releases e mudanças por versão
-├── pyproject.toml     v0.7.0; deps + entry point
-├── src/pdf2md/        (10 módulos — toda a lógica do pacote)
-│   ├── cli.py · normalize.py · provenance.py · stats.py · aggregate.py
-│   ├── roundtrip.py · multi_roundtrip.py · pdfs.py · restructure.py · optimize.py
-│   ├── telemetry.py            wall/cpu/mem/gpu/io por step (v0.5)
-│   └── pixel_roundtrip.py      validador visual L0.5 (v0.6)
-├── lab/               bancada experimental — eNN/ por experimento (15 labs)
-├── tickets/           work items: open/closed/research/blocked + INDEX.md
-├── corpus/nielsen_chuang/   extrações de referência (gitignored se push público)
-└── docs/              **organizado por Diátaxis** (Procida ~2017)
-    ├── README.md          índice + explicação do método
-    ├── tutorials/         LEARNING — passo-a-passo
-    ├── how-to/            GOAL — soluções para problemas concretos
-    ├── reference/         INFO — definições autoritativas
-    │   ├── cli.md · md_canonical.md · metricas.md · tecnologias.md · conventions.md
-    │   ├── modulos/       API por módulo
-    │   ├── corpus/        manifests + licensing
-    │   └── biblioteca/    catálogo (ferramentas/métricas/papers/benchmarks/glossário)
-    ├── explanation/       UNDERSTANDING — por quê, conceitual
-    │   ├── arquitetura.md (+ sub-arquitetura/01-05 detalhes por camada)
-    │   ├── philosophy.md · transmutos.md · analise_critica.md
-    │   ├── literatura.md  revisão de literatura (papers, ferramentas, benchmarks)
-    │   └── diario.md      timeline cronológica do projeto
-    └── _archive/          documentos históricos
+├── src/pdf2md/                 (lógica do pacote)
+│   ├── cli.py                  CLI (macro --intent, route, doctor, subcomandos)
+│   ├── routing.py              ROTEADOR T090: route() puro + HostInfo/DocInfo + pass2_warranted
+│   ├── _profiles.py            MAPA: perfis medidos (route-relevant), dep-free
+│   ├── executor.py             executa o Pipeline que route() decide
+│   ├── extractors.py           PRIMARYs CPU: pdftotext + tesseract
+│   ├── formula_cropper.py      cropper de fórmula display CPU (built-in)
+│   ├── discovery.py            descoberta portável de ferramentas externas
+│   ├── optimize.py             otimização adaptativa de imagens
+│   ├── telemetry.py            INSTRUMENTO: wall/cpu/mem/gpu/io por step
+│   ├── pixel_roundtrip.py      validador visual L0.5 (extra [rtpixel])
+│   ├── roundtrip.py · multi_roundtrip.py   round-trip textual + estabilidade
+│   ├── pdfs.py · restructure.py · normalize.py · provenance.py · stats.py · aggregate.py
+│   └── _pix2tex_runner.py      script no venv externo do pix2tex (subprocess)
+├── corpus/                     dataset em 3 tiers (ver corpus/RIGHTS.md)
+│   ├── examples/               excertos LIVRES commitados (prova pronta, sem baixar nada)
+│   └── registry.py             resolve(doc_id) → in-repo | zcache | private
+├── docs/                       Diátaxis (tutorials/how-to/reference/explanation/profiles)
+├── lab/                        bancada experimental (eNN por experimento)
+└── tickets/                    work items (open/closed/research) + INDEX.md
 ```
 
-PDFs binários moram fora do repo — sources canônicos em outros projetos
-(ex.: AulaQuantum) e corpus público em `Z:\caches\corpus\pdf2md\`. O repo
-guarda só refs (manifests YAML) e resultados de extração.
+PDFs pesados ficam **fora do repo** (zcache `Z:/caches/...` via `PDF2MD_ZCACHE`, ou sources
+privados). O tier in-repo (`corpus/examples/`) tem só excertos livres pequenos.
 
 ---
 
-## Resultado ancoragem (snapshot 2026-05-08, baseline e00)
+## Resultados (medidos)
 
-Aplicado a Nielsen & Chuang QCQI (704 páginas, 21 capítulos):
+Round-trip e telemetria sobre **Nielsen & Chuang QCQI** (704 pág, RTX 3060):
 
 | Métrica | Valor |
 |---|---:|
-| PDF original | 8.1 MB, 704 páginas |
-| MD extraído | 332,652 tokens |
-| **Round-trip (cap. 4)** | **95.09%** |
-| Multi-iteration (paper de teste) | drift 0.86% em 5 iter, **estável** |
-| Imagens (após T131) | 4.5 MB → 2.7 MB (**−38.6%**) |
-| Tempo de extração | 4145 s (~70 min, GPU RTX 3060) |
+| Round-trip textual (cap. 4, marker) | **95.09%** |
+| Multi-iteração (paper) | drift 0.86% em 5 iter (**estável**) |
+| Otimização de imagens (cap. 4) | 4.5 → 2.7 MB (**−38.6%**) |
+| Extração full-doc (marker) | ~4145 s (~70 min) |
 
-Detalhes em [`corpus/nielsen_chuang/_stats.md`](corpus/nielsen_chuang/_stats.md).
+> Os números do N&C são **resultados derivados** (métricas, não reprodução da obra),
+> usados sob licença legítima do detentor — ver [`corpus/RIGHTS.md`](corpus/RIGHTS.md). O
+> PDF original e reproduções completas ficam fora do repositório.
 
-Ablações validadas (todas em `lab/`):
-
-- **e07 Marker `--use_llm`** (llama3.2-vision/Ollama): 40× mais lento, qualidade ≈ baseline → descartado para N&C LaTeX nativo
-- **e08 Granite-Docling-258M**: 50× mais lento, imagens em base64 inline → descartado para livro; install limpo (resolve fricção Q15)
-
-Conclusão atual: **Marker baseline 95.09% é o teto operacional testado** para este PDF específico.
+Caminho CPU validado em corpus livre in-repo: pdftotext prosa WER 0.016 (pg estruturada),
+Tesseract scan impresso WER 0.052, pix2tex math display 0.80 (linha única; matriz ~0.50).
 
 ---
 
-## Origem
+## Documentação
 
-Ver [`docs/explanation/diario.md`](docs/explanation/diario.md) para timeline cronológica desde a primeira
-ideia até a separação em projeto autônomo.
+- Arquitetura: [`docs/explanation/arquitetura.md`](docs/explanation/arquitetura.md) · Filosofia: [`philosophy.md`](docs/explanation/philosophy.md)
+- Perfis medidos: [`docs/profiles/`](docs/profiles/) · Tecnologias: [`docs/reference/tecnologias.md`](docs/reference/tecnologias.md)
+- Referência de CLI: [`docs/reference/cli.md`](docs/reference/cli.md) · Escolher intent: [`docs/how-to/escolher_intent.md`](docs/how-to/escolher_intent.md)
+- Direitos do corpus: [`corpus/RIGHTS.md`](corpus/RIGHTS.md) · Timeline: [`docs/explanation/diario.md`](docs/explanation/diario.md)
+
+Licença: MIT (ver [`LICENSE`](LICENSE)).

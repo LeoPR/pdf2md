@@ -4,6 +4,14 @@
 Para detalhes por camada, ver [`arquitetura/`](arquitetura/). Perfis cross-recursos
 em [`TECNOLOGIAS.md`](../reference/tecnologias.md).*
 
+> **Atualização 2026-06-09:** este doc precede a integração do caminho CPU + roteador.
+> Já **implementado/fechado**: o ROTEADOR macro-intent (T090 — `routing.py` + `executor.py`
+> + `_profiles.py`), os PRIMARYs CPU `extractors.py` (pdftotext/tesseract), o cropper de
+> fórmula CPU `formula_cropper.py` + pix2tex, e `discovery.py` (descoberta portável). Onde a
+> Camada 1 listar pdftotext/tesseract/pix2tex como "ALT/futuro" ou a §6 listar "macro-intent
+> CLI (T090)" como pendente, **leia como entregue**. Ver [README](../../README.md) e
+> [`tickets/closed/T090…`](../../tickets/closed/T090_macro_intent_routing.md).
+
 ---
 
 ## 1. Conceito abstrato
