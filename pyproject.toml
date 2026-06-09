@@ -1,13 +1,29 @@
 [project]
 name = "pdf2md"
-version = "0.7.0"
-description = "Conversor PDF↔MD com round-trip mensurável e otimização adaptativa de imagens"
+version = "0.8.0"
+description = "Conversor PDF→MD CPU-first: roteamento por intent (rápido/qualidade), núcleo offline e round-trip mensurável"
 authors = [
     { name = "Leonardo Marques de Souza", email = "leonardo.marques.souza@gmail.com" }
 ]
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
+keywords = ["pdf", "markdown", "pdf-to-markdown", "ocr", "latex", "document-conversion", "cli", "round-trip"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Markup :: Markdown",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Utilities",
+]
 
 # Deps base do CLI. Marker/pandoc/Chrome são checados em runtime via `pdf2md doctor`,
 # não declarados aqui (cada um vive no seu venv ou no PATH, sem conflito pillow<11).
@@ -30,7 +46,9 @@ all = ["pdf2md[rtpixel,ocr]"]                                     # tudo que é 
 pdf2md = "pdf2md.cli:app"
 
 [project.urls]
-Repository = "https://github.com/leonardomdesouza/pdf2md"
+Homepage = "https://github.com/LeoPR/pdf2md"
+Repository = "https://github.com/LeoPR/pdf2md"
+Issues = "https://github.com/LeoPR/pdf2md/issues"
 
 [build-system]
 requires = ["setuptools>=64"]

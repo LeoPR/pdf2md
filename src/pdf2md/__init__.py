@@ -1,5 +1,8 @@
-"""pdf2md — conversor PDF↔MD com round-trip mensurável.
+"""pdf2md — conversor PDF→Markdown CPU-first com roteamento por intent.
 
-Subpacote ainda embrionário; expande para src/ atual quando T108 (packaging)
-acontecer. Por enquanto agrupa funções compartilhadas entre scripts standalone.
+Núcleo CPU (pdftotext/PyMuPDF) offline e determinístico; capacidades pesadas
+(marker/GPU, pix2tex, OCR, VLM) são opcionais e detectadas em runtime via
+`pdf2md doctor`. CLI em `pdf2md.cli:app`.
 """
+
+__version__ = "0.8.0"

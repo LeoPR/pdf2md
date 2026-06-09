@@ -4,12 +4,24 @@ Releases do `pdf2md` por ordem decrescente. Formato inspirado em
 [Keep a Changelog](https://keepachangelog.com/). Versionamento segue
 [SemVer](https://semver.org/) — MAJOR.MINOR.PATCH.
 
-## [Não lançado]
+## [0.8.0] — 2026-06-09
 
-- Reestruturação docs/ via [Diátaxis](https://diataxis.fr/) (4 quadrantes
-  facetados — tutorials/how-to/reference/explanation). Elimina duplicação
-  (LITERATURA v1+v2 fundidos em `explanation/literatura.md`; histórico no git).
-- `CHANGELOG.md` novo na raiz (este arquivo).
+Primeiro release no PyPI. Roteador macro-intent + preparação para publicação.
+
+### Adicionado
+- **Roteador macro-intent (T090)**: `pdf2md convert --intent rapido|qualidade|balanceado|auto|indexacao|low-resource`
+  e `pdf2md route` (dry-run). `route()` puro, profile-driven, com degradação honesta (`.degraded`/`.rationale`).
+- **Extração CPU** (`extractors.py`): pdftotext/PyMuPDF + Tesseract — caminho 100% CPU, offline, determinístico.
+- **Cropper de fórmula CPU built-in** + integração pix2tex (math display → LaTeX no caminho CPU).
+- **Gatilho de pass2 seletivo** no `--indexacao` (`pass2_warranted`: math denso OU densidade anômala).
+- **Extras pip**: `[rtpixel]` (validador visual), `[ocr]` (wrapper pytesseract), `[all]`. numpy/scipy/scikit-image
+  saíram do core (base enxuto: typer/pymupdf/pillow/psutil).
+- **`pdf2md doctor` estendido** (marker/tesseract/pix2tex/ollama) + `doctor --intent` (pipeline que o host usaria).
+- **`discovery.py`**: descoberta portável de ferramentas externas (env → PATH multi-SO → local do SO), sem paths
+  presos a uma máquina. `LICENSE` (MIT) na raiz; docs reestruturadas (Diátaxis); `CHANGELOG.md`.
+
+### Mudado
+- `--intent` substitui `--quick`/`--best` (mantidos como legado).
 
 ## [0.7.0] — 2026-05-16
 

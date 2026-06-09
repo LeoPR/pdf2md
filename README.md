@@ -73,7 +73,7 @@ quer marker/GPU) — `pdf2md doctor --intent qualidade` diz exatamente o que fal
 ## Instalação
 
 ```bash
-git clone https://github.com/leonardomdesouza/pdf2md && cd pdf2md
+git clone https://github.com/LeoPR/pdf2md && cd pdf2md
 pip install -e .                 # núcleo CPU (typer, pymupdf, pillow, psutil)
 pip install -e '.[rtpixel]'      # + validador visual (numpy/scipy/scikit-image)
 pip install -e '.[ocr]'          # + wrapper pytesseract (engine é externo)
