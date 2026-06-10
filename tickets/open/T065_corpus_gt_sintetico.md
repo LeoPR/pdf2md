@@ -105,3 +105,43 @@ design; o conteúdo de fórmula/tabela/diagrama será graduado na onda 2
 (rankings pdftotext × marker × pix2tex, Kendall-τ vs histórico real,
 reaparição da fraqueza de matrizes ~0.5) — os critérios de descarte de
 substituição continuam em aberto até lá.
+## Progresso — onda 2 (e24, 2026-06-10): concordância 4/4; eixo Tectonic disparou; 3 achados novos
+
+Marker batch (1 carga de modelo, 75 PDFs, RTX 3060; venv do marker ganhou
+`psutil` — o entry-point batch exigia e o marker_single não) × pdftotext:
+
+| categoria | pdftotext | marker | âncora histórica |
+|---|---|---|---|
+| prosa | 1.000 | 1.000 | empate alto ✓ |
+| formula_display | 0.024 | 0.973 | marker >> ✓ |
+| formula_matriz | 0.027 | 0.986 | marker >> ✓ |
+| formula_multiline | 0.040 | **0.681** | (sem âncora) |
+| formula_inline | 1.000 | 1.000 | — |
+| tabela | 0.500 | 1.000 | marker > ✓ (pdftotext = conteúdo sem estrutura) |
+| diagrama | **1.000** | **0.000** | (sem âncora) |
+| logo | **1.000** | **0.000** | (sem âncora) |
+
+**Concordância: 4/4 ancoradas** — a hipótese de substituição SEGURA para as
+camadas prosa/display/matriz/tabela (com marker×pdftotext).
+
+**Critério condicional DISPAROU (medido, não especulado):** o cropper de
+fórmulas detecta **0 regiões** no render KaTeX — detector é acoplado à
+assinatura de fonte CM/CMEX do pdflatex; o PDF sintético usa `KaTeX_Main/
+KaTeX_Math-Italic/KaTeX_Size3`. Logo o caminho pix2tex é intestável neste
+renderer e **o eixo Tectonic/pdflatex é OBRIGATÓRIO (onda 3)** para qualquer
+conclusão de fórmula-CPU no sintético. Bônus de produto: PDFs web-rendered
+(Jupyter/KaTeX) existem no mundo real e o cropper é cego a eles — candidato a
+ticket próprio (suporte multi-tipografia no detector).
+
+**Achados novos (o corpus descobrindo coisas):**
+1. **Marker degrada em multi-linha** (`aligned`/`cases`): 0.681 vs 0.97-0.99
+   em display/matriz simples — modo de falha mensurável inédito.
+2. **Inversão em diagrama/logo**: o texto vetorial dentro de figuras (labels
+   de mermaid, texto de logo SVG) é 100% recuperado pelo pdftotext e **0%
+   pelo marker** — o layout model classifica a região como figura e descarta
+   o texto interno. Implicação direta no roteamento de indexação (T092): doc
+   rico em diagramas pode indexar MELHOR pelo caminho CPU.
+3. **Escopo honesto das categorias logo/diagrama**: no sintético o texto da
+   figura permanece VETORIAL no PDF (caminho fácil); logo real rasterizado
+   (e16) é outro problema — futura variante: rasterizar os SVGs e re-embutir
+   como PNG para simular o caso raster.
