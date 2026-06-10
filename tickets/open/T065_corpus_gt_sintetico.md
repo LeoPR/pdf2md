@@ -145,3 +145,29 @@ ticket próprio (suporte multi-tipografia no detector).
    figura permanece VETORIAL no PDF (caminho fácil); logo real rasterizado
    (e16) é outro problema — futura variante: rasterizar os SVGs e re-embutir
    como PNG para simular o caso raster.
+## Progresso — onda 3 (e24, 2026-06-10): eixo Tectonic — contra-prova OK, pix2tex segue bloqueado (2º modo de falha do cropper)
+
+Tectonic 0.15.0 instalado (`Z:\bin`, external-capability). 24 fórmulas
+compiladas em CM real. Resultados:
+
+1. **Contra-prova da cegueira KaTeX: confirmada** — o cropper volta a detectar
+   regiões em tipografia CM (24/24 docs onde há detecção vs 0 em KaTeX). O
+   eixo de renderer domina o comportamento do detector, como previsto.
+2. **NOVO modo de falha do cropper (medido):** em layout minimal-article
+   denso, o merge da região expande além das fontes math e **engole prosa
+   vizinha** — o crop misto faz o pix2tex alucinar LaTeX a partir de prosa
+   (sim ~0.02 vs âncora 0.80). Fórmulas curtas (E=mc², Euler, CNOT 4×4)
+   produzem **0 regiões**. O cropper foi calibrado no espaçamento generoso de
+   lecture-notes (Preskill, e21) — banda de calibração mais estreita do que se
+   assumia, agora com DOIS modos medidos: (a) cego a fontes KaTeX; (b) merge
+   prosa+math em layout denso.
+3. **Fraqueza de matrizes (~0.5): ainda não-testável** no sintético — bloqueada
+   pelo instrumento (cropper), não pelo corpus. Harness teve 1 bug corrigido no
+   caminho (parse do output do pix2tex cortava no ":" do drive Windows).
+
+**Escopo honesto consolidado do T065 até aqui:** o corpus está VALIDADO como
+instrumento para as camadas marker×pdftotext (onda 2, 4/4) e revelou 5 achados
+de produto inéditos. A camada fórmula-CPU (cropper+pix2tex) fica pendente de
+um ticket de **robustez do cropper** (multi-tipografia KaTeX + merge limitado
+por classe de fonte) OU de variante de template menos denso (com o viés
+registrado). Promoção parcial do corpus (camadas validadas) é o próximo passo.
