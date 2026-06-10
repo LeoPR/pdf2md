@@ -209,6 +209,7 @@ row/colspan — exatamente o **teto do formato pipe**; pdftotext 0.0 em estrutur
 
 ## Documentação
 
+- Avaliação (formato artigo, medido × literatura): [`docs/explanation/avaliacao.md`](docs/explanation/avaliacao.md)
 - Arquitetura: [`docs/explanation/arquitetura.md`](docs/explanation/arquitetura.md) · Filosofia: [`philosophy.md`](docs/explanation/philosophy.md)
 - Perfis medidos: [`docs/profiles/`](docs/profiles/) · Tecnologias: [`docs/reference/tecnologias.md`](docs/reference/tecnologias.md)
 - Referência de CLI: [`docs/reference/cli.md`](docs/reference/cli.md) · Escolher intent: [`docs/how-to/escolher_intent.md`](docs/how-to/escolher_intent.md)

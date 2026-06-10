@@ -75,6 +75,7 @@ funciona do início ao fim.
 - [`arquitetura.md`](explanation/arquitetura.md) — visão de 4 camadas + sub-docs detalhados em [`arquitetura/01-05`](explanation/arquitetura/)
 - [`philosophy.md`](explanation/philosophy.md) — hierarquia de prioridades + eixo de representação + validação por fechamento recursivo + triângulo + calibração + ablação + tradeoffs + convergência
 - [`transmutos.md`](explanation/transmutos.md) — tese da família (decompilador/recompilador universal; pdf2md como instância)
+- [`avaliacao.md`](explanation/avaliacao.md) — avaliação condensada em formato de artigo (método, resultados medidos, posição na literatura, ameaças à validade)
 - [`analise_critica.md`](explanation/analise_critica.md) — revisão crítica do curso do projeto
 - [`literatura.md`](explanation/literatura.md) — compilado de literatura (revisão narrativa; fichas detalhadas em `reference/biblioteca/`)
 - [`diario.md`](explanation/diario.md) — timeline cronológica das decisões
