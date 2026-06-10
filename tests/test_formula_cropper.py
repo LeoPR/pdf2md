@@ -139,3 +139,36 @@ def test_crop_empty_pdf_raises(tmp_path, monkeypatch):
     monkeypatch.setattr("pdf2md.formula_cropper.fitz.open", lambda *a, **k: FakeDoc())
     with pytest.raises(ValueError):
         crop_formulas("whatever.pdf", tmp_path)
+
+
+# --- T192: detector multi-tipografia (KaTeX) --------------------------------
+
+def _md2pdf_tools() -> bool:
+    from pdf2md.discovery import available, find_chrome, find_pandoc
+    return available(find_pandoc()) and available(find_chrome())
+
+
+@pytest.mark.skipif(not _md2pdf_tools(), reason="pandoc/chrome ausentes")
+def test_detecta_formula_em_pdf_katex(tmp_path):
+    """e24 ondas 2-4: o detector era CEGO a fontes KaTeX (0 regiões em PDF do
+    próprio md_to_pdf). Regressão: display math em render KaTeX é detectada e
+    o crop não engole a prosa vizinha (segmento de linhas math)."""
+    from pdf2md.pdfs import md_to_pdf
+    md = tmp_path / "f.md"
+    md.write_text(
+        "# Doc\n\nUm parágrafo de prosa antes da fórmula, longo o suficiente "
+        "para ser bloco de texto corrido de verdade.\n\n"
+        "$$ H = \\frac{1}{\\sqrt{2}} \\begin{pmatrix} 1 & 1 \\\\ 1 & -1 \\end{pmatrix} $$\n\n"
+        "E mais prosa depois da fórmula, também razoavelmente comprida.\n",
+        encoding="utf-8",
+    )
+    pdf = md_to_pdf(md, tmp_path / "f.pdf")
+    regs = crop_formulas(pdf, tmp_path / "crops")
+    assert len(regs) >= 1                      # era 0 antes do T192
+    assert regs[0].crop_path.exists()
+    # crop puro: a prosa não entra no bbox (modo de falha da onda 3)
+    import fitz
+    d = fitz.open(pdf)
+    txt = d[0].get_text(clip=fitz.Rect(*regs[0].bbox))
+    d.close()
+    assert "parágrafo" not in txt and "prosa" not in txt

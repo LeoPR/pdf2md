@@ -171,3 +171,13 @@ de produto inéditos. A camada fórmula-CPU (cropper+pix2tex) fica pendente de
 um ticket de **robustez do cropper** (multi-tipografia KaTeX + merge limitado
 por classe de fonte) OU de variante de template menos denso (com o viés
 registrado). Promoção parcial do corpus (camadas validadas) é o próximo passo.
+## Progresso — onda 4 via T192 (2026-06-10): fraqueza de matrizes REAPARECE
+
+Com o cropper corrigido (T192), o teste pendente fechou: pix2tex no sintético
+dá display 0.852/matriz 0.384 (KaTeX) e 0.721/0.318 (CM) — o modo de falha
+histórico (e18/e21: 0.80/0.50) reproduz nos DOIS renderers. **Todos os
+critérios de validade do instrumento estão satisfeitos** (gate identidade 8/8;
+concordância 4/4; modos de falha reproduzidos; eixo de renderer documentado
+como adapter). Pendente para fechar o ticket: PROMOÇÃO — corpus →
+`corpus/examples/` (tier in-repo) + entradas em `docs/profiles/` (multiline,
+inversão diagrama/logo) + fixtures herméticos de teste.

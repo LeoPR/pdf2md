@@ -44,9 +44,13 @@ MIN_CHARS = 4           # texto mínimo da região (idem)
 DENSITY_MIN = 0.30      # fração de chars math (sozinha não basta; ver _is_anchor)
 COMPLEX_LINES = 5       # n_lines >= isto (com cmex) → multi-linha complexa
 
-MATH_BIG_FONT = re.compile(r"(CMEX|MSAM|MSBM|EX\d)", re.I)          # delimitadores grandes
-MATH_FONT = re.compile(r"(CMMI|CMSY|CMEX|MSAM|MSBM|EX\d|MI\d|SY\d)", re.I)
-PROSE_FONT = re.compile(r"(CMR|CMTI|CMBX|CMSL|CMTT)\d", re.I)
+# T192: família KaTeX_* incluída — PDFs web-rendered (Chrome/Jupyter, e o próprio
+# md→pdf deste pacote) usam fontes KaTeX SÓ dentro de math (prosa fica em fontes
+# CSS), então qualquer KaTeX_* é sinal math; KaTeX_Size\d são os delimitadores
+# grandes (análogo do CMEX). e24 onda 2/3: detector era cego a esses PDFs.
+MATH_BIG_FONT = re.compile(r"(CMEX|MSAM|MSBM|EX\d|KaTeX_Size\d)", re.I)
+MATH_FONT = re.compile(r"(CMMI|CMSY|CMEX|MSAM|MSBM|EX\d|MI\d|SY\d|KaTeX_)", re.I)
+PROSE_FONT = re.compile(r"(CMR|CMTI|CMBX|CMSL|CMTT)\d", re.I)  # CM-only; teste operativo é não-math
 EQNUM_RE = re.compile(r"^\(\d+(?:\.\d+)?[a-z]?\)$")
 
 
@@ -101,17 +105,20 @@ def _body_left(blocks) -> float:
     for b in blocks:
         sp = _spans(b)
         txt = "".join(s["text"] for s in sp)
-        prose = sum(1 for s in sp if PROSE_FONT.search(s["font"]))
+        # T192: prosa = maioria NÃO-math (cobre CMR do pdflatex E fontes CSS de
+        # PDFs web — SegoeUI/Times não casam com PROSE_FONT mas são prosa).
+        prose = sum(1 for s in sp if not MATH_FONT.search(s["font"]))
         if len(txt) > 40 and sp and prose >= 0.6 * len(sp):
             xs.append(b["bbox"][0])
     return min(xs) if xs else min((b["bbox"][0] for b in blocks), default=0.0)
 
 
 def _is_prose_block(b) -> bool:
-    """Bloco majoritariamente prosa de corpo (não absorver na banda da eq)."""
+    """Bloco majoritariamente prosa de corpo (não absorver na banda da eq).
+    T192: teste por NÃO-math (fontes de prosa variam entre renderers)."""
     sp = _spans(b)
     txt = "".join(s["text"] for s in sp)
-    prose = sum(1 for s in sp if PROSE_FONT.search(s["font"]))
+    prose = sum(1 for s in sp if not MATH_FONT.search(s["font"]))
     return len(txt) > 40 and bool(sp) and prose >= 0.6 * len(sp)
 
 
@@ -229,7 +236,19 @@ def detect_formula_regions(page, page_index: int = 0, raw_blocks=None) -> list[F
             if id(s) in label_ids:
                 label_boxes.append((s["text"].strip().strip("()"), s["bbox"]))
         label = next((s["text"].strip().strip("()") for s in sp if id(s) in label_ids), None)
-        body = [s for s in sp if id(s) not in label_ids]
+        # T192: SEGMENTO de linhas math, não o bloco inteiro. Em layout denso o
+        # PyMuPDF funde prosa+fórmula num bloco só (e24 onda 3: crop misto →
+        # pix2tex lixo; fórmula curta fundida → 0 regiões). Linha é "math" se tem
+        # span de fonte math; o segmento vai da 1ª à última linha math (linhas-meio
+        # sem fonte math = dígitos de matriz em CMR, ficam). Prosa nas bordas cai.
+        line_flags = [any(MATH_FONT.search(s["font"]) for s in ln["spans"]
+                          if id(s) not in label_ids) for ln in b["lines"]]
+        if not any(line_flags):
+            continue
+        lo = line_flags.index(True)
+        hi = len(line_flags) - 1 - line_flags[::-1].index(True)
+        seg_lines = b["lines"][lo:hi + 1]
+        body = [s for ln in seg_lines for s in ln["spans"] if id(s) not in label_ids]
         body_txt = "".join(s["text"] for s in body).strip()
         if not body_txt:
             continue
@@ -238,8 +257,10 @@ def detect_formula_regions(page, page_index: int = 0, raw_blocks=None) -> list[F
         math_chars = sum(len(s["text"]) for s in body if MATH_FONT.search(s["font"]))
         density = math_chars / tot
         has_cmex = any(MATH_BIG_FONT.search(s["font"]) for s in body)
-        n_lines = len(b["lines"])
-        indented = b["bbox"][0] - body_left > INDENT_PT
+        n_lines = len(seg_lines)
+        # indent do SEGMENTO (bloco fundido começa na margem da prosa; o segmento
+        # da display centrada começa deslocado — é ele que interessa).
+        indented = min(s["bbox"][0] for s in body) - body_left > INDENT_PT
         bx = [s["bbox"] for s in body]
         width = max(c[2] for c in bx) - min(c[0] for c in bx)
 
