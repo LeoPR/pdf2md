@@ -395,11 +395,32 @@ direitos — critério: publica-se o licenciado ou domínio público, não o
 apenas defensável (ver `corpus/RIGHTS.md`). Próxima parada: 0.8.1 com
 fixes de versão/proveniência.
 
+## 2026-06-10 — v0.8.1 + mermaid (T190) + corpus GT-por-construção (T065 ondas 1-2)
+
+**v0.8.1 no PyPI** (fixes de versão/proveniência pegos por smoke em container
+limpo). Review de dimensões abriu 5 tickets (T065/T075/T092/T190/T191) para os
+eixos diagrama/tabela/indexação/GT-sintético. **T190 entregue no mesmo dia**:
+mermaid no md→pdf via mermaid.js vendorado + Lua filter (e22: 20/20 render,
+determinístico; achado: diagramas altos fatiados por page-break → mitigado com
+`max-height` no CSS). **T065 ondas 1-2**: corpus 100% autoral (75 itens, 8
+categorias) rendido pelo próprio md→pdf; gate de identidade 8/8; concordância
+**4/4** com as âncoras do corpus real (marker×pdftotext). Três achados novos:
+marker degrada em `aligned`/`cases` (0.681); **inversão diagrama/logo** (texto
+vetorial em figura: pdftotext 1.0, marker 0.0 — layout model descarta texto
+interno de figuras; relevante p/ roteamento de indexação); cropper de fórmulas
+é **cego a fontes KaTeX** (0 regiões) — o critério condicional do T065
+disparou e o eixo Tectonic/pdflatex virou obrigatório (onda 3). Lição de
+instrumento: detector de render agrega TODAS as páginas (pg0-only deu
+falso-negativo 13/20 no e22).
+
 ## Próximos passos planejados
 
 Ver [`ROADMAP.md`](../../ROADMAP.md) para o quadro completo. Curto prazo:
-- T060: mini-corpus GT humano (4-6h humanas) — destrava validação
-  não-circular do round-trip.
+- T065 onda 3: eixo Tectonic/pdflatex — destrava cropper+pix2tex no sintético
+  (reaparição da fraqueza de matrizes ~0.5) e a promoção do corpus.
+- T075 (TEDS tabelas) e T092 (proxies de indexação) — corpus já pronto.
+- T060: mini-corpus GT humano (4-6h humanas) — agora focado em docs REAIS
+  (tier privado); o GT público migra para o sintético do T065.
 - T132: integrar potrace para vetorização SVG.
 - Q11 AcroForm pipeline: integrar `pypdf.get_fields()` em `src/` para
   PDFs de formulário (achado de e05).
