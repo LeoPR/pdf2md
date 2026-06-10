@@ -1,6 +1,6 @@
 # Pipeline — orquestração
 
-*Como os scripts em [`../../src/`](../../../src/) se compõem nas 4 camadas. Ver [`../ARQUITETURA.md`](../ARQUITETURA.md).*
+*Como os scripts em [`../../src/`](../../../src/) se compõem nas 4 camadas. Ver [`../arquitetura.md`](../arquitetura.md).*
 
 ---
 

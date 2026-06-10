@@ -1,6 +1,6 @@
 # Camada 3 — Reconstrução (MD → PDF)
 
-*MD canônico → PDF visualizável. Fecha o ciclo de round-trip (Camada 4). Ver [`../ARQUITETURA.md`](../ARQUITETURA.md) para o contexto.*
+*MD canônico → PDF visualizável. Fecha o ciclo de round-trip (Camada 4). Ver [`../arquitetura.md`](../arquitetura.md) para o contexto.*
 
 ---
 

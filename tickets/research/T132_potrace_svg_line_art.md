@@ -60,4 +60,4 @@ pip install pypotrace pillow scikit-image
 
 - Frente D (otimização de representação)
 - Sub-ticket de [T130](T130_image_optimization.md) — nível 3 da decisão tree
-- Pode habilitar [T180](T180_reconstrucao_vetorial_imagens.md): SVG limpo facilita reconstrução vetorial textual
+- Pode habilitar [T180](../open/T180_reconstrucao_vetorial_imagens.md): SVG limpo facilita reconstrução vetorial textual

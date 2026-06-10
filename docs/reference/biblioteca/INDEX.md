@@ -97,14 +97,14 @@ Glossário completo em [`glossario.md`](glossario.md).
 |---|---|---|
 | [`../METRICS.md`](../metricas.md) | Painel de métricas adotado | `metricas.md` (M1, M2, M3, M4) |
 | [`../PHILOSOPHY.md`](../../explanation/philosophy.md) | Hierarquia conteúdo > estrutura > otimização > formato | — |
-| [`../ARQUITETURA.md`](../../explanation/arquitetura.md) | Pipeline atual (Marker + Pandoc + Chrome + KaTeX) | `ferramentas.md` |
+| [`arquitetura.md`](../../explanation/arquitetura.md) | Pipeline atual (Marker + Pandoc + Chrome + KaTeX) | `ferramentas.md` |
 | [`../LICENSING.md`](../corpus/licensing.md) | GPL / AGPL / MIT / Apache implicações | `ferramentas.md` |
 | `../../tickets/closed/T030_*` | Compilação literatura v1 | gera `LITERATURA.md` |
 | `../../tickets/closed/T031_*` | Definição de métricas | gera `../METRICS.md` |
 | `../../tickets/closed/T040_*` | Corpus canônico | usa `benchmarks.md` |
 | `../../tickets/closed/T050_*` | Baseline marker round-trip 95.09% | usa `metricas.md` |
 | `../../tickets/closed/T071_*` | Heurística bloat_ratio | adicionou bloat_ratio em `metricas.md` |
-| `../../lab/e03_atkins_wilson_scan/` | Validou bloat em scan_image_only e slides | gerou `bloat_ratio` |
+| `lab/e03_atkins_wilson_scan` | Validou bloat em scan_image_only e slides | gerou `bloat_ratio` |
 
 ---
 

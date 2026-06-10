@@ -1,5 +1,7 @@
 # Protocolo da bancada `pdf2md`
 
+> **Nota:** Os experimentos `eNN` (e00–e21) rodam numa **bancada interna** (`lab/`) que não é versionada neste repositório público; hipóteses, critérios e vereditos estão preservados em `tickets/`, e os números promovidos vivem em `docs/profiles/`, `docs/reference/tecnologias.md` e no `CHANGELOG.md`.
+
 Regras de funcionamento do `lab/`, separação entre bancada suja e bancada limpa, e relação com tickets.
 
 ## Duas bancadas
@@ -18,7 +20,7 @@ Regras de funcionamento do `lab/`, separação entre bancada suja e bancada limp
 2. **Cada experimento tem seu venv** em `Z:\venvs\pdf2md_lab_eNN`.
 3. **Hipótese e critério escritos antes** — `lab/eNN/README.md` preenchido em "Hipótese", "Critério de promoção", "Critério de descarte" antes de rodar qualquer coisa.
 4. **Veredito explícito no fim** — `RESULT.md` registra promoção/descarte/congelamento, sem zona cinza.
-5. **Limpar a mesa é primeira classe** — ao descartar, deletar pasta + venv. A trilha histórica fica em git e (opcionalmente) em `lab/_archive/`.
+5. **Limpar a mesa é primeira classe** — ao descartar, deletar pasta + venv. A trilha histórica fica na bancada interna do autor (não no repositório público) e (opcionalmente) em `lab/_archive/`.
 
 ## Ciclo de vida de um experimento
 

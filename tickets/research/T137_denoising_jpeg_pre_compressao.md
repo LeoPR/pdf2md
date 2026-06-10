@@ -14,7 +14,7 @@ kind: experimento
 ## Contexto
 
 Observação do usuário (2026-05-08): a logo da Cambridge University Press
-em [`00_front_matter/images/_page_0_Picture_3.png`](../../pesquisa_geral/livros/Quantum_Computation_and_Quantum_Information/00_front_matter/images/_page_0_Picture_3.png)
+em `00_front_matter/images/_page_0_Picture_3.png` *(imagem no source privado N&C — ver corpus/RIGHTS.md)*
 mostra **pixels dispersos pretos** no fundo branco ao redor das letras —
 clássicos artefatos de **JPEG ringing/mosquito noise**.
 
@@ -79,7 +79,7 @@ elementos repetitivos como logos de editora que aparecem em muitos
 livros.
 
 > **Atualização 2026-05-10**: este Nível 3 foi **promovido a ticket
-> próprio [T180](T180_reconstrucao_vetorial_imagens.md)** (Frente E
+> próprio [T180](../open/T180_reconstrucao_vetorial_imagens.md)** (Frente E
 > da hierarquia, [PHILOSOPHY eixo de representação](../../docs/explanation/philosophy.md#eixo-de-representação)
 > Nível 4). T137 mantém o foco em **denoising** (níveis 1-2 — filtros
 > clássicos e ML JPEG-specific). A reconstrução vetorial é tratada
@@ -88,7 +88,7 @@ livros.
 ## Plano de prototipagem (quando ativar)
 
 1. **Sample**: pegar 5-10 imagens problemáticas representativas
-   - Logo Cambridge ([referência exata acima](../../pesquisa_geral/livros/Quantum_Computation_and_Quantum_Information/00_front_matter/images/_page_0_Picture_3.png))
+   - Logo Cambridge *(imagem no source privado N&C — ver corpus/RIGHTS.md)*
    - Diagramas de circuito quântico (cap. 4)
    - Texto puro com artefatos
    - Fórmulas-como-imagem (slides PPTX)

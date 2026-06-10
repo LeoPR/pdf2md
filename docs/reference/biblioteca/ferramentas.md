@@ -15,7 +15,7 @@
 - **Refs**: [repo](https://github.com/datalab-to/marker) · [benchmarks](https://github.com/datalab-to/marker/tree/master/benchmarks) · [releases](https://github.com/datalab-to/marker/releases)
 - **Sumário**: pipeline modular Surya (OCR + layout + table + equation) com opção `--use_llm`. Throughput alto. Math em LaTeX. Block-level OCR é default a partir de v1.10.x.
 - **Status no projeto**: **adotado** (extrator atual)
-- **Relação com**: backend é [Surya](#surya); foi o baseline em T050 (round-trip 95.09% no N&C cap. 4); `--use_llm` recomendado para AcroForm (ver [`papers.md` § forms](papers.md#formnet)); aparece em [`../ARQUITETURA.md`](../../explanation/arquitetura.md).
+- **Relação com**: backend é [Surya](#surya); foi o baseline em T050 (round-trip 95.09% no N&C cap. 4); `--use_llm` recomendado para AcroForm (ver [`papers.md` § forms](papers.md#formnet)); aparece em [`arquitetura.md`](../../explanation/arquitetura.md).
 - **Conflito v1×v2**: v1 mencionava 1.10.x genérico; v2 fixa v1.10.2 (31-jan-2026) com Surya 0.17.1.
 
 ### MinerU 2.5
@@ -325,7 +325,7 @@
 - **Refs**: [pandoc.org](https://pandoc.org/MANUAL.html) · [katex.org](https://katex.org/)
 - **Sumário**: Robusto, 95.09% round-trip no N&C cap. 4 (T050). KaTeX é subset do LaTeX, suficiente para 99% do que aparece em livros de QC. HTML/CSS, sem "look" LaTeX mas fiel.
 - **Status no projeto**: **adotado** (reconstrutor atual)
-- **Relação com**: usado no pipeline ([`../ARQUITETURA.md`](../../explanation/arquitetura.md)); falha em `\xymatrix` ou `tikz`; potencial substituição por [Tectonic](#tectonic) em Q8.
+- **Relação com**: usado no pipeline ([`arquitetura.md`](../../explanation/arquitetura.md)); falha em `\xymatrix` ou `tikz`; potencial substituição por [Tectonic](#tectonic) em Q8.
 
 ### Pandoc + pdflatex / lualatex
 

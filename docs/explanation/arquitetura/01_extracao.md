@@ -1,6 +1,6 @@
 # Camada 1 — Extração
 
-*PDF → texto + estrutura + imagens + fórmulas. Ver [`../ARQUITETURA.md`](../ARQUITETURA.md) para o contexto.*
+*PDF → texto + estrutura + imagens + fórmulas. Ver [`../arquitetura.md`](../arquitetura.md) para o contexto.*
 
 ---
 

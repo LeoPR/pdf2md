@@ -1,6 +1,6 @@
 # Camada 4 — Métrica e validação
 
-*MD₁ vs MD₂ → similarity, divergência categorizada. Decisão de métricas em [`../METRICS.md`](../../reference/metricas.md); contexto em [`../ARQUITETURA.md`](../ARQUITETURA.md).*
+*MD₁ vs MD₂ → similarity, divergência categorizada. Decisão de métricas em [`../METRICS.md`](../../reference/metricas.md); contexto em [`../arquitetura.md`](../arquitetura.md).*
 
 ---
 

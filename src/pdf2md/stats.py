@@ -646,7 +646,8 @@ def render_md(stats: dict) -> str:
                 "MD₁ tem pouco conteúdo → marker re-OCR-iza o PDF reconstruído e "
                 "inventa fórmulas/texto. Observado em IBM lesson 1 (3.4×, rt 28.9%) "
                 "e Wilson 1800 (7.7×, rt 13.6%). Não é mau extract — é descompasso "
-                "entre input pobre e re-OCR sem âncora. Ver `lab/e03_atkins_wilson_scan/`.",
+                "entre input pobre e re-OCR sem âncora (validado no experimento e03, "
+                "bancada interna).",
                 "",
             ]
         cats = rt.get("divergence_categories", {})

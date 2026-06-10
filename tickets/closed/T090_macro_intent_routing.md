@@ -380,5 +380,5 @@ limitações mapeadas, fora do escopo do roteador — não bloqueiam o fechament
 
 - Frente A (validação) + UX. Substitui `--quick`/`--best` em [cli.py](../../src/pdf2md/cli.py).
 - Consome [docs/profiles/ativo/](../../docs/profiles/ativo/) (7 perfis) — o **mapa**.
-- Depende de [T085](T085_telemetry_module.md) (instrumento ✓) e [T060](T060_mini_corpus_gt_humano.md) (GT N=7 ✓ — qualidade dos perfis ancorada).
+- Depende de [T085](T085_telemetry_module.md) (instrumento ✓) e [T060](../open/T060_mini_corpus_gt_humano.md) (GT N=7 ✓ — qualidade dos perfis ancorada).
 - Articula [[arquitetura-instrumento-mapa-roteador]], [[caminho-executivo-vs-cientifico]], [[arquitetura-delta-e-ideal-vs-pratico]].

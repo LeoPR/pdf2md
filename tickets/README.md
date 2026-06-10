@@ -112,14 +112,19 @@ o ticket numa de 5 faixas:
 | `infra` | Setup, manifests, lab protocol, venv, gitignore, scripts utilitários, corpus | T020, T040, T050 |
 | `pipeline` | Pipeline atual (marker, restructure, round-trip, stats) — código estável | T101-T106, T107, T108 |
 | `imagens` | Decisões arquiteturais sobre imagens (T130 family) | T130, T131 |
-| `experimento` | Hipóteses testáveis com critério mensurável; rodam em [`../lab/`](../lab/) | T410, T420, T450 |
+| `experimento` | Hipóteses testáveis com critério mensurável; rodam em `lab/` | T410, T420, T450 |
 | `decisao` | Discussões arquiteturais, categorias, princípios de design | T400, T401, T440, T451 |
 
 O índice agrupado por `kind:` fica em [`INDEX.md`](INDEX.md).
 
 Hipóteses concretas (= `kind: experimento`) idealmente vivem em
-[`../lab/eNN_<slug>/`](../lab/), com o ticket apenas referenciando o
+`lab/eNN_<slug>/`, com o ticket apenas referenciando o
 experimento. Tickets de `decisao` ficam aqui — não vão pro lab.
+
+Os experimentos `eNN` (e00–e21) rodam numa **bancada interna** (`lab/`) que
+não é versionada neste repositório público; hipóteses, critérios e vereditos
+estão preservados em `tickets/`, e os números promovidos vivem em
+`docs/profiles/`, `docs/reference/tecnologias.md` e no `CHANGELOG.md`.
 
 ## Rotação para `_archive`
 

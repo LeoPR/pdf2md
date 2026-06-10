@@ -5,7 +5,7 @@
 > RAM). Valores absolutos variam por máquina; razões e complexidades não.
 > Articula o "mapa" da arquitetura `instrumento → mapa → roteador` (ver
 > [PHILOSOPHY](../explanation/philosophy.md), tickets [T085](../../tickets/closed/T085_telemetry_module.md),
-> [T090](../../tickets/research/T090_macro_intent_routing.md)).*
+> [T090](../../tickets/closed/T090_macro_intent_routing.md)).*
 
 ## Sumário executivo
 
@@ -58,9 +58,9 @@ Recomendação inicial de **macro-intents** (T090):
 
 | Tool | Lab | Resultado | Por quê descartado | Recuperável? |
 |---|---|---|---|---|
-| Marker `--use_llm` + `llama3.2-vision:11b` via Ollama | [e07](../../lab/e07_marker_llm/RESULT.md) | descartado | 40× mais lento, ganho zero em N&C; bugs do Ollama (servidor crasha) | Sim — outro modelo VLM via outra tool poderia render |
-| MinerU 2.5-Pro (Q15) | [e06](../../lab/e06_mineru25_pro/RESULT.md) | **blocked** | uv install OK; FastAPI server crasha silenciosamente em Win+RTX 3060 | Investigação aberta — pode rodar em Linux ou via API direta |
-| Granite-Docling-258M (Q16) | [e08](../../lab/e08_granite_docling/RESULT.md) | descartado | tempo 50× pior; imagens em base64 inline; LaTeX verboso | Sim para casos curtos / single-file output / sem GPU |
+| Marker `--use_llm` + `llama3.2-vision:11b` via Ollama | `e07` | descartado | 40× mais lento, ganho zero em N&C; bugs do Ollama (servidor crasha) | Sim — outro modelo VLM via outra tool poderia render |
+| MinerU 2.5-Pro (Q15) | `e06` | **blocked** | uv install OK; FastAPI server crasha silenciosamente em Win+RTX 3060 | Investigação aberta — pode rodar em Linux ou via API direta |
+| Granite-Docling-258M (Q16) | `e08` | descartado | tempo 50× pior; imagens em base64 inline; LaTeX verboso | Sim para casos curtos / single-file output / sem GPU |
 
 **Padrão metodológico:** todos os descartes nomeiam o modelo+tool+corpus específico. "LLM em geral" não é avaliado — só `llama3.2-vision:11b` via Ollama em N&C cap 4. Ver [feedback memory escopo-de-conclusao](#).
 

@@ -278,7 +278,7 @@ Métrica que aloca cada palavra numa grid 2D (row, horizontal cell) e mede simil
 
 ### 7.1 Q15 (MinerU 2.5-Pro) → blocked operacional
 
-[Lab e06](../../lab/e06_mineru25_pro/RESULT.md): 3 tentativas em Win+RTX3060.
+Lab `e06` (`lab/e06_mineru25_pro`): 3 tentativas em Win+RTX3060.
 Install OK via `uv` (após primeiro falhar com `pip` em loop de uvicorn);
 mas FastAPI server interno crasha silenciosamente após download dos
 modelos. Não foi possível obter outputs.
@@ -288,7 +288,7 @@ fariam sentido em ambiente Linux ou via API REST direta.
 
 ### 7.2 Q16 (Granite-Docling-258M) → respondido parcialmente
 
-[Lab e08](../../lab/e08_granite_docling/RESULT.md): install limpo via `uv pip install docling`,
+Lab `e08` (`lab/e08_granite_docling`): install limpo via `uv pip install docling`,
 1 comando, sem servidor. Rodou foreground transparente. **Descartado
 para N&C** (50× mais lento que Marker GPU, imagens em base64 inline,
 LaTeX verboso) mas **viable para casos curtos / single-file / sem GPU**.
@@ -300,7 +300,7 @@ LaTeX verboso) mas **viable para casos curtos / single-file / sem GPU**.
 ### 7.3 Q7 (e07) descartado — não estava no backlog Q11-17 original mas vale registrar
 
 Marker `--use_llm` + Ollama `llama3.2-vision:11b` no cap 4 N&C
-([Lab e07](../../lab/e07_marker_llm/RESULT.md)): 40× mais lento que Marker
+(Lab `e07`, `lab/e07_marker_llm`): 40× mais lento que Marker
 base, ganho zero. **Descartado para esse modelo específico em Ollama**.
 
 **Conclusão metodológica:** "LLM" é categoria com centenas de modelos;

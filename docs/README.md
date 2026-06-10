@@ -43,7 +43,7 @@ arquivo. Não existe `literatura_v2.md` — existe `literatura.md` com `git log`
 
 ## Mapa atual
 
-### 🎓 [tutorials/](tutorials/) — aprender o sistema
+### 🎓 tutorials/ (em construção) — aprender o sistema
 
 *(placeholder — em construção)* Documentos passo-a-passo orientados a
 quem nunca usou o `pdf2md`. Cada tutorial é uma sessão completa que
@@ -106,7 +106,9 @@ não duplicar.
 | [`../ROADMAP.md`](../ROADMAP.md) | raiz | Plano macro de execução |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | raiz | Releases por versão |
 | [`../tickets/`](../tickets/) | raiz | Work items (não são docs) |
-| [`../lab/`](../lab/) | raiz | Experimentos descartáveis |
+| `lab/` | bancada interna (não versionada) | Experimentos descartáveis |
+
+Os experimentos `eNN` (e00–e21) rodam numa **bancada interna** (`lab/`) que não é versionada neste repositório público; hipóteses, critérios e vereditos estão preservados em `tickets/`, e os números promovidos vivem em `docs/profiles/`, `docs/reference/tecnologias.md` e no `CHANGELOG.md`.
 
 ---
 

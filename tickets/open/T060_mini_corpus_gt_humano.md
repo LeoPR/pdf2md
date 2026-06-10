@@ -24,6 +24,10 @@ Mudanças concretas:
 - Esforço estimado: 2-3h humano (vs 4-6h)
 - Arxiv 1706/2106 + tabela CDC + Trotter movidos para T060.2 condicional
 
+> **Nota 2026-06-09**: os diretórios de GT `corpus/_gt/nielsen_chuang_cap4/` e
+> `corpus/_gt/preskill_ph219_ch5/` são **privados** desde 2026-06-09 (fontes
+> proprietárias/não-redistribuíveis; ver `corpus/RIGHTS.md`).
+
 ## Contexto
 
 [`docs/explanation/literatura.md`](../../docs/explanation/literatura.md) §4 e [`docs/reference/metricas.md`](../../docs/reference/metricas.md) reconhecem que **round-trip não substitui GT humano** para validar fidelidade real do pipeline. Round-trip captura estabilidade (idempotência), mas erros silenciosos por simetria entre extrator e reconstrutor passam despercebidos.
@@ -84,7 +88,7 @@ Cada página GT acompanhada de:
 - ✅ `corpus/_gt/_prefill.py` gera drafts via PyMuPDF text-extract para
   8 páginas em 5 docs (cobrindo 5 categorias-meta)
 - ✅ 8 `pg<NN>.expected.md.draft` + 8 `pg<NN>.note.md` criados
-- ✅ `lab/e15_gt_validation/` com:
+- ✅ `lab/e15_gt_validation/` (bancada interna) com:
   - `compare_gt.py` — WER-prosa com mascaramento + count-snapshots por categoria
   - `run.py` — itera sobre `.expected.md` curados, compara com extração
     via PyMuPDF cache, gera relatório JSON + MD
@@ -107,7 +111,7 @@ Fluxo por página: abrir PDF + draft lado a lado, comparar parágrafo a
 parágrafo, corrigir, anotar desvios no `.note.md`, renomear de `.draft`
 para `.expected.md`. ~30-45min por página math-heavy.
 
-### Próxima ação (automatizada, após GT pronto)
+### Próxima ação (automatizada, após GT pronto — bancada interna)
 
 ```powershell
 cd lab/e15_gt_validation
@@ -120,7 +124,7 @@ Reporta WER-prosa + count-diffs por página. Veredito:
 
 ### Limitação conhecida (sub-ticket potencial)
 
-`extract_hyp_for_page` em `lab/e15/run.py` usa PyMuPDF text-extract direto
+`extract_hyp_for_page` em `lab/e15/run.py` (bancada interna) usa PyMuPDF text-extract direto
 como hipótese, não marker output. Em fase 2 (após validação inicial), pode-se
 re-extrair via `marker_single --page_range N-N` para isolar o efeito do
 marker. PyMuPDF extract puro serve como **baseline mais conservador** (sem

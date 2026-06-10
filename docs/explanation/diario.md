@@ -381,6 +381,20 @@ docs "meta" até features concretas (T060/T132/T160) saírem do roadmap.
 **Gap crítico identificado**: T060 (GT humano em mini-corpus, 5-10 pgs)
 destrava T072, T410, Q13, Q14. 4-6h humanas resolvem; valor permanente.
 
+## 2026-06-09 — v0.8.0 no PyPI + repo público enxuto
+
+Marco: primeiro release público. **v0.8.0 publicado no PyPI** como
+`pdf2md-tool` — o slug `pdf2md` estava reservado por outra conta; comando
+CLI e nome de import continuam `pdf2md`. O roteador macro-intent (T090)
+saiu do papel e foi **entregue** nesse release. Junto com a publicação, a
+bancada `lab/` tornou-se **interna** (não versionada no repo público) —
+hipóteses, critérios e vereditos seguem em `tickets/`, e os números
+promovidos vivem em `docs/` e no `CHANGELOG.md`. O GT verbatim de N&C e
+Preskill foi movido para o tier **privado** do corpus por decisão de
+direitos — critério: publica-se o licenciado ou domínio público, não o
+apenas defensável (ver `corpus/RIGHTS.md`). Próxima parada: 0.8.1 com
+fixes de versão/proveniência.
+
 ## Próximos passos planejados
 
 Ver [`ROADMAP.md`](../../ROADMAP.md) para o quadro completo. Curto prazo:

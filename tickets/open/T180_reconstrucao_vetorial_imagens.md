@@ -48,7 +48,7 @@ para começar implementação, mesmo que XL em escopo.
 
 ## Contexto
 
-A imagem da logo Cambridge University Press em `corpus/nielsen_chuang/00_front_matter/images/_page_0_Picture_3.png` foi observação inicial ([T137](T137_denoising_jpeg_pre_compressao.md) nível 3): **se soubéssemos a fonte, o texto e a geometria, poderíamos re-renderizar perfeitamente, deixando só o brasão como bitmap pequeno**.
+A imagem da logo Cambridge University Press em `corpus/nielsen_chuang/00_front_matter/images/_page_0_Picture_3.png` foi observação inicial ([T137](../research/T137_denoising_jpeg_pre_compressao.md) nível 3): **se soubéssemos a fonte, o texto e a geometria, poderíamos re-renderizar perfeitamente, deixando só o brasão como bitmap pequeno**.
 
 Isso é o **Nível 4 do eixo de representação** ([PHILOSOPHY](../../docs/explanation/philosophy.md)): texto vetorial + brasão residual.
 
@@ -127,8 +127,8 @@ Reconstrução de logos comerciais via re-render do nome **não viola direito au
 - **Dependência de T160 removida pós-e16**: VLM faz OCR no escopo small-image
 - Promovido a partir de T137 nível 3 (que era especulativo)
 - Habilita parte de T440 (MD como transporte — assets vetoriais são naturalmente compactos)
-- Apoiado empiricamente em [`lab/e16_image_decompose/notes.md`](../../lab/e16_image_decompose/notes.md)
-- Limite externo empírico em [`lab/e17_vlm_full_page/notes.md`](../../lab/e17_vlm_full_page/notes.md):
+- Apoiado empiricamente em `lab/e16_image_decompose/notes.md` (bancada interna)
+- Limite externo empírico em `lab/e17_vlm_full_page/notes.md` (bancada interna):
   VLM não escala para full-page; não tentar generalizar T180 além de small-image
 
 ## Origem da ideia

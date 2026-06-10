@@ -37,7 +37,7 @@ Exemplo de saída desejada:
 - [x] `stats.py` atualizado — agregação `images_by_format` e `images_bytes_by_format` em `folder_metrics()`
 - [x] Render no `_stats.md` em seção `### Breakdown por formato` (após o resumo de imagens)
 - [x] Campos `images_by_format` e `images_bytes_by_format` em `_stats.json`
-- [x] Validado em 3 PDFs do experimento [`lab/e01_baseline_corpus_categorias/`](../../lab/e01_baseline_corpus_categorias/) — todos têm a seção, todos mostram 100% JPEG (output default do marker)
+- [x] Validado em 3 PDFs do experimento `lab/e01_baseline_corpus_categorias/` — todos têm a seção, todos mostram 100% JPEG (output default do marker)
 
 ## Resultado
 
@@ -46,7 +46,7 @@ Implementação em [`src/stats.py`](../../src/stats.py): ~25 linhas adicionadas.
 - **Agregação de bytes por formato**: loop secundário em `folder_metrics()` (linhas ~222-232) lê filesystem por chapter para obter bytes por formato com precisão. Não confia em `avg_bytes * count` que seria incorreto.
 - **Render**: substitui a lista bullet anterior por tabela markdown com 3 colunas (Count, Bytes, % bytes). Mantém fallback para o caso de `totals` não ter `images_by_format`.
 
-Validação via [`lab/e01_baseline_corpus_categorias/_stats_*.md`](../../lab/e01_baseline_corpus_categorias/) — todos 3 docs mostram a tabela. Output típico:
+Validação via `lab/e01_baseline_corpus_categorias/_stats_*.md` — todos 3 docs mostram a tabela. Output típico:
 
 ```
 ### Breakdown por formato
@@ -70,7 +70,7 @@ Promovido direto — trabalho mecânico, baixo risco, validado em 3 PDFs reais.
 ## Conexão
 
 - Frente D (otimização de representação) — telemetria
-- Sub-ticket de [T130](T130_image_optimization.md)
+- Sub-ticket de [T130](../research/T130_image_optimization.md)
 - Pequeno escopo, ~30 min de trabalho
 
 ## Esforço estimado

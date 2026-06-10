@@ -6,13 +6,13 @@
 
 | Categoria | OK para repo público? | Notas |
 |---|---|---|
-| **Código** (`src/`, `lab/*/run.ps1`, etc.) | ✅ MIT (já em `pyproject.toml`) | Reescrito do zero |
+| **Código** (`src/`, `lab/*/run.ps1` *(bancada interna, não versionada)*, etc.) | ✅ MIT (já em `pyproject.toml`) | Reescrito do zero |
 | **Documentação** (`docs/`, `README`, `ROADMAP`, etc.) | ✅ Próprio | Inclui referências a obras de terceiros (fair use citacional) |
 | **Tickets** (`tickets/`) | ✅ Próprio | Notas internas, sem conteúdo proprietary |
 | **Manifests** (`corpus/_*/MANIFEST.md`) | ✅ Próprio | URLs + sha256 + metadados, sem PDFs |
 | **PDFs originais (zcache)** | ⛔ Excluídos via `.gitignore` | `corpus/_sources/*` e `corpus/_canonical/*` ignorados; ref via `corpus/registry.py` |
 | **`corpus/examples/` (in-repo)** | ✅ Livre | Excertos public-domain / US-gov / arXiv — prova pronta, ~0.83MB. Ver `corpus/examples/README.md` |
-| **Extrações no `lab/`** | ⚠️ Caso a caso | Evidência sumária OK (`_stats_*.md`); MD inteiro NÃO |
+| **Extrações no `lab/`** *(bancada interna, não versionada)* | ⚠️ Caso a caso | Evidência sumária OK (`_stats_*.md`); MD inteiro NÃO |
 | **`corpus/nielsen_chuang/`** | ✅ **RESOLVIDO (2026-05-31)** | Purgado do histórico via `git filter-repo`. Ver `corpus/RIGHTS.md` |
 | **Resultados derivados N&C** | ✅ Com declaração | Excertos GT + métricas OK público COM declaração de direito (`corpus/RIGHTS.md`) |
 
@@ -24,7 +24,7 @@
 
 **Manifests de corpus** — listam URLs e sha256, não conteúdo. Schema declara licenças de cada source.
 
-**Resultados de extração em `lab/`** (a partir de `e00_baseline_marker` em diante):
+**Resultados de extração em `lab/`** (bancada interna, não versionada; a partir de `e00_baseline_marker` em diante):
 - `_stats_*.md/json` — apenas telemetria (tokens, similarity, divergence counts), zero conteúdo
 - `_md1_acroform_excerpt.md` (e05) — nomes de form-fields do IRS Form 1040 (**US Government Work, public domain**)
 - `_atkins_md1_extract_ok.md` (e03) — extração parcial de Wilson 1800 / Atkins 1874 (**public domain**, pré-1928)

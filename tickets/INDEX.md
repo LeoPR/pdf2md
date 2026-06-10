@@ -72,7 +72,10 @@ Decisões arquiteturais sobre tratamento de imagens extraídas.
 
 ## `experimento` — Hipóteses testáveis
 
-Cada um destes tem ou terá um experimento correspondente em [`../lab/eNN_/`](../lab/).
+Cada um destes tem ou terá um experimento correspondente em `lab/eNN_/` — uma
+**bancada interna** que não é versionada neste repositório público; hipóteses,
+critérios e vereditos estão preservados em `tickets/`, e os números promovidos
+vivem em `docs/profiles/`, `docs/reference/tecnologias.md` e no `CHANGELOG.md`.
 
 | Ticket | Status | Título | Experimento sugerido | Frente |
 |---|---|---|---|---|
@@ -136,7 +139,7 @@ Próximas famílias de experimentos (alinhadas com [Frentes do ROADMAP](../ROADM
   - [T160](research/T160_ocr_semantico_generalizado.md): OCR semântico generalizado (núcleo da Frente B)
   - [T060](open/T060_mini_corpus_gt_humano.md): mini-corpus de GT humano (Frente A; valida se round-trip ≈ WER vs GT real)
 - **Frente C/D — captura estrutural + otimização**:
-  - [T132](research/T132_potrace_svg_line_art.md), [T133](research/T133_detector_de_formula.md), [T134](research/T134_pix2tex_formulas.md), [T135](research/T135_ssim_gate_qualidade.md), [T136](open/T136_breakdown_formato_stats.md)
+  - [T132](research/T132_potrace_svg_line_art.md), [T133](research/T133_detector_de_formula.md), [T134](research/T134_pix2tex_formulas.md), [T135](research/T135_ssim_gate_qualidade.md), [T136](closed/T136_breakdown_formato_stats.md)
 - **Família `lab/e1X_*`** (T410): comparação Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling
 - **Frente E — ambição**: [T180](open/T180_reconstrucao_vetorial_imagens.md) (reconstrução vetorial — escopo small-image pós-e16/e17)
 

@@ -13,7 +13,7 @@ kind: pipeline
 
 ## Contexto
 
-O experimento [`lab/e03_atkins_wilson_scan/`](../../lab/e03_atkins_wilson_scan/) descobriu um **padrão de degradação não-óbvio** do pipeline: quando o MD₁ extraído pelo marker é esparso (pouco conteúdo por página), o re-OCR do PDF intermediário **alucina** muito mais conteúdo no MD₂, resultando em round-trip catastrófico.
+O experimento `lab/e03_atkins_wilson_scan/` descobriu um **padrão de degradação não-óbvio** do pipeline: quando o MD₁ extraído pelo marker é esparso (pouco conteúdo por página), o re-OCR do PDF intermediário **alucina** muito mais conteúdo no MD₂, resultando em round-trip catastrófico.
 
 Casos confirmados:
 

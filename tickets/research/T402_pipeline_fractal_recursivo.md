@@ -39,7 +39,7 @@ diagrama_line_art ─extract(potrace)─▶ SVG ─reconstruct(browser)─▶ ra
 
 Tickets [T132](T132_potrace_svg_line_art.md) /
 [T133](T133_detector_de_formula.md) / [T134](T134_pix2tex_formulas.md) /
-[T180](T180_reconstrucao_vetorial_imagens.md) implementam pontas
+[T180](../open/T180_reconstrucao_vetorial_imagens.md) implementam pontas
 individuais desse padrão sem nomear que **são instâncias do mesmo
 template recursivo**. Sem articulação, viram features cosméticas; com
 articulação, viram peças composicionais de uma arquitetura coerente.
@@ -79,7 +79,7 @@ dos erros locais por bbox/artefato. Triângulo macro/médio/micro
 
 - [T132](T132_potrace_svg_line_art.md) precisa ter `measure(raster, raster_from_svg)` antes de ativar — não só "gerar SVG"
 - [T134](T134_pix2tex_formulas.md) precisa ter CDM + compile-OK como gate, não só "extrair LaTeX"
-- [T180](T180_reconstrucao_vetorial_imagens.md) já tem critério SSIM + texto-WER explícitos — modelo bom
+- [T180](../open/T180_reconstrucao_vetorial_imagens.md) já tem critério SSIM + texto-WER explícitos — modelo bom
 - Refatorar API comum: `pdf2md/artifacts/<type>/{extract,reconstruct,measure}.py`?
   (decisão adiada até segunda instância — over-engineering hoje)
 
@@ -116,5 +116,5 @@ dos erros locais por bbox/artefato. Triângulo macro/médio/micro
 - Articula [PHILOSOPHY §"Validação por fechamento"](../../docs/explanation/philosophy.md#validação-por-fechamento-recursivo-de-ciclos)
 - Articula [META_TRANSMUTOS §"Pré-condições estruturais"](../../docs/explanation/transmutos.md#pré-condições-estruturais)
 - Organiza [T132](T132_potrace_svg_line_art.md), [T133](T133_detector_de_formula.md),
-  [T134](T134_pix2tex_formulas.md), [T180](T180_reconstrucao_vetorial_imagens.md)
+  [T134](T134_pix2tex_formulas.md), [T180](../open/T180_reconstrucao_vetorial_imagens.md)
 - Depende de [T401](../open/T401_documentar_hierarquia_de_prioridades.md) (já documentado em PHILOSOPHY)

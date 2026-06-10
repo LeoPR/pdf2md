@@ -1,6 +1,6 @@
 # Camada 2 — Otimização de representação
 
-*Imagens raw → representação mais semântica que não viola a 1ª prioridade (conteúdo). Ver [`../ARQUITETURA.md`](../ARQUITETURA.md) para o contexto e [`../PHILOSOPHY.md`](../philosophy.md#eixo-de-representação) para os níveis de representação.*
+*Imagens raw → representação mais semântica que não viola a 1ª prioridade (conteúdo). Ver [`../arquitetura.md`](../arquitetura.md) para o contexto e [`../PHILOSOPHY.md`](../philosophy.md#eixo-de-representação) para os níveis de representação.*
 
 ---
 

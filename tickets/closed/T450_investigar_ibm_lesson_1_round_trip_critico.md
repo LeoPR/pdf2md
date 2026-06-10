@@ -68,7 +68,7 @@ Diagnosticada a causa do bloat 3.4x. Pelo menos uma destas:
 
 ## Resolução (2026-05-10)
 
-**Fechado como "categoria conhecida"** após o experimento [`lab/e03_atkins_wilson_scan/`](../../lab/e03_atkins_wilson_scan/) (commit `e194ad5`) revelar o **padrão sistemático** que explica o bloat.
+**Fechado como "categoria conhecida"** após o experimento `lab/e03_atkins_wilson_scan/` (commit `e194ad5`) revelar o **padrão sistemático** que explica o bloat.
 
 ### Diagnóstico definitivo
 
@@ -100,4 +100,4 @@ H5 (marker flag) — irrelevante; problema não é fluxo do marker, é descompas
 
 - [T071](T071_bloat_ratio_alucinacao_heuristica.md) — heurística implementada
 - [T451](../research/T451_slides_pptx_como_categoria_problematica.md) — categoria PPTX em research (continua)
-- [`lab/e03_atkins_wilson_scan/RESULT.md`](../../lab/e03_atkins_wilson_scan/RESULT.md) — discussão completa
+- `lab/e03_atkins_wilson_scan/RESULT.md` — discussão completa

@@ -175,7 +175,7 @@ pdf2md/
 │   ├── examples/               excertos LIVRES commitados (prova pronta, sem baixar nada)
 │   └── registry.py             resolve(doc_id) → in-repo | zcache | private
 ├── docs/                       Diátaxis (tutorials/how-to/reference/explanation/profiles)
-├── lab/                        bancada experimental (eNN por experimento)
+├── lab/                        bancada experimental interna (não versionada; resultados promovidos em docs/ e tickets/)
 └── tickets/                    work items (open/closed/research) + INDEX.md
 ```
 
