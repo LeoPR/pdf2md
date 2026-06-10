@@ -72,7 +72,7 @@ instalados.
 
 ## Conexão
 
-- Destrava a onda 4 do [T065](T065_corpus_gt_sintetico.md) (matriz ~0.5) e a
+- Destrava a onda 4 do [T065](../closed/T065_corpus_gt_sintetico.md) (matriz ~0.5) e a
   promoção completa do corpus sintético.
 - Amplia o caminho CPU ([T133](../research/T133_detector_de_formula.md)/
   [T134](../research/T134_pix2tex_formulas.md), e21) para PDFs web-rendered —

@@ -2,9 +2,11 @@
 
 - Unit HERMÉTICOS das funções puras (_overlap, merge_regions, _is_complex): não
   precisam de PDF.
-- Integração no Preskill (zcache) com skipif: born-digital Computer Modern é o
-  único caso validado; não há fixture in-repo (licença read-only do Preskill +
-  examples in-repo não têm display math). Mesmo padrão skipif dos outros testes.
+- Integração HERMÉTICA nos fixtures sintéticos commitados (T065:
+  corpus/examples/sintetico/pdf/, renders KaTeX e Computer Modern com GT
+  conhecido) — rodam em qualquer clone, sem zcache nem pandoc/chrome.
+- Integração no Preskill (zcache) com skipif: caso real born-digital CM
+  (licença read-only impede fixture in-repo).
 """
 from pathlib import Path
 
@@ -18,6 +20,7 @@ from pdf2md.formula_cropper import (
 )
 
 PRESKILL = Path("Z:/caches/corpus/pdf2md/preskill_ph219_ch5.pdf")
+SINTETICO_PDF = Path(__file__).parent.parent / "corpus" / "examples" / "sintetico" / "pdf"
 
 
 # --- unit herméticos -------------------------------------------------------
@@ -139,6 +142,32 @@ def test_crop_empty_pdf_raises(tmp_path, monkeypatch):
     monkeypatch.setattr("pdf2md.formula_cropper.fitz.open", lambda *a, **k: FakeDoc())
     with pytest.raises(ValueError):
         crop_formulas("whatever.pdf", tmp_path)
+
+
+# --- T065/T192: fixtures sintéticos in-repo (herméticos, 2 tipografias) -----
+
+@pytest.mark.parametrize("rel", [
+    "katex/formula_display/bayes.pdf",     # T192 H1: era 0 regiões em KaTeX
+    "katex/formula_matriz/hadamard.pdf",
+    "cm/formula_display/bayes.pdf",        # T192 H2: era crop com prosa engolida
+    "cm/formula_matriz/hadamard.pdf",
+])
+def test_detecta_formula_fixture_sintetico(tmp_path, rel):
+    """Render commitado (GT-por-construção) tem exatamente 1 fórmula display
+    cercada de prosa: o cropper deve achá-la e o crop não pode conter prosa
+    (os 2 modos de falha medidos no e24 ondas 2-3)."""
+    regs = crop_formulas(SINTETICO_PDF / rel, tmp_path)
+    assert regs, f"0 regiões em {rel}"
+    assert all(r.crop_path.exists() for r in regs)
+    import fitz
+    d = fitz.open(SINTETICO_PDF / rel)
+    try:
+        clipped = " ".join(d[0].get_text(clip=fitz.Rect(*r.bbox)) for r in regs)
+    finally:
+        d.close()
+    # prosa sintética: toda frase termina em "sob condições de contorno regulares"
+    assert "contorno" not in clipped and "regulares" not in clipped, \
+        f"crop de {rel} engoliu prosa: {clipped[:120]!r}"
 
 
 # --- T192: detector multi-tipografia (KaTeX) --------------------------------

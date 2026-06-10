@@ -11,6 +11,13 @@ terceiros; os excertos aqui são curtos, atribuídos e se apoiam em **citação/
 use**, não em licença de redistribuição. Ver
 [`examples/README.md`](examples/README.md) para o status de cada arquivo.
 
+**`examples/sintetico/` é 100% autoral** (GT-por-construção, T065): a fonte é
+escrita pelo gerador determinístico do próprio repo. Fórmulas canônicas
+(Bayes, Hadamard, Schrödinger…) são **fatos matemáticos**, não protegíveis
+(17 U.S.C. 102(b), merger doctrine; Lei 9.610 art. 8º I) — a tipografia/seleção
+aqui é expressão nossa. Prosa, tabelas, diagramas e logos são inventados.
+Redistribuição livre, sem dependência de fair use.
+
 ## Tier ZCACHE — referenciado, não versionado
 
 Fontes livres porém pesadas/recuperáveis. Bytes ficam em `Z:/caches/corpus/pdf2md/`

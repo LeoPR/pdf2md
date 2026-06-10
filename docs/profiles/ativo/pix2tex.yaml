@@ -5,8 +5,8 @@ algoritmo:
   tipo: extractor
   estado: testado
   particao: ativo
-  lab_origem: [lab/e18_vlm_formula_isolada, lab/e21_cpu_formula_cropper]
-  medido_em: 2026-05-31
+  lab_origem: [lab/e18_vlm_formula_isolada, lab/e21_cpu_formula_cropper, lab/e24_gt_sintetico]
+  medido_em: 2026-06-10
   licenca: MIT
   dependencias_externas: offline   # ~150MB pesos baixados 1x, depois offline
 
@@ -50,6 +50,14 @@ dimensoes:
     unidade: sim_latex_normalizado
     confianca: medido
     contexto: "e21: display linha-única N=6 sim 0.80 (5/6 usáveis); matriz N=3 (onda 2) sim 0.50"
+    sintetico_cross_renderer:        # e24 onda 4 (GT-por-construção, 24 fórmulas × 2 tipografias)
+      display_katex: 0.852
+      display_cm: 0.721
+      matriz_katex: 0.384
+      matriz_cm: 0.318
+      multiline_katex: 0.645
+      multiline_cm: 0.508
+      confianca: medido
     notas: |
       CORRIGIDO de 1.0 (era N=1: só a matriz 4.12 do N&C em e18 — não generalizou).
       FRONTEIRA medida: bom em display linha-única (0.80), FRACO em matriz (0.50).
@@ -57,6 +65,11 @@ dimensoes:
       - matriz: pix2tex TRUNCA eq longa (5.32: 3/6 matrizes ok depois corta) e embaralha
         2×2 (5.123 lida como \frac). Gargalo é o MODELO, não o cropper (detecção 3/3, crop limpo).
       Qualidade governada tb pelo crop — sweet spot medido: DPI=300, margem 4pt (e21).
+      CONFIRMADO cross-renderer (e24 onda 4, pós-T192): display≫matriz reproduz nas
+      DUAS tipografias (KaTeX 0.852/0.384; CM 0.721/0.318) — fraqueza é do modelo,
+      independente de renderer. Display KaTeX (0.852) supera a âncora CM real (0.80):
+      fontes KaTeX são até mais legíveis pro pix2tex. Multi-linha aligned/cases fica
+      no meio (0.5-0.65).
 
   qualidade_tabelas:
     valor: N-A
@@ -145,3 +158,5 @@ evidencias:
     quote: "pix2tex semanticamente 100% correto, 4 VLMs falharam (N=1 — não generalizou)"
   - path: lab/e21_cpu_formula_cropper/notes.md
     quote: "N=6: recall detecção 6/6, sim médio 0.80, 5/6 usáveis; crop @300dpi/4pt é a alavanca"
+  - path: tickets/closed/T065_corpus_gt_sintetico.md
+    quote: "fraqueza de matrizes REAPARECE nos 2 renderers (display−matriz: 0.47 KaTeX, 0.40 CM)"

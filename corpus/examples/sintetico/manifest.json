@@ -1,0 +1,93 @@
+{
+ "prosa": [
+  "prosa_00",
+  "prosa_01",
+  "prosa_02",
+  "prosa_03",
+  "prosa_04"
+ ],
+ "formula_display": [
+  "emc2",
+  "schrodinger",
+  "euler",
+  "fourier",
+  "gauss_int",
+  "bayes",
+  "entropy",
+  "binomial",
+  "maxwell_gauss",
+  "bell_state"
+ ],
+ "formula_matriz": [
+  "hadamard",
+  "pauli_x",
+  "pauli_y",
+  "pauli_z",
+  "rot2d",
+  "cnot",
+  "densidade",
+  "bmatrix4"
+ ],
+ "formula_multiline": [
+  "quadratica",
+  "soma_geom",
+  "cases_abs",
+  "dist_pontos",
+  "prod_tel",
+  "exp_serie"
+ ],
+ "formula_inline": [
+  "inline_00",
+  "inline_01",
+  "inline_02",
+  "inline_03",
+  "inline_04",
+  "inline_05"
+ ],
+ "tabela": [
+  "t1_0",
+  "t1_1",
+  "t1_2",
+  "t2_0",
+  "t2_1",
+  "t2_2",
+  "t3_0",
+  "t3_1",
+  "t3_2",
+  "t4_0",
+  "t4_1",
+  "t4_2",
+  "t5_0",
+  "t5_1",
+  "t5_2"
+ ],
+ "diagrama": [
+  "flow_td_04",
+  "flow_lr_04",
+  "seq_04",
+  "state_04",
+  "class_04",
+  "flow_td_06",
+  "flow_lr_06",
+  "seq_06",
+  "state_06",
+  "class_06",
+  "flow_td_08",
+  "flow_lr_08",
+  "seq_08",
+  "state_08",
+  "class_08",
+  "flow_td_12",
+  "flow_lr_12",
+  "seq_12",
+  "state_12",
+  "class_12"
+ ],
+ "logo": [
+  "logo_00",
+  "logo_01",
+  "logo_02",
+  "logo_03",
+  "logo_04"
+ ]
+}

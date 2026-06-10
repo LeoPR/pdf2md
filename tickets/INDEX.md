@@ -41,7 +41,7 @@ trabalhados sem se preocupar com setup.
 | [T030](closed/T030_revisao_literatura.md) | (c) | Revisão de literatura inicial — `docs/explanation/literatura.md` |
 | [T040](closed/T040_corpus_canonico_inicial.md) | (c) | Corpus canônico (8/8-12 entradas; 5/9 categorias; PMC pendente) |
 | [T060](open/T060_mini_corpus_gt_humano.md) | (o) | Mini-corpus de GT humano (5-10 págs) — Frente A |
-| [T065](open/T065_corpus_gt_sintetico.md) | (o) | Corpus GT-por-construção — sintético, autoral, publicável (destrava T075/T092/T191) |
+| [T065](closed/T065_corpus_gt_sintetico.md) | (c) | Corpus GT-por-construção — **promovido 2026-06-10** (`corpus/examples/sintetico/`, instrumento validado e24 ondas 1-4; destrava T075/T092/T191) |
 | [T105](closed/T105_substituir_extracao_antiga_eliminar_v2_anti_padra.md) | (c) | Substituir extração antiga (eliminar `_v2`) |
 | [T430](closed/T430_corpus_livre_para_testes_urls_licencas.md) | (c) | Corpus livre — URLs + licenças (fechado 2026-05-11; substituído por T040 + MANIFEST) |
 

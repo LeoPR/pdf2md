@@ -38,6 +38,17 @@ AULAQUANTUM = Path(
 
 # doc_id -> entrada. Chaves batem com os doc_ids já usados em labs e em corpus/_gt/.
 REGISTRY: dict[str, dict] = {
+    # ---- IN-REPO (commitado; redistribuível) -------------------------------
+    "sintetico_v1": {
+        "tier": "inrepo",
+        "path": EXAMPLES / "sintetico",   # diretório: gt/ (source) + pdf/ (renders fixture)
+        "license": "autoral",             # GT-por-construção, 100% nosso (T065)
+        "title": "Corpus sintético GT-por-construção v1 (75 itens, 8 categorias)",
+        "note": "Source = gt/ (gerado por gen.py, determinístico); pdf/ é render "
+                "(katex=Chrome, cm=Tectonic). Validado como instrumento em e24 "
+                "ondas 1-4 (ver examples/sintetico/README.md).",
+    },
+
     # ---- PRIVATE (proprietary; nunca no git) -------------------------------
     "nielsen_chuang_cap4": {
         "tier": "private",

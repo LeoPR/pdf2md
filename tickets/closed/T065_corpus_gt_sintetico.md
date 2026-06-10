@@ -1,9 +1,9 @@
 ---
 id: T065
 titulo: Corpus GT-por-construção — sintético, autoral, publicável
-status: open
+status: closed
 criado_em: 2026-06-09
-fechado_em:
+fechado_em: 2026-06-10
 fase: 4
 depende_de: [T060]
 blocks: [T075, T092, T191]
@@ -181,3 +181,26 @@ concordância 4/4; modos de falha reproduzidos; eixo de renderer documentado
 como adapter). Pendente para fechar o ticket: PROMOÇÃO — corpus →
 `corpus/examples/` (tier in-repo) + entradas em `docs/profiles/` (multiline,
 inversão diagrama/logo) + fixtures herméticos de teste.
+
+## Promoção (2026-06-10) — critério cumprido; ticket FECHADO
+
+- **`corpus/examples/sintetico/`** (tier in-repo, ~330KB): `gen.py`
+  autocontido (diagramas do e22 inlined; determinismo verificado — regen
+  reproduz gt/ byte a byte, 80 arquivos), `gt/` com os 75 itens (source),
+  `pdf/` com 8 renders fixture (katex 6 + cm 2, escolhidos entre os que o
+  cropper pós-T192 detecta), `manifest.json`, README com validade e eixo
+  delta-E. Registry: doc_id `sintetico_v1`. RIGHTS.md: seção "100% autoral"
+  no tier in-repo.
+- **`docs/profiles/`** (entradas medidas e24): `marker.yaml` (multiline
+  aligned/cases 0.681; figura_vetorial perde — texto interno 0%),
+  `pdftotext.yaml` (inversão: texto vetorial interno 100%, ganha para
+  indexação — insumo T092), `pix2tex.yaml` (cross-renderer display/matriz:
+  0.852/0.384 KaTeX, 0.721/0.318 CM — fraqueza de matriz é do modelo).
+- **Fixtures herméticos**: `tests/test_formula_cropper.py` ganhou 4 testes
+  parametrizados sobre os PDFs commitados (detecção + crop sem prosa, nas 2
+  tipografias) — rodam em qualquer clone, sem zcache/pandoc/chrome.
+
+Fora do escopo do fechamento (registrado onde pertence): resíduo CM do
+cropper (3 itens, euler/cnot/bmatrix4) segue no [T192](T192_cropper_robustez_tipografia.md);
+consumo do corpus por TEDS/indexação segue em [T075](T075_tabelas_teds.md)/
+[T092](T092_indexacao_utility_proxies.md).

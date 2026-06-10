@@ -77,5 +77,5 @@ nova, só no venv do lab até vingar. Resto stdlib + registry/extractors/routing
 ## Conexão
 
 - Valida a promessa central do [T090](../closed/T090_macro_intent_routing.md)
-  (caminho executivo de indexação); corpus misto [T065](T065_corpus_gt_sintetico.md)
+  (caminho executivo de indexação); corpus misto [T065](../closed/T065_corpus_gt_sintetico.md)
   + `corpus/examples`. Docs privados: só métricas derivadas publicáveis (RIGHTS.md).

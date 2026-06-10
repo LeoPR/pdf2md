@@ -5,8 +5,8 @@ algoritmo:
   tipo: extractor
   estado: ativo
   particao: ativo
-  lab_origem: lab/e19_cpu_only_baseline    # promovido de inferido após medição end-to-end
-  medido_em: 2026-05-31
+  lab_origem: [lab/e19_cpu_only_baseline, lab/e24_gt_sintetico]   # promovido de inferido após medição end-to-end
+  medido_em: 2026-06-10
   licenca: AGPL-3-ou-comercial    # PyMuPDF AGPL-3; pdftotext (poppler) GPL-2; Tesseract Apache-2.0
   dependencias_externas: offline
 
@@ -106,10 +106,18 @@ dimensoes:
     prose: forte           # medido
     math_inline: baixo     # medido
     math_display: baixo    # medido
-    tabela: fraco          # estimado
-    figura_vetorial: perde # medido: labels soltos (ex. Figure 4.1 -> 'Fourier transform / NP')
-    logo: nao_medido
+    tabela: fraco          # estimado; e24: conteúdo 100%, estrutura 0 (0.500 na régua mista)
+    figura_vetorial: texto-forte-estrutura-perde
+    logo: texto-forte      # e24: texto vetorial de logo SVG recall 1.000 (raster não medido)
     confianca: parcial
+    notas: |
+      figura_vetorial refinado no e24 (sintético): o TEXTO vetorial interno
+      (labels de mermaid, texto de logo) vem 100% — o marker descarta (0%),
+      inversão medida. O que se perde é a ESTRUTURA (posição/setas/forma) —
+      labels chegam soltos (já visto no N&C: 'Figure 4.1' → texto corrido).
+      Para indexação/rastreio o caminho CPU GANHA em doc rico em diagramas
+      (insumo direto do roteador T092). Escopo: figura VETORIAL born-digital;
+      logo raster (e16) é outro problema.
 
 dimensoes_que_vence:
   - velocidade_wall_full_doc            # ~20ms/pg vs Marker (GPU, ordens de grandeza mais lento)
@@ -144,3 +152,5 @@ evidencias:
     quote: "grade_vs_gt_structured vs grade_vs_gt_raw_e15"
   - path: lab/e15_gt_validation/out/gt_comparison.md
     quote: "baseline PyMuPDF cru: pg200 0.041, pg204 0.377"
+  - path: tickets/closed/T065_corpus_gt_sintetico.md
+    quote: "inversão diagrama/logo: texto vetorial interno pdftotext 1.000 × marker 0.000"

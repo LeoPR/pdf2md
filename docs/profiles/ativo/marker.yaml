@@ -8,7 +8,8 @@ algoritmo:
   lab_origem:
     - lab/e00_baseline_marker
     - lab/e14_pixel_roundtrip_cross_pdf
-  medido_em: 2026-05-07
+    - lab/e24_gt_sintetico
+  medido_em: 2026-06-10
   licenca: GPL-3
   dependencias_externas: download-on-demand   # Surya + Texify + Equation models
 
@@ -49,8 +50,12 @@ dimensoes:
 
   qualidade_math_semantica:
     valor: alto
-    confianca: estimado
-    notas: "math LaTeX nativo via Texify; WER-LaTeX vs GT humano pendente T060"
+    confianca: medido
+    contexto: "e24 sintético (GT-por-construção): display 0.973, matriz 0.986 sim-LaTeX"
+    notas: |
+      MAS degrada em multi-linha aligned/cases: 0.681 (e24) — modo de falha
+      mensurável inédito, achado pelo corpus sintético. WER vs GT humano de
+      doc real segue pendente (T060, tier privado).
 
   qualidade_tabelas:
     valor: nao_medido
@@ -98,9 +103,14 @@ dimensoes:
     math_inline: forte
     math_display: forte
     tabela: medio
-    figura_vetorial: nao_medido
+    figura_vetorial: perde    # e24: texto VETORIAL interno (labels mermaid/SVG) = 0% recuperado
     logo: medio
     confianca: medido
+    notas: |
+      INVERSÃO medida (e24): o layout model classifica a região como figura e
+      DESCARTA o texto vetorial interno — recall 0.000 vs pdftotext 1.000 nas
+      categorias diagrama/logo. Para indexação, doc rico em diagramas pode
+      indexar MELHOR pelo caminho CPU (insumo T092/roteador).
 
   scaling_behavior:
     descricao: "linear em n_paginas, validado até 704pg"
@@ -127,6 +137,10 @@ notas: |
   - bloat_ratio > 2× em PDFs sparse (re-OCR alucinante, padrão Wilson e03)
   - Escapes markdown auto penalizam round-trip textual em formulários AcroForm (e05)
   - Tabelas TEDS não medido formalmente — pendente T060/T410
+  - Math multi-linha (aligned/cases) degrada a 0.681 vs 0.97-0.99 em
+    display/matriz simples (e24 sintético)
+  - Texto vetorial DENTRO de figuras é descartado pelo layout model — 0% de
+    recall em diagrama/logo, vs 100% do pdftotext (e24; insumo T092)
 
   Comparação contra Nougat/MinerU/olmOCR-2/Docling pendente T410 (precisa GT humano T060 primeiro).
 
@@ -137,3 +151,5 @@ evidencias:
     quote: "generaliza em 3 categorias além N&C, WER med 0.26-0.42"
   - path: tickets/closed/T108_pacote_conversor_readme.md
     quote: "Validação em produção N&C completo: 1h54min, 21/21 capítulos bit-for-bit reprodutíveis"
+  - path: tickets/closed/T065_corpus_gt_sintetico.md
+    quote: "marker degrada em multi-linha 0.681; inversão diagrama/logo: pdftotext 1.000 × marker 0.000"

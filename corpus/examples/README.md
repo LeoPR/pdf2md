@@ -13,8 +13,10 @@ Regenerável: `python corpus/examples/_build_examples.py` (lê as fontes complet
 | `wilson_mathematics_excerpt.pdf` | ia_mathematics00wils | public domain (pré-1928) | scanned_image_only | 2 págs (scan PD) |
 | `cdc_mmwr_73_35_a1.pdf` | cdc_mmwr_73_35_a1 | US Gov public domain | gov multi-col | inteiro (~0.3MB) |
 | `irs_f1040_2025.pdf` | irs_f1040_2025 | US Gov public domain | gov_form (AcroForm) | inteiro (~0.2MB) |
+| [`sintetico/`](sintetico/) | sintetico_v1 | **autoral** (GT-por-construção) | 8 categorias (math, tabela, mermaid, logo, prosa) | gt/ 75 itens + 8 PDFs fixture (~0.4MB) |
 
-**Total: ~1.1 MB.** Cobre 4 categorias (paper math, scan PD, gov multi-col, AcroForm).
+**Total: ~1.5 MB.** Cobre 4 categorias reais (paper math, scan PD, gov multi-col,
+AcroForm) + o corpus sintético com GT conhecido byte a byte (T065).
 O par intro/math do mesmo paper é proposital: o **gatilho de pass2 do T090** discrimina por
 conteúdo (math-denso → pass2; prosa → não) no mesmo doc. Sem inflar o git.
 

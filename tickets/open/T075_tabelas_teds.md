@@ -72,4 +72,5 @@ se vingar.
 
 - Fecha **BURACO #2**; alimenta [T440](../research/T440_md_como_formato_de_transporte_vs_pdf.md)
   com números (teto do pipe-table em T4/T5).
-- Corpus vem de [T065](T065_corpus_gt_sintetico.md).
+- Corpus vem de [T065](../closed/T065_corpus_gt_sintetico.md) — promovido:
+  `corpus/examples/sintetico/` (15 tabelas em 5 tiers; `gen.py render` gera os PDFs).

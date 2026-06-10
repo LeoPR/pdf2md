@@ -75,8 +75,8 @@ RecallOCR/PrecisionVE (arXiv:2602.13376) é o caminho citável.
 
 ## Conexão
 
-- Par de [T190](../open/T190_mermaid_render_md2pdf.md); corpus de
-  [T065](../open/T065_corpus_gt_sintetico.md); irmão metodológico de
+- Par de [T190](../closed/T190_mermaid_render_md2pdf.md); corpus de
+  [T065](../closed/T065_corpus_gt_sintetico.md); irmão metodológico de
   [T180](../open/T180_reconstrucao_vetorial_imagens.md) (mesma família
   imagem-elaborada→representação-textual→reconstrução; T180 = logo→SVG/texto,
   T191 = flowchart→mermaid, e18/e21 = fórmula→LaTeX já entregue).
