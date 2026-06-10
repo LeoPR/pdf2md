@@ -41,6 +41,7 @@ trabalhados sem se preocupar com setup.
 | [T030](closed/T030_revisao_literatura.md) | (c) | Revisão de literatura inicial — `docs/explanation/literatura.md` |
 | [T040](closed/T040_corpus_canonico_inicial.md) | (c) | Corpus canônico (8/8-12 entradas; 5/9 categorias; PMC pendente) |
 | [T060](open/T060_mini_corpus_gt_humano.md) | (o) | Mini-corpus de GT humano (5-10 págs) — Frente A |
+| [T065](open/T065_corpus_gt_sintetico.md) | (o) | Corpus GT-por-construção — sintético, autoral, publicável (destrava T075/T092/T191) |
 | [T105](closed/T105_substituir_extracao_antiga_eliminar_v2_anti_padra.md) | (c) | Substituir extração antiga (eliminar `_v2`) |
 | [T430](closed/T430_corpus_livre_para_testes_urls_licencas.md) | (c) | Corpus livre — URLs + licenças (fechado 2026-05-11; substituído por T040 + MANIFEST) |
 
@@ -96,7 +97,11 @@ vivem em `docs/profiles/`, `docs/reference/tecnologias.md` e no `CHANGELOG.md`.
 | [T134](research/T134_pix2tex_formulas.md) | (r) | pix2tex para fórmulas-imagem detectadas | futuro `lab/eXX_pix2tex/` | B+D |
 | [T137](research/T137_denoising_jpeg_pre_compressao.md) | (r) | Denoising JPEG antes da compressão | futuro `lab/eXX_jpeg_denoise/` | D |
 | [T160](research/T160_ocr_semantico_generalizado.md) | (r) | OCR semântico generalizado de imagens-com-texto | futuro `lab/eXX_semantic_ocr/` | **B (atual)** |
+| [T075](open/T075_tabelas_teds.md) | (o) | TEDS bidirecional — nota de tabela por algoritmo (fecha BURACO #2) | futuro `lab/e25_tabelas_teds/` | A+C |
+| [T092](open/T092_indexacao_utility_proxies.md) | (o) | Utilidade de indexação — proxies tool-agnostic + valida `pass2_warranted` | futuro `lab/e26_indexacao_proxies/` | A+B |
 | [T180](open/T180_reconstrucao_vetorial_imagens.md) | (o) | Reconstrução vetorial (texto + fonte + brasão residual) — escopo refinado pós-e16/e17 | `lab/e16_image_decompose/` + `lab/e17_vlm_full_page/` | E |
+| [T190](open/T190_mermaid_render_md2pdf.md) | (o) | Mermaid no md→pdf (client-side, mesmo mecanismo do KaTeX) — destrava round-trip de diagramas | futuro `lab/e22_mermaid_render/` | C |
+| [T191](research/T191_diagram_to_mermaid_vlm.md) | (r) | Diagrama→mermaid via VLM local (research-tier, VLM-as-tool; irmão do T180) | futuro `lab/e23_diagram_vlm/` | E |
 | [T410](research/T410_testar_ferramentas_alternativas_nougat_mineru_pdftotext.md) | (r) | Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling | família `lab/e1X_*` | A+B+C |
 | [T420](research/T420_fallback_low_resource_sem_gpu_sem_modelos_ml_pesados.md) | (r) | Fallback low-resource (sem GPU) | futuro `lab/eXX_low_resource/` | B |
 | [T450](closed/T450_investigar_ibm_lesson_1_round_trip_critico.md) | (c) | IBM lesson 1 — fechado como "categoria conhecida" (bloat 3.4× via padrão de e03) | (sem lab dedicado — entendido sistemicamente) | A |
