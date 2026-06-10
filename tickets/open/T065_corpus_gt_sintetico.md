@@ -89,3 +89,19 @@ renderer: external-capability opcional (modelo do doctor), nunca no pyproject.
   [T180](T180_reconstrucao_vetorial_imagens.md) (logos sintéticos).
 - Materializa o princípio delta-E articulado em T060 pg03.
 - Resolve a tensão corpus público × direitos (RIGHTS.md trivial: tudo autoral).
+
+## Progresso — onda 1 (e24, 2026-06-10): gate de identidade PASS
+
+Corpus v1 gerado (75 itens, 8 categorias: prosa 5, formula_display 10,
+formula_matriz 8, formula_multiline 6, formula_inline 6, tabela 15 em 5 tiers,
+diagrama 20 — herdados do e22/T190 e rendidos com `mermaid=True` —, logo
+sintético 5). Gerador 100% determinístico (crc32, sem `hash()` salteado).
+
+**Gate (c) do ticket — teto de identidade: PASS 8/8.** Recall de tokens de
+prosa (pdftotext sobre o render Chrome+KaTeX) = **1.0000 (mean e min) em todas
+as categorias** — o harness não introduz ruído mensurável na camada que o
+extractor base tem que capturar. Escopo honesto: o gate é prosa-only por
+design; o conteúdo de fórmula/tabela/diagrama será graduado na onda 2
+(rankings pdftotext × marker × pix2tex, Kendall-τ vs histórico real,
+reaparição da fraqueza de matrizes ~0.5) — os critérios de descarte de
+substituição continuam em aberto até lá.
