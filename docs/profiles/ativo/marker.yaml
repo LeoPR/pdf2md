@@ -58,8 +58,16 @@ dimensoes:
       doc real segue pendente (T060, tier privado).
 
   qualidade_tabelas:
-    valor: nao_medido
-    confianca: inferido
+    valor_grid_align_multilinha_zebra: 1.0
+    valor_spans: 0.749
+    unidade: TEDS
+    confianca: medido
+    contexto: "e25/T075 (sintético born-digital Chrome, 15 docs): T1 grid, T2 align+números, T3 multilinha, T5 borderless/zebra = 1.000; T4 row/colspan = 0.749"
+    notas: |
+      0.749 em spans é o TETO do formato pipe-table — TEDS(marker) ==
+      TEDS(best-pipe) POR ITEM (4 casas): a perda é do markdown-transporte
+      (T440), não do extractor. Escopo honesto: render born-digital (Chrome)
+      de templates próprios; tabela LaTeX/booktabs e scan NÃO medidas.
 
   preservacao_numeros_citacoes:
     valor: alto
@@ -102,7 +110,7 @@ dimensoes:
     prose: forte
     math_inline: forte
     math_display: forte
-    tabela: medio
+    tabela: forte             # e25/T075: no teto do formato (TEDS 1.0/0.749=teto); LaTeX/scan pendente
     figura_vetorial: perde    # e24: texto VETORIAL interno (labels mermaid/SVG) = 0% recuperado
     logo: medio
     confianca: medido

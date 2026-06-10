@@ -54,9 +54,14 @@ dimensoes:
     notas: "N&C pg204 (prova + matriz 2x2) WER 0.370, Δmath_i -27. Math vem Unicode cru, sem LaTeX. Limite do CPU-only — estruturação NÃO cria semântica math."
 
   qualidade_tabelas:
-    valor: fraco
-    confianca: estimado
-    notas: "pdftotext -layout preserva alinhamento mas não estrutura; não medido contra GT de tabela"
+    valor: 0.0
+    unidade: TEDS
+    confianca: medido
+    contexto: "e25/T075: 15/15 docs sintéticos sem NENHUMA tabela no output"
+    notas: |
+      TEDS 0.0 é perda de ESTRUTURA, não de conteúdo: as células chegam como
+      texto corrido (e24: 100% dos tokens) — indexável, não estruturado.
+      Confirma quantitativamente o "conteúdo sem estrutura" estimado.
 
   preservacao_numeros_citacoes:
     valor: alto

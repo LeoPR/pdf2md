@@ -8,9 +8,15 @@ Lei 9.610 art. 8º I) tipografadas por nós; prosa, tabelas, diagramas mermaid e
 logos SVG são inventados. Zero material de terceiros.
 
 **75 itens, 8 categorias** (`manifest.json`): prosa 5, formula_display 10,
-formula_matriz 8, formula_multiline 6, formula_inline 6, tabela 15 (5 tiers,
-T4/T5 = HTML rowspan/colspan), diagrama 20 (mermaid, 5 tipos × 4 tamanhos),
-logo 5 (SVG texto+formas).
+formula_matriz 8, formula_multiline 6, formula_inline 6, tabela 15 (tiers
+v1.1/T075: T1 grid, T2 alinhamentos+números, T3 células multilinha, T4
+row/colspan — teto do pipe-transporte, T440 —, T5 borderless/zebra), diagrama
+20 (mermaid, 5 tipos × 4 tamanhos), logo 5 (SVG texto+formas).
+
+Versões: v1.0 (2026-06-10, e24) → v1.1 (mesmo dia, T075/e25): a categoria
+tabela foi redesenhada de tiers-de-tamanho para tiers-de-feature (os 15 docs
+medidos com TEDS no e25 são byte-idênticos aos daqui); demais categorias
+inalteradas.
 
 ## gt/ é source; pdf/ é render
 
@@ -40,5 +46,9 @@ tectonic no PATH ou `PDF2MD_TECTONIC`); `python gen.py render <out_dir>`
   multi-linha `aligned`/`cases` (0.681); inversão em figuras vetoriais —
   texto interno 100% recuperado por pdftotext e 0% por marker; ver
   `docs/profiles/ativo/`.
+- **Tabelas (e25/T075, TEDS)**: marker no TETO do formato em todos os tiers
+  (1.000 em T1/T2/T3/T5; 0.749 em T4 = exatamente o máximo que pipe-table
+  representa); pdftotext = 0.0 estrutura (conteúdo 100%). Medidor promovido:
+  `pdf2md.table_teds` (extra `[tables]`).
 
 Resultados completos: `tickets/closed/T065_corpus_gt_sintetico.md` (ondas 1-4).

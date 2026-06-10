@@ -85,6 +85,21 @@ def _stable(s: str) -> int:
     return zlib.crc32(s.encode("utf-8"))
 
 
+def _w(seed: str) -> str:
+    pool = ("alfa", "beta", "gama", "delta", "sigma", "fluxo", "norma",
+            "malha", "campo", "fase", "modo", "polo")
+    return pool[_stable(seed) % len(pool)]
+
+
+def _num(seed: str, kind: int) -> str:
+    n = _stable(seed)
+    if kind == 0:
+        return f"{(n % 90000) / 10:,.1f}"          # 1,234.5 (milhar+decimal)
+    if kind == 1:
+        return f"{-(n % 500)}"                     # negativo
+    return f"{n % 100}%"                           # percentual
+
+
 def prose_par(seed: int, n_sent: int = 5) -> str:
     sents = []
     for k in range(n_sent):
@@ -93,6 +108,64 @@ def prose_par(seed: int, n_sent: int = 5) -> str:
         m = (seed * 13 + k * 7) % 10
         sents.append(f"{WORDS[i].capitalize()} {VERBS[j]} {OBJS[m]} sob condições de contorno regulares.")
     return " ".join(sents)
+
+
+def _t1_grid(k: int) -> str:
+    head = "| item | classe | valor |"
+    sep = "|---|---|---|"
+    rows = "\n".join(
+        f"| {_w(f'a{r}{k}')}_{r}{k} | {_w(f'b{r}{k}')} | v{r}_{k} |"
+        for r in range(4))
+    return f"{head}\n{sep}\n{rows}"
+
+
+def _t2_align_num(k: int) -> str:
+    head = "| métrica | média | desvio | taxa |"
+    sep = "|:---|---:|---:|:---:|"
+    rows = "\n".join(
+        f"| {_w(f'm{r}{k}')}_{r} | {_num(f'x{r}{k}', 0)} | {_num(f'y{r}{k}', 1)} | {_num(f'z{r}{k}', 2)} |"
+        for r in range(5))
+    return f"{head}\n{sep}\n{rows}"
+
+
+def _t3_multiline(k: int) -> str:
+    head = "| etapa | descrição | nota |"
+    sep = "|---|---|---|"
+    rows = "\n".join(
+        f"| e{r}_{k} | {_w(f'p{r}{k}')} primeira<br>{_w(f'q{r}{k}')} segunda | n{r}{k} |"
+        for r in range(4))
+    return f"{head}\n{sep}\n{rows}"
+
+
+def _t4_span(k: int) -> str:
+    # k=0 rowspan; k=1 colspan; k=2 ambos — pipe-table NÃO representa (T440)
+    if k == 0:
+        return ('<table><tr><th>grupo</th><th>par</th><th>val</th></tr>'
+                '<tr><td rowspan="2">G0</td><td>p0</td><td>1</td></tr>'
+                '<tr><td>p1</td><td>2</td></tr>'
+                '<tr><td rowspan="2">G1</td><td>p2</td><td>3</td></tr>'
+                '<tr><td>p3</td><td>4</td></tr></table>')
+    if k == 1:
+        return ('<table><tr><th colspan="2">cabeçalho duplo</th><th>val</th></tr>'
+                '<tr><td>a0</td><td>b0</td><td>5</td></tr>'
+                '<tr><td colspan="2">linha fundida</td><td>6</td></tr>'
+                '<tr><td>a2</td><td>b2</td><td>7</td></tr></table>')
+    return ('<table><tr><th>x</th><th colspan="2">par</th></tr>'
+            '<tr><td rowspan="2">R</td><td>c0</td><td>c1</td></tr>'
+            '<tr><td colspan="2">fundida</td></tr></table>')
+
+
+def _t5_borderless_zebra(k: int) -> str:
+    # estrutura = grid simples; o DESAFIO é o render (sem bordas, zebra)
+    cell = 'style="border:none;padding:4px 10px"'
+    rows = []
+    for r in range(4):
+        bg = ' style="background:#efefef"' if r % 2 == 0 else ""
+        rows.append(f'<tr{bg}><td {cell}>z{r}a_{k}</td><td {cell}>{_w(f"z{r}{k}")}</td>'
+                    f'<td {cell}>{_num(f"w{r}{k}", 0)}</td></tr>')
+    return ('<table style="border-collapse:collapse;border:none">'
+            f'<tr><th {cell}>chave</th><th {cell}>nome</th><th {cell}>medida</th></tr>'
+            + "".join(rows) + "</table>")
 
 
 def gen_diagramas() -> dict[str, str]:
@@ -163,25 +236,17 @@ def gen_corpus() -> dict[str, list[str]]:
                 f"Além disso ${bit}$ implica estabilidade. {prose_par(k + 40, 2)}\n")
         write("formula_inline", f"inline_{k:02d}", body)
 
-    # tabelas — 5 tiers × 3 (T1-T3 pipe GFM crescente; T4/T5 HTML span = teto T440)
-    for tier in range(1, 6):
+    # tabelas — tiers v1.1 (redesenho T075/e25; v1.0 só variava TAMANHO):
+    # T1 grid simples; T2 alinhamentos+números; T3 células multilinha;
+    # T4 row/colspan (teto do pipe-transporte, T440); T5 borderless/zebra
+    # (estrutura simples, RENDER difícil). Medidos com TEDS em e25.
+    for tier, fn in (("t1", _t1_grid), ("t2", _t2_align_num), ("t3", _t3_multiline),
+                     ("t4", _t4_span), ("t5", _t5_borderless_zebra)):
         for k in range(3):
-            name = f"t{tier}_{k}"
-            if tier <= 3:
-                rows = 3 + tier
-                cols = 2 + tier
-                head = "| " + " | ".join(f"col{c}" for c in range(cols)) + " |"
-                sep = "|" + "---|" * cols
-                body_rows = "\n".join(
-                    "| " + " | ".join(f"v{r}{c}_{k}" for c in range(cols)) + " |"
-                    for r in range(rows))
-                tbl = f"{head}\n{sep}\n{body_rows}"
-            else:
-                span = ' rowspan="2"' if tier == 4 else ' colspan="2"'
-                tbl = ("<table><tr><th>a</th><th>b</th><th>c</th></tr>"
-                       f"<tr><td{span}>X{k}</td><td>1</td><td>2</td></tr>"
-                       "<tr><td>3</td><td>4</td></tr></table>")
-            write("tabela", name, f"# Tabela {name}\n\n{prose_par(tier * 3 + k, 2)}\n\n{tbl}\n")
+            name = f"{tier}_{k}"
+            write("tabela", name,
+                  f"# Tabela {name}\n\n{prose_par(_stable(name) % 40, 2)}\n\n"
+                  f"{fn(k)}\n\n{prose_par(_stable(name) % 40 + 1, 2)}\n")
 
     # diagramas mermaid
     for name, dia in gen_diagramas().items():

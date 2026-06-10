@@ -4,6 +4,30 @@ Releases do `pdf2md` por ordem decrescente. Formato inspirado em
 [Keep a Changelog](https://keepachangelog.com/). Versionamento segue
 [SemVer](https://semver.org/) — MAJOR.MINOR.PATCH.
 
+## [Unreleased] — master (0.8.2-dev)
+
+### Adicionado
+- **Mermaid no md→pdf (T190)**: `md_to_pdf(mermaid=True)` / `pdfs --mermaid` —
+  diagramas ```mermaid``` viram SVG no PDF (mermaid 11.4.1 vendorado +
+  filtro Lua; offline). Validado 20/20 com SSIM determinístico (e22).
+- **Medidor TEDS de tabelas (T075)**: módulo `pdf2md.table_teds`
+  (`table_roundtrip()`, teto do pipe-transporte) + extra pip **`[tables]`**
+  (table-recognition-metric, pure-pip; incluído em `[all]`). Medido: marker
+  atinge exatamente o teto do formato (1.000 nos tiers sem span; 0.749 = teto
+  em row/colspan); pdftotext 0.0 em estrutura.
+- **Corpus sintético GT-por-construção (T065)**: `corpus/examples/sintetico/`
+  — 75 itens 100% autorais (fórmulas canônicas, tabelas, mermaid, logos SVG,
+  prosa) + gerador determinístico + fixtures herméticos de teste em 2
+  tipografias (KaTeX e Computer Modern). Instrumento validado contra âncoras
+  do corpus real (e24, ondas 1-4); v1.1 redesenha os tiers de tabela (e25).
+
+### Corrigido
+- **Cropper de fórmulas multi-tipografia (T192)**: detector era cego a fontes
+  KaTeX (PDFs web-rendered: 0 regiões → 24/24) e engolia prosa vizinha em
+  layout denso (âncora por segmento de linhas math; pix2tex display em CM
+  0.005 → 0.721). Resíduo documentado no ticket (3 casos CM com delimitador
+  em bloco próprio).
+
 ## [0.8.1] — 2026-06-09
 
 Patch de correções pego por teste de instalação em container limpo + review
