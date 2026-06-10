@@ -104,7 +104,8 @@ vivem em `docs/profiles/`, `docs/reference/tecnologias.md` e no `CHANGELOG.md`.
 | [T190](closed/T190_mermaid_render_md2pdf.md) | (c) | Mermaid no md→pdf — **entregue 2026-06-10** (e22: 20/20, determinístico; `md_to_pdf(mermaid=True)` + `pdfs --mermaid`) | `lab/e22_mermaid_render/` | C |
 | [T191](research/T191_diagram_to_mermaid_vlm.md) | (r) | Diagrama→mermaid via VLM local (research-tier, VLM-as-tool; irmão do T180) | futuro `lab/e23_diagram_vlm/` | E |
 | [T192](open/T192_cropper_robustez_tipografia.md) | (o) | Robustez do cropper — fontes KaTeX + merge por classe de fonte (2 modos medidos no e24) | `lab/e24_gt_sintetico/` onda 4 | B+C |
-| [T410](research/T410_testar_ferramentas_alternativas_nougat_mineru_pdftotext.md) | (r) | Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling | família `lab/e1X_*` | A+B+C |
+| [T194](research/T194_programa_comparativo_cientifico.md) | (r) | **PLANO**: programa comparativo científico — pureza das cadeias (achado: KaTeX via CDN fura o "offline"), métricas canônicas (CDM/NED/KTDS), concorrentes na mesma régua, envelope de recursos | absorve T410/Q14 | A+B+C |
+| [T410](research/T410_testar_ferramentas_alternativas_nougat_mineru_pdftotext.md) | (r) | Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling — absorvido pelo plano [T194](research/T194_programa_comparativo_cientifico.md) (F3) | família `lab/e1X_*` | A+B+C |
 | [T420](research/T420_fallback_low_resource_sem_gpu_sem_modelos_ml_pesados.md) | (r) | Fallback low-resource (sem GPU) | futuro `lab/eXX_low_resource/` | B |
 | [T450](closed/T450_investigar_ibm_lesson_1_round_trip_critico.md) | (c) | IBM lesson 1 — fechado como "categoria conhecida" (bloat 3.4× via padrão de e03) | (sem lab dedicado — entendido sistemicamente) | A |
 
