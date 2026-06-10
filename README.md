@@ -16,8 +16,7 @@ pip install pdf2md-tool           # núcleo CPU — nada externo
 pdf2md convert paper.pdf --intent rapido
 ```
 > No PyPI o pacote chama-se **`pdf2md-tool`** (o slug `pdf2md` estava reservado por
-> outra conta). O **comando** e o **import** continuam `pdf2md`. Do código-fonte:
-> `git clone … && pip install -e .`.
+> outra conta). O **comando** e o **import** continuam `pdf2md`.
 
 ---
 
@@ -67,20 +66,24 @@ quer marker/GPU) — `pdf2md doctor --intent qualidade` diz exatamente o que fal
 | **Pixel-roundtrip visual L0.5** (SSIM + align) | Estável | extra `[rtpixel]` |
 | **Otimização adaptativa de imagens** | Estável | −38.6% em N&C, sem perda visual |
 | **Telemetria por step + agregada** | Estável | `psutil` + `nvidia-smi` |
+| **TEDS de tabelas** (`pdf2md.table_teds`) | Estável (T075) | extra `[tables]`; marker no teto do formato pipe |
+| **Mermaid no md→pdf** (```` ```mermaid ```` → SVG) | Estável (T190) | vendorado, offline |
 | Reconstrução vetorial de logos (VLM small-image) | Pesquisa | T180 (não promovido) |
-| Vetorização SVG (potrace) · tabelas (TEDS) · cross-hardware | Pesquisa | T132 · BURACO #2 · T091 |
+| Vetorização SVG (potrace) · cross-hardware | Pesquisa | T132 · T091 |
 
 ---
 
 ## Instalação
 
 ```bash
-git clone https://github.com/LeoPR/pdf2md && cd pdf2md
-pip install -e .                 # núcleo CPU (typer, pymupdf, pillow, psutil)
-pip install -e '.[rtpixel]'      # + validador visual (numpy/scipy/scikit-image)
-pip install -e '.[ocr]'          # + wrapper pytesseract (engine é externo)
-pip install -e '.[all]'          # tudo que é pip-puro seguro
+pip install pdf2md-tool                # núcleo CPU (typer, pymupdf, pillow, psutil)
+pip install "pdf2md-tool[rtpixel]"     # + validador visual (numpy/scipy/scikit-image)
+pip install "pdf2md-tool[ocr]"         # + wrapper pytesseract (engine é externo)
+pip install "pdf2md-tool[tables]"      # + medidor TEDS de tabelas (apted/lxml)
+pip install "pdf2md-tool[all]"         # tudo que é pip-puro seguro
 ```
+
+Para desenvolver / rodar o master: [instalar do fonte](docs/how-to/instalar_do_fonte.md).
 
 **Capacidades externas (NÃO instaláveis por pip deste pacote — `pdf2md doctor` valida):**
 
@@ -94,10 +97,7 @@ pip install -e '.[all]'          # tudo que é pip-puro seguro
 
 > `pip install pdf2md-tool[gpu]` **não existe de propósito**: marker fixa `Pillow<11` e é
 > impossível co-instalar no mesmo ambiente. A interface honesta para a stack pesada é o
-> `doctor`, não um extra pip. Dev roda a suíte com `uv sync --all-extras`.
->
-> *Setup do autor (não é requisito):* venv junction em `Z:\venvs\pdf2md`; ver
-> [`docs/reference/conventions.md`](docs/reference/conventions.md).
+> `doctor`, não um extra pip.
 
 ---
 
@@ -201,6 +201,9 @@ Round-trip e telemetria sobre **Nielsen & Chuang QCQI** (704 pág, RTX 3060):
 
 Caminho CPU validado em corpus livre in-repo: pdftotext prosa WER 0.016 (pg estruturada),
 Tesseract scan impresso WER 0.052, pix2tex math display 0.80 (linha única; matriz ~0.50).
+Tabelas (corpus sintético, TEDS): marker **1.000** nos tiers sem span e **0.749** em
+row/colspan — exatamente o **teto do formato pipe**; pdftotext 0.0 em estrutura
+(conteúdo 100%, indexável).
 
 ---
 

@@ -10,7 +10,9 @@ description = "Conversor PDF→MD CPU-first: roteamento por intent (rápido/qual
 authors = [
     { name = "Leonardo Marques de Souza", email = "leonardo.marques.souza@gmail.com" }
 ]
-readme = "README.md"
+# README curado p/ a página do PyPI (links ABSOLUTOS — relativos quebram lá;
+# PyPA "Making a PyPI-friendly README"). O README.md do repo segue rico/relativo.
+readme = "README_PYPI.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
 keywords = ["pdf", "markdown", "pdf-to-markdown", "ocr", "latex", "document-conversion", "cli", "round-trip"]
@@ -54,6 +56,8 @@ pdf2md = "pdf2md.cli:app"
 [project.urls]
 Homepage = "https://github.com/LeoPR/pdf2md"
 Repository = "https://github.com/LeoPR/pdf2md"
+Documentation = "https://github.com/LeoPR/pdf2md/tree/master/docs"
+Changelog = "https://github.com/LeoPR/pdf2md/blob/master/CHANGELOG.md"
 Issues = "https://github.com/LeoPR/pdf2md/issues"
 
 [build-system]
