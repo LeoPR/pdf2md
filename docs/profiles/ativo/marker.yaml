@@ -120,6 +120,18 @@ dimensoes:
       categorias diagrama/logo. Para indexação, doc rico em diagramas pode
       indexar MELHOR pelo caminho CPU (insumo T092/roteador).
 
+  utilidade_indexacao_lexica:
+    term_recall_top20: {prosa: 1.0, formula_display: 0.985, formula_matriz: 0.994, formula_multiline: 0.858, tabela: 0.947, diagrama: 0.816, logo: 0.933}
+    math_term_recall: {display: 0.952, matriz: 0.958, multiline: 0.511}
+    structure_loss: 0.544
+    confianca: medido
+    contexto: "e26/T092 (corpus sintético GT, retrieval léxico — não extrapolar p/ embeddings)"
+    notas: |
+      Como pass2 do --indexacao: ganho de +43pp médio em math-terms sobre o
+      pass1 (até +100pp). MAS em diagrama PERDE do pdftotext (0.816 vs 0.872,
+      labels descartados) — pass2 em doc diagramático REGRIDE (−11pp pior
+      caso); ver T193 (braço de densidade do gatilho).
+
   scaling_behavior:
     descricao: "linear em n_paginas, validado até 704pg"
     pontos_medidos:

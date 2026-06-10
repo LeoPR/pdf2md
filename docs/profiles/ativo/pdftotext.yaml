@@ -124,6 +124,19 @@ dimensoes:
       (insumo direto do roteador T092). Escopo: figura VETORIAL born-digital;
       logo raster (e16) é outro problema.
 
+  utilidade_indexacao_lexica:
+    term_recall_top20: {prosa: 1.0, formula_display: 0.86, formula_matriz: 0.794, formula_multiline: 0.75, tabela: 0.947, diagrama: 0.872, logo: 0.933}
+    math_term_recall: {display: 0.514, matriz: 0.175, multiline: 0.206}
+    structure_loss: 0.965
+    confianca: medido
+    contexto: "e26/T092 (corpus sintético GT, retrieval léxico — não extrapolar p/ embeddings)"
+    notas: |
+      Pass1 universal do --indexacao: termos de prosa/tabela/figura chegam
+      (em diagrama GANHA do marker: 0.872 vs 0.816). O gap real é math-terms
+      (0.18-0.51) — exatamente o que o braço math do pass2_warranted flagga
+      (regra medida, e26). Estrutura quase toda se perde (0.965) — indexável,
+      não estruturado.
+
 dimensoes_que_vence:
   - velocidade_wall_full_doc            # ~20ms/pg vs Marker (GPU, ordens de grandeza mais lento)
   - uso_hardware_acelerador             # único CPU-only end-to-end medido viável

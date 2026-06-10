@@ -370,8 +370,14 @@ def _indexacao_pass2(host: HostInfo, doc: DocInfo, profiles: dict) -> Pipeline |
 #   - densidade de texto anômala (chars/página baixíssima): text-layer esparso/garbage
 #     (scan de OCR ruim que passou a guarda) — marker re-OCR/layout recupera estrutura.
 # Thresholds calibrados no corpus livre in-repo (N=5): separam com folga ampla (math-arm
-# arxiv-math 3.57 vs prosa ≤0.14; density-arm wilson 261 vs sãos ≥3079). HONESTO quanto ao
-# escopo: N=5 não generaliza — revisitar num corpus maior (relacionado ao BURACO cross-doc).
+# arxiv-math 3.57 vs prosa ≤0.14; density-arm wilson 261 vs sãos ≥3079).
+# Status MEDIDO (e26/T092, corpus sintético GT, 2026-06-10):
+#   - braço MATH = regra MEDIDA: docs flagados por math ganham +43pp médios de recall
+#     de termos-math no pass2 (mín 0, máx +100pp); ok-pass1 ganham 0.
+#   - braço DENSIDADE = heurística com RISCO medido: em sparse-SAUDÁVEL born-digital
+#     (diagramas/tabelas/logos; análogo: slides) o ganho é ≤0 (mín −11pp — marker
+#     descarta texto de figura). O caso calibrado (text-layer garbage) segue válido,
+#     mas o braço não discrimina os dois — recalibração em T193.
 PASS2_MATH_PER_KCHAR = 1.0       # ≥ ⇒ math-heavy (folga: arxiv-math 3.57; prosa ≤0.14)
 PASS2_DENSITY_FLOOR_CPP = 800    # chars/pág < ⇒ text-layer esparso/garbage (wilson 261; sãos ≥3079)
 

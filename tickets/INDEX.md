@@ -98,7 +98,8 @@ vivem em `docs/profiles/`, `docs/reference/tecnologias.md` e no `CHANGELOG.md`.
 | [T137](research/T137_denoising_jpeg_pre_compressao.md) | (r) | Denoising JPEG antes da compressão | futuro `lab/eXX_jpeg_denoise/` | D |
 | [T160](research/T160_ocr_semantico_generalizado.md) | (r) | OCR semântico generalizado de imagens-com-texto | futuro `lab/eXX_semantic_ocr/` | **B (atual)** |
 | [T075](closed/T075_tabelas_teds.md) | (c) | TEDS — **entregue 2026-06-10** (`pdf2md.table_teds` + extra `[tables]`; marker NO teto do formato pipe — 1.000 T1-T3/T5, 0.749=teto em spans; pdftotext 0.0 estrutura) | `lab/e25_tabelas_teds/` | A+C |
-| [T092](open/T092_indexacao_utility_proxies.md) | (o) | Utilidade de indexação — proxies tool-agnostic + valida `pass2_warranted` | futuro `lab/e26_indexacao_proxies/` | A+B |
+| [T092](closed/T092_indexacao_utility_proxies.md) | (c) | Utilidade de indexação — **entregue 2026-06-10** (math-terms marker +43..78pp; braço math do `pass2_warranted` = regra MEDIDA; braço densidade falsificado em sparse-saudável → T193) | `lab/e26_indexacao_proxies/` | A+B |
+| [T193](open/T193_pass2_densidade_sparse_saudavel.md) | (o) | `pass2_warranted` — discriminar sparse-garbage de sparse-saudável (braço densidade enfileira pass2 que REGRIDE em doc diagramático, −11pp medido) | futuro `lab/e27_pass2_densidade/` | A+B |
 | [T180](open/T180_reconstrucao_vetorial_imagens.md) | (o) | Reconstrução vetorial (texto + fonte + brasão residual) — escopo refinado pós-e16/e17 | `lab/e16_image_decompose/` + `lab/e17_vlm_full_page/` | E |
 | [T190](closed/T190_mermaid_render_md2pdf.md) | (c) | Mermaid no md→pdf — **entregue 2026-06-10** (e22: 20/20, determinístico; `md_to_pdf(mermaid=True)` + `pdfs --mermaid`) | `lab/e22_mermaid_render/` | C |
 | [T191](research/T191_diagram_to_mermaid_vlm.md) | (r) | Diagrama→mermaid via VLM local (research-tier, VLM-as-tool; irmão do T180) | futuro `lab/e23_diagram_vlm/` | E |
