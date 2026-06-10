@@ -5,4 +5,4 @@ Núcleo CPU (pdftotext/PyMuPDF) offline e determinístico; capacidades pesadas
 `pdf2md doctor`. CLI em `pdf2md.cli:app`.
 """
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"

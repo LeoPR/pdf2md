@@ -5,7 +5,7 @@
 # com "pdf-to-md" (ambos -> pdft0md). "pdf2md-tool" tem chave "pdf2mdt001", distinta
 # de tudo (verificado, 81 grafias 404). Import e comando CLI permanecem "pdf2md".
 name = "pdf2md-tool"
-version = "0.8.0"
+version = "0.8.1"
 description = "Conversor PDF→MD CPU-first: roteamento por intent (rápido/qualidade), núcleo offline e round-trip mensurável"
 authors = [
     { name = "Leonardo Marques de Souza", email = "leonardo.marques.souza@gmail.com" }

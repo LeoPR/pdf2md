@@ -4,6 +4,35 @@ Releases do `pdf2md` por ordem decrescente. Formato inspirado em
 [Keep a Changelog](https://keepachangelog.com/). Versionamento segue
 [SemVer](https://semver.org/) — MAJOR.MINOR.PATCH.
 
+## [0.8.1] — 2026-06-09
+
+Patch de correções pego por teste de instalação em container limpo + review
+pré-release. Recomendado para todos os usuários do 0.8.0.
+
+### Corrigido
+- **`pdf2md version` mentia em installs do PyPI** ("pdf2md 0.7.0 (uninstalled)"):
+  resolvia o metadata pelo nome antigo `pdf2md`. Agora lê a distribuição
+  `pdf2md-tool` com fallback em `__version__` (`provenance.pkg_version()`);
+  a proveniência idem (gravava `version=unknown` via git-describe do cwd — que
+  ainda vazaria o repo do usuário, não a versão do conversor).
+- **Título fóssil no index.md**: `convert --book`/`restruct` intitulava qualquer
+  livro como "Quantum Computation and Quantum Information — Nielsen & Chuang"
+  (default da era do corpus privado). Agora deriva do metadata do PDF
+  (fallback: nome do arquivo) + flags `--title`/`--subtitle` no `restruct`.
+- **Proveniência/stats honestas**: `extractor="marker-pdf 1.10.2"` e PyMuPDF
+  `"1.27.2"` eram hardcoded; ambos agora leem a versão real do ambiente.
+- **Scan sem `[ocr]`**: host com engine tesseract mas sem o wrapper pip era
+  roteado para OCR e morria com traceback cru; o gate agora exige engine+wrapper
+  e o caminho CPU do `convert` reporta erro de execução como o `route --execute`.
+- **`restruct` destrutivo**: não apaga mais diretório de destino não-vazio sem
+  `--force` (re-runs do `convert` seguem funcionando).
+
+### Direitos / repo
+- GT verbatim de N&C e Preskill movidos para tier **privado** (fora do repo
+  público e do histórico); `RIGHTS.md` atualizado (incl. correção do rótulo
+  arXiv: a licença non-exclusive não concede redistribuição a terceiros).
+  Métricas derivadas continuam públicas. Bancada `lab/` tornada interna.
+
 ## [0.8.0] — 2026-06-09
 
 Primeiro release no PyPI. Roteador macro-intent + preparação para publicação.
@@ -140,6 +169,7 @@ Histórico em `docs/explanation/diario.md`. Resumo:
 
 ---
 
+[0.8.1]: https://github.com/LeoPR/pdf2md/releases/tag/v0.8.1
 [0.8.0]: https://github.com/LeoPR/pdf2md/releases/tag/v0.8.0
 [0.7.0]: https://github.com/LeoPR/pdf2md/releases/tag/v0.7.0
 [0.6.0]: https://github.com/LeoPR/pdf2md/releases/tag/v0.6.0
