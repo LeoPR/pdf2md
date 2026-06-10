@@ -184,21 +184,40 @@ def fix_image_paths_in_md(chunk: str, chapter_id: str) -> str:
     )
 
 
+def derive_book_header(pdf_path: Path) -> tuple[str, str]:
+    """Título/subtítulo do index a partir do metadata do PDF.
+
+    Fallback: nome do arquivo. Subtítulo vazio quando o PDF não declara autor.
+    """
+    title, author = "", ""
+    try:
+        import fitz
+        with fitz.open(pdf_path) as doc:
+            meta = doc.metadata or {}
+            title = (meta.get("title") or "").strip()
+            author = (meta.get("author") or "").strip()
+    except Exception:
+        pass
+    if not title:
+        title = pdf_path.stem.replace("_", " ").strip() or pdf_path.stem
+    subtitle = f"**{author}**" if author else ""
+    return title, subtitle
+
+
 def write_index(
     target_dir: Path,
     chapters: list[Chapter],
     image_counts: dict[str, int],
     *,
-    book_title: str = "Quantum Computation and Quantum Information",
-    book_subtitle: str = "**Michael A. Nielsen & Isaac L. Chuang — 10th Anniversary Edition**",
+    book_title: str,
+    book_subtitle: str = "",
 ) -> Path:
     """Gera `target/index.md` com sumário navegável. Retorna path."""
-    lines = [
-        f"# {book_title}",
-        "",
-        book_subtitle,
-        "",
-        "*Re-extração via marker-pdf (GPU), organizada por capítulo. Estrutura simétrica:*",
+    lines = [f"# {book_title}", ""]
+    if book_subtitle:
+        lines += [book_subtitle, ""]
+    lines += [
+        "*Extração organizada por capítulo via TOC do PDF. Estrutura:*",
         "*MD por capítulo + imagens locais + index navegável.*",
         "",
         "---",
@@ -229,9 +248,10 @@ def restructure(
     marker_dir: Path,
     target_dir: Path,
     *,
-    book_title: str = "Quantum Computation and Quantum Information",
-    book_subtitle: str = "**Michael A. Nielsen & Isaac L. Chuang — 10th Anniversary Edition**",
+    book_title: str | None = None,
+    book_subtitle: str | None = None,
     on_chapter=None,
+    force: bool = False,
 ) -> dict[str, int]:
     """Pipeline completo: detecta TOC, copia imagens, escreve MDs por capítulo + index.
 
@@ -239,15 +259,19 @@ def restructure(
         pdf_path: PDF original (para TOC).
         marker_dir: pasta com o MD bruto do marker + imagens.
         target_dir: destino — será LIMPO (rmtree) antes de recriar.
-        book_title, book_subtitle: cabeçalho do index.md.
+        book_title, book_subtitle: cabeçalho do index.md. Default (None): derivados
+            do metadata do PDF (título/autor), fallback nome do arquivo.
         on_chapter: callback opcional `(chapter_id, chars, images)`.
+        force: permite apagar um target_dir pré-existente NÃO-vazio. Sem force,
+            destino não-vazio levanta ValueError (proteção contra wipe de dados
+            do usuário; re-runs do pipeline passam force=True explicitamente).
 
     Returns:
         dict {chapter_id: image_count} — útil para stats agregados.
 
     Raises:
         ValueError se marker_dir está dentro de target_dir (rmtree apagaria
-        próprio input — bug pego 2026-05-12).
+        próprio input — bug pego 2026-05-12), ou se target_dir não-vazio sem force.
         RuntimeError se marker_dir não tem .md.
     """
     # Defensiva: marker_dir ⊂ target_dir é fatal (rmtree apagaria input).
@@ -274,6 +298,12 @@ def restructure(
     chunks = split_md_by_headers(md_text, chapters)
 
     if target_dir.exists():
+        if any(target_dir.iterdir()) and not force:
+            raise ValueError(
+                f"target_dir ({target_dir}) já existe e não está vazio — restructure "
+                f"APAGA o destino antes de recriar. Use force=True (CLI: --force) "
+                f"para confirmar."
+            )
         shutil.rmtree(target_dir)
     target_dir.mkdir(parents=True)
 
@@ -300,6 +330,10 @@ def restructure(
         if on_chapter:
             on_chapter(ch.id, len(chunk), image_counts.get(ch.id, 0), error=None)
 
+    if book_title is None or book_subtitle is None:
+        meta_title, meta_subtitle = derive_book_header(pdf_path)
+        book_title = meta_title if book_title is None else book_title
+        book_subtitle = meta_subtitle if book_subtitle is None else book_subtitle
     write_index(target_dir, chapters, image_counts,
                 book_title=book_title, book_subtitle=book_subtitle)
     return image_counts

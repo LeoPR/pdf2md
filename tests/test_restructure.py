@@ -9,12 +9,27 @@ import pytest
 
 from pdf2md.restructure import (
     Chapter,
+    derive_book_header,
     fix_image_paths_in_md,
     restructure,
     slugify,
     split_md_by_headers,
     write_index,
 )
+
+
+def _mini_book_pdf(path: Path, title: str = "", author: str = "") -> None:
+    """PDF mínimo com TOC de 1 capítulo (+ metadata opcional) via fitz."""
+    import fitz
+    doc = fitz.open()
+    page = doc.new_page()
+    page.insert_text((72, 72), "1 Intro")
+    doc.new_page().insert_text((72, 72), "conteudo")
+    doc.set_toc([[1, "1 Intro", 1]])
+    if title or author:
+        doc.set_metadata({"title": title, "author": author})
+    doc.save(str(path))
+    doc.close()
 
 
 def test_slugify_basic():
@@ -111,3 +126,55 @@ def test_restructure_rejects_marker_inside_target(tmp_path: Path):
 
     with pytest.raises(ValueError, match="dentro de target_dir"):
         restructure(pdf, marker, target)
+
+
+# --- regressão: título default do index (era hardcoded "Nielsen & Chuang") --
+
+def test_derive_book_header_from_metadata(tmp_path: Path):
+    pdf = tmp_path / "qualquer.pdf"
+    _mini_book_pdf(pdf, title="Meu Livro de Teste", author="Fulano de Tal")
+    title, subtitle = derive_book_header(pdf)
+    assert title == "Meu Livro de Teste"
+    assert "Fulano de Tal" in subtitle
+
+
+def test_derive_book_header_fallback_stem(tmp_path: Path):
+    pdf = tmp_path / "tratado_de_fisica.pdf"
+    _mini_book_pdf(pdf)
+    title, subtitle = derive_book_header(pdf)
+    assert title == "tratado de fisica"
+    assert subtitle == ""
+
+
+def test_restructure_default_title_nao_eh_nielsen_chuang(tmp_path: Path):
+    """Sem book_title explícito, o index deriva do PDF — nunca do default fóssil."""
+    pdf = tmp_path / "meu_livro.pdf"
+    _mini_book_pdf(pdf, title="Meu Livro", author="Autora X")
+    marker = tmp_path / "marker"
+    marker.mkdir()
+    (marker / "x.md").write_text("# 1 Intro\n\nconteudo\n", encoding="utf-8")
+
+    restructure(pdf, marker, tmp_path / "out")
+    idx = (tmp_path / "out" / "index.md").read_text(encoding="utf-8")
+    assert "# Meu Livro" in idx
+    assert "Autora X" in idx
+    assert "Nielsen" not in idx and "Chuang" not in idx
+
+
+def test_restructure_refuses_nonempty_target_sem_force(tmp_path: Path):
+    """Destino pré-existente não-vazio só é apagado com force=True."""
+    pdf = tmp_path / "meu_livro.pdf"
+    _mini_book_pdf(pdf, title="Meu Livro")
+    marker = tmp_path / "marker"
+    marker.mkdir()
+    (marker / "x.md").write_text("# 1 Intro\n\nconteudo\n", encoding="utf-8")
+    target = tmp_path / "out"
+    target.mkdir()
+    (target / "dados_do_usuario.txt").write_text("importante", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="não está vazio"):
+        restructure(pdf, marker, target)
+    assert (target / "dados_do_usuario.txt").exists()   # nada foi apagado
+
+    restructure(pdf, marker, target, force=True)        # com force, procede
+    assert (target / "index.md").exists()

@@ -395,7 +395,7 @@ def norm(
 @app.command("prov")
 def prov(
     target_dir: Path = typer.Argument(..., exists=True, file_okay=False, help="Diretório com MDs a marcar"),
-    pkg_version: str = typer.Option(None, "--version", help="Versão do conversor (default: git describe)"),
+    pkg_version: str = typer.Option(None, "--version", help="Versão do conversor (default: versão instalada do pacote)"),
     source: str = typer.Option(None, "--source", help="Nome do PDF fonte"),
     sha256: str = typer.Option(None, "--sha256", help="SHA-256 do PDF fonte (ou caminho — auto-calcula)"),
     extractor: str = typer.Option(None, "--extractor", help="Ex: 'marker-pdf 1.10.2'"),
@@ -452,9 +452,12 @@ def extract(
 
 @app.command("restruct")
 def restruct(
-    target_dir: Path = typer.Argument(..., help="Diretório final (será criado)"),
+    target_dir: Path = typer.Argument(..., help="Diretório final (será APAGADO e recriado; --force se não-vazio)"),
     pdf: Path = typer.Option(..., "--pdf", exists=True, dir_okay=False, help="PDF original (para extrair TOC)"),
     marker_out: Path = typer.Option(..., "--marker-out", exists=True, file_okay=False, help="Saída do marker_single"),
+    title: str = typer.Option(None, "--title", help="Título do index.md (default: metadata do PDF / nome do arquivo)"),
+    subtitle: str = typer.Option(None, "--subtitle", help="Subtítulo do index.md (default: autor do metadata)"),
+    force: bool = typer.Option(False, "--force", help="Permite apagar target_dir pré-existente não-vazio"),
 ):
     """Reorganiza saída do marker em capítulos via TOC do PDF.
 
@@ -472,7 +475,8 @@ def restruct(
             typer.echo(f"  [{cid}] {chars:,} chars, {imgs} imagens")
 
     try:
-        counts = _restructure(pdf, marker_out, target_dir, on_chapter=_report)
+        counts = _restructure(pdf, marker_out, target_dir, on_chapter=_report,
+                              book_title=title, book_subtitle=subtitle, force=force)
     except (ValueError, RuntimeError) as e:
         typer.secho(f"[ERRO] {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
@@ -731,7 +735,11 @@ def convert(
         if pipe.primary in ("pdftotext", "tesseract"):
             # caminho CPU: extrai → escreve md → stats + provenance (sem restructure/optimize)
             from pdf2md.executor import run_pipeline
-            res = run_pipeline(pipe, pdf, out)
+            try:
+                res = run_pipeline(pipe, pdf, out)
+            except Exception as exc:
+                typer.secho(f"[ERRO execução] {exc}", fg=typer.colors.RED)
+                raise typer.Exit(3)
             for algo, why in res.skipped:
                 typer.echo(f"  ⊘ {algo}: {why}")
             if not no_stats:
@@ -776,7 +784,8 @@ def convert(
     # 2. Restructure (só se book)
     if is_book:
         typer.secho("\n[2/5] restruct...", bold=True)
-        restruct(out, pdf=pdf, marker_out=marker_out)  # type: ignore
+        # force=True: re-runs do convert sobre o mesmo --out são uso esperado (T076).
+        restruct(out, pdf=pdf, marker_out=marker_out, title=None, subtitle=None, force=True)  # type: ignore
     else:
         typer.echo("\n[2/5] restruct ⏭ (paper layout)")
         # Move marker output direto para out/
@@ -808,7 +817,7 @@ def convert(
             pkg_version=None,
             source=pdf.name,
             sha256=str(pdf),  # calcula automaticamente via prov()
-            extractor="marker-pdf 1.10.2",
+            extractor=f"marker-pdf {_detect_marker_version() or '?'}",
             when=None,
         )
     else:

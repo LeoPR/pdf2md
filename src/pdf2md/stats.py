@@ -120,8 +120,15 @@ def detect_tools(
         info["pandoc"] = v.replace("pandoc ", "") if v.startswith("pandoc ") else v
     else:
         info["pandoc"] = "n/a"
-    # PyMuPDF
-    info["pymupdf"] = "1.27.2" if HAS_FITZ else "n/a"
+    # PyMuPDF — versão real do ambiente (bloco de reprodutibilidade não pode mentir)
+    if HAS_FITZ:
+        try:
+            from importlib.metadata import version as _pkg_v
+            info["pymupdf"] = _pkg_v("pymupdf")
+        except Exception:
+            info["pymupdf"] = "?"
+    else:
+        info["pymupdf"] = "n/a"
     return info
 
 

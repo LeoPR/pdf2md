@@ -442,7 +442,10 @@ def _detect_marker() -> bool:
 
 
 def _detect_tesseract() -> bool:
-    return available(find_tesseract())
+    # Engine (binário) E wrapper pip (extra [ocr]): o executor usa pytesseract, então
+    # rotear um host que só tem o binário levaria a ModuleNotFoundError no meio do run.
+    import importlib.util
+    return available(find_tesseract()) and importlib.util.find_spec("pytesseract") is not None
 
 
 def _detect_pix2tex() -> bool:
