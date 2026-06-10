@@ -37,6 +37,11 @@ corpus/_canonical/*
 # Source vive read-only no AulaQuantum; output de uso volta pra lá. Ver corpus/RIGHTS.md.
 # Regra abaixo impede re-add acidental.
 corpus/nielsen_chuang/
+# GT verbatim de fontes proprietárias/não-redistribuíveis: PRIVADO desde 2026-06-09
+# (purgado do histórico; arquivos seguem no disco do autor). Critério: só publica
+# o que é licenciado ou domínio público, não o que é apenas "fair-use-defensável".
+corpus/_gt/nielsen_chuang_cap4/
+corpus/_gt/preskill_ph219_ch5/
 
 # diretórios temp do pipeline
 /tmp_*/

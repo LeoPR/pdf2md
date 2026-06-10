@@ -45,9 +45,10 @@ REGISTRY: dict[str, dict] = {
         "license": "proprietary",            # copyright Cambridge University Press
         "sha256": "4090c88c294fbe428114256185118b6862d8716a14f9ebf2c7df258f28eb640e",
         "title": "Nielsen & Chuang, Quantum Computation and Quantum Information (cap4)",
-        "results_publishable": "with-declaration",  # excerpts/resultados OK com RIGHTS.md
+        "results_publishable": "with-declaration",  # só resultados DERIVADOS (RIGHTS.md)
         "note": "Source E destiny no AulaQuantum (output de uso volta pra lá). "
-                "GT excerpts em corpus/_gt/nielsen_chuang_cap4/ são fair-use + declaração.",
+                "GT verbatim (corpus/_gt/nielsen_chuang_cap4/) é PRIVADO desde 2026-06-09 "
+                "(fora do repo público e do histórico; vive só no disco do autor).",
     },
 
     # ---- ZCACHE (livre/recuperável; bytes em Z:, só ref aqui) --------------
@@ -57,6 +58,8 @@ REGISTRY: dict[str, dict] = {
         "url": "http://theory.caltech.edu/~preskill/ph219/",
         "license": "read-only-online",       # NÃO redistribuir o PDF (só referenciar)
         "title": "Preskill, PH219/CS219 Lecture Notes ch5",
+        "note": "GT + rasters (corpus/_gt/preskill_ph219_ch5/) privados desde 2026-06-09, "
+                "alinhando o repo à própria política read-only-online.",
     },
     "arxiv_1706_03762": {
         "tier": "zcache",

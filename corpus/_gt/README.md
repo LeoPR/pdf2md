@@ -8,13 +8,18 @@
 
 | Doc | Pgs | Categoria | Pré-fill | Curadoria humana |
 |---|---|---|---|---|
-| nielsen_chuang_cap4 | 199, 200, 204 | math denso, fórmula multi-linha | ✅ draft | ⏳ pendente |
-| preskill_ph219_ch5 | 1, 2 | notes math single-col | ✅ draft | ⏳ pendente |
+| nielsen_chuang_cap4 † | 199, 200, 204 | math denso, fórmula multi-linha | ✅ draft | ⏳ pendente |
+| preskill_ph219_ch5 † | 1, 2 | notes math single-col | ✅ draft | ⏳ pendente |
 | arxiv_1706_03762 | 3 | paper 2-col, math moderado | ✅ draft | ⏳ pendente |
 | arxiv_2106_05919v2 | 30 | math heavy | ✅ draft | ⏳ pendente |
 | cdc_mmwr_73_35_a1 | 1 | tabela complexa | ✅ draft | ⏳ pendente |
 
 Total: **8 páginas** em 5 docs cobrindo 5 categorias-meta.
+
+> † **Privados desde 2026-06-09** — GT de fontes proprietárias (N&C/Cambridge) ou
+> não-redistribuíveis (Preskill read-only-online) vive fora deste repo público,
+> no disco do autor. Ver [`../RIGHTS.md`](../RIGHTS.md). Os demais docs (arXiv,
+> CDC) permanecem aqui.
 
 ## Fluxo de trabalho
 
@@ -22,7 +27,7 @@ Total: **8 páginas** em 5 docs cobrindo 5 categorias-meta.
 [automático]                    [humano: 4-6h]               [automático]
                                 ─────────────────
  marker extract             →   audit + correção MD     →    pdf2md gt-compare
- (já feito)                     (esta etapa)                  (lab/e15)
+ (já feito)                     (esta etapa)                  (bancada interna e15)
    ↓                              ↓                             ↓
  .expected.md.draft         →   .expected.md            →    WER + count-diff
                                 + .note.md
@@ -62,10 +67,8 @@ página simples. Total: **4-6h**.
 
 ## Validação automatizada (após curadoria)
 
-```powershell
-cd lab/e15_gt_validation
-.\run.ps1
-```
+Roda na **bancada interna do autor** (experimento e15 — não versionada neste
+repositório público); resultados promovidos vivem em `tickets/` e `docs/`.
 
 Output: `out/gt_comparison.json` + `out/gt_comparison.md` com:
 - WER-prosa (com mascaramento de markup) por página
