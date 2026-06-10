@@ -66,3 +66,45 @@ def test_md_to_pdf_raises_on_explicit_out_pdf_when_exists(tmp_path: Path):
         md_to_pdf(md, out_pdf=custom)
 
     assert custom.read_bytes() == b"existing"
+
+
+# --- mermaid adapter (T190/e22) ----------------------------------------------
+
+def _tools_available() -> bool:
+    from pdf2md.discovery import available, find_chrome, find_pandoc
+    return available(find_pandoc()) and available(find_chrome())
+
+
+def test_mermaid_vendor_files_ship():
+    """O wheel precisa carregar o JS pinado + Lua filter (package-data)."""
+    from pdf2md.pdfs import MERMAID_JS, MERMAID_LUA
+    assert MERMAID_JS.exists() and MERMAID_JS.stat().st_size > 1_000_000
+    assert MERMAID_LUA.exists()
+
+
+@pytest.mark.skipif(not _tools_available(), reason="pandoc/chrome ausentes")
+def test_md_to_pdf_mermaid_renders_diagram(tmp_path: Path):
+    """Detector do e22 como regressão: com mermaid=True o fonte NÃO vaza como
+    texto e a página ganha desenhos vetoriais; sem a flag, vaza (code block)."""
+    import fitz
+
+    md = tmp_path / "d.md"
+    md.write_text(
+        "# Doc\n\ntexto antes\n\n```mermaid\nflowchart LR\n"
+        "  A[caixa A] -->|e0| B[caixa B]\n  B --> C[caixa C]\n```\n\ndepois\n",
+        encoding="utf-8",
+    )
+
+    pdf_on = md_to_pdf(md, tmp_path / "on.pdf", mermaid=True)
+    doc = fitz.open(pdf_on)
+    text = "".join(p.get_text() for p in doc)
+    n_draw = sum(len(p.get_drawings()) for p in doc)
+    doc.close()
+    assert "-->" not in text and "flowchart" not in text   # fonte não vazou
+    assert n_draw >= 5                                      # diagrama desenhado
+
+    pdf_off = md_to_pdf(md, tmp_path / "off.pdf", mermaid=False)
+    doc = fitz.open(pdf_off)
+    text_off = "".join(p.get_text() for p in doc)
+    doc.close()
+    assert "flowchart" in text_off                          # sem flag: literal

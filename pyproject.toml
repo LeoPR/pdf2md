@@ -63,6 +63,11 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 include = ["pdf2md*"]
 
+[tool.setuptools.package-data]
+# mermaid.min.js (11.4.1, MIT) + Lua filter do adapter mermaid (T190) — md→pdf
+# renderiza diagramas offline, mesma classe do KaTeX client-side.
+pdf2md = ["_vendor/*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

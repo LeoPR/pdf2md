@@ -39,7 +39,17 @@ tr:nth-child(even) td { background: #f0f4f8; }
 .katex { font-size: 1em !important; }
 img { max-width: 90%; height: auto; display: block; margin: 0.8em auto; border: 1px solid #d0d8e0; border-radius: 4px; background: white; padding: 4px; page-break-inside: avoid; }
 hr { border: 0; border-top: 1px solid #c8d2dc; margin: 1.5em 0; }
+pre.mermaid { background: white; border: none; text-align: center; page-break-inside: avoid; }
+pre.mermaid svg { max-width: 100%; max-height: 23cm; height: auto; }
 """
+
+# Adapter mermaid (T190/e22): client-side no Chrome, mesma classe do KaTeX.
+# JS pinado (11.4.1, MIT) vendorado — md→pdf continua offline. O max-height
+# do CSS acima evita o achado do e22: diagramas TD/state/class altos eram
+# empurrados (page-break-inside) e fatiados em 2-5 páginas.
+_VENDOR = Path(__file__).parent / "_vendor"
+MERMAID_JS = _VENDOR / "mermaid.min.js"
+MERMAID_LUA = _VENDOR / "mermaid.lua"
 
 
 def md_to_pdf(
@@ -50,6 +60,7 @@ def md_to_pdf(
     chrome: str = DEFAULT_CHROME,
     css: str = CSS_INLINE,
     overwrite: bool = False,
+    mermaid: bool = False,
 ) -> Path:
     """Converte um MD em PDF, salvando ao lado (ou em `out_pdf` se passado).
 
@@ -63,6 +74,10 @@ def md_to_pdf(
         overwrite: se False (default), raise `FileExistsError` quando destino
             já existe — proteção contra destruir um PDF pré-existente
             silenciosamente (T076).
+        mermaid: renderiza blocos ```` ```mermaid ```` como diagramas (T190).
+            Opt-in: injeta mermaid.js vendorado + Lua filter; validado no e22
+            (20/20 render, determinístico). Sem a flag, o bloco sai como code
+            block literal (comportamento anterior).
 
     Returns:
         Path do PDF gerado.
@@ -90,7 +105,7 @@ def md_to_pdf(
         css_path.write_text(css, encoding="utf-8")
         html_path = tmp / "out.html"
 
-        subprocess.run([
+        cmd = [
             pandoc, str(md_path),
             "-o", str(html_path),
             "--standalone", "--embed-resources",
@@ -98,7 +113,16 @@ def md_to_pdf(
             "--css", str(css_path),
             "--resource-path", str(chapter_dir),
             "--metadata", f"title={md_path.stem}",
-        ], check=True, capture_output=True)
+        ]
+        if mermaid:
+            header = tmp / "mermaid_header.html"
+            header.write_text(
+                f"<script>{MERMAID_JS.read_text(encoding='utf-8')}</script>\n"
+                "<script>mermaid.initialize({startOnLoad:true, theme:'neutral'});</script>\n",
+                encoding="utf-8",
+            )
+            cmd += ["--lua-filter", str(MERMAID_LUA), "-H", str(header)]
+        subprocess.run(cmd, check=True, capture_output=True)
 
         url = "file:///" + html_path.absolute().as_posix().replace(" ", "%20")
         subprocess.run([
@@ -127,7 +151,7 @@ def find_chapter_mds(base: Path) -> list[Path]:
     return targets
 
 
-def generate_all(base: Path, *, on_progress=None) -> tuple[int, int]:
+def generate_all(base: Path, *, mermaid: bool = False, on_progress=None) -> tuple[int, int]:
     """Gera PDF para todos os capítulos. Retorna (sucessos, falhas).
 
     Re-runs sobrescrevem PDFs anteriores por design (uso normal do
@@ -139,7 +163,7 @@ def generate_all(base: Path, *, on_progress=None) -> tuple[int, int]:
     fail = 0
     for md in targets:
         try:
-            pdf = md_to_pdf(md, overwrite=True)
+            pdf = md_to_pdf(md, overwrite=True, mermaid=mermaid)
             kb = pdf.stat().st_size / 1024
             if on_progress:
                 on_progress(md, pdf, kb, None)

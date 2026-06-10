@@ -647,6 +647,7 @@ def aggr(
 @app.command()
 def pdfs(
     target_dir: Path = typer.Argument(..., exists=True, file_okay=False, help="Diretório com capítulos MD"),
+    mermaid: bool = typer.Option(False, "--mermaid", help="Renderiza blocos ```mermaid como diagramas (T190)"),
 ):
     """Renderiza cada capítulo MD em PDF via pandoc + Chrome + KaTeX.
 
@@ -663,7 +664,7 @@ def pdfs(
         else:
             typer.echo(f"  {md.parent.name}/ {kb:>6.0f} KB ✓")
 
-    ok, fail = generate_all(target_dir, on_progress=_report)
+    ok, fail = generate_all(target_dir, mermaid=mermaid, on_progress=_report)
     typer.echo(f"\n[OK] {ok}/{len(targets)}" + (f" — {fail} falhas" if fail else ""))
     if fail:
         raise typer.Exit(1)

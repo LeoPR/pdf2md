@@ -1,9 +1,9 @@
 ---
 id: T190
 titulo: Mermaid no md→pdf — render client-side no pipeline pandoc+Chrome
-status: open
+status: closed
 criado_em: 2026-06-09
-fechado_em:
+fechado_em: 2026-06-10
 fase: 4
 depende_de: []
 blocks: [T191]
@@ -75,3 +75,22 @@ dep KaTeX atual. mmdc só como renderer de REFERÊNCIA no lab
   diagrama) e enriquece [T065](T065_corpus_gt_sintetico.md) (categoria
   diagrama no corpus sintético).
 - Bidirecionalidade: primeira capacidade rica do md→pdf além de KaTeX.
+
+## Resultado (e22, 2026-06-10) — H1 CONFIRMADA, promovido
+
+- **Render 20/20** (flowchart TD/LR, sequence, state, class × 4 tamanhos);
+  detector validado nos dois sentidos (20/20 controles sem adapter acusaram
+  code block literal).
+- **Determinismo perfeito**: SSIM 1.0000 par-a-par em 3 runs, 20/20 docs.
+- **Achado**: diagramas altos (TD/state/class ≥6-8 nós) eram empurrados pelo
+  `page-break-inside: avoid` e fatiados em 2-5 páginas. Primeira leitura do
+  detector (só pg0) deu falso-negativo 13/20 — lição: detector de render tem
+  que agregar TODAS as páginas. Mitigado na promoção com
+  `pre.mermaid svg { max-height: 23cm }`: piores casos (12 nós) caem para
+  2 páginas, diagrama inteiro sem corte.
+- **Latência**: ~7s/doc com adapter (JS 2.6MB inline no header).
+- **Promoção**: `md_to_pdf(..., mermaid=True)` + `pdf2md pdfs --mermaid`;
+  mermaid 11.4.1 (MIT) + Lua filter vendorados em `src/pdf2md/_vendor/`
+  (package-data) — md→pdf segue offline. 2 testes de regressão (detector do
+  e22) em `tests/test_pdfs.py`. Sem entrada nova no doctor (zero dependência
+  externa nova).

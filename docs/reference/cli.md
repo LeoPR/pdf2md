@@ -56,7 +56,8 @@ host+doc — não faz I/O na decisão.
 - **OCR de scan** (`stats`/`route` em scan sem GPU): extra **`[ocr]`** + engine `tesseract`.
 - **extract/convert `--qualidade`** com marker: **externo** (venv + GPU + `PDF2MD_MARKER`).
 - **math→LaTeX CPU** (`--qualidade` sem GPU): runtime **pix2tex** externo (`PDF2MD_PIX2TEX_PYTHON`).
-- **pdfs / rt / MD→PDF**: **pandoc + Chrome** no PATH.
+- **pdfs / rt / MD→PDF**: **pandoc + Chrome** no PATH. `pdfs --mermaid` renderiza
+  blocos ```` ```mermaid ```` como diagramas (T190; mermaid.js vendorado, offline).
 
 Rode `pdf2md doctor` para ver o que está presente. Detalhes de instalação no
 [README](../../README.md#instalação); escolha de intent em

@@ -100,7 +100,7 @@ vivem em `docs/profiles/`, `docs/reference/tecnologias.md` e no `CHANGELOG.md`.
 | [T075](open/T075_tabelas_teds.md) | (o) | TEDS bidirecional — nota de tabela por algoritmo (fecha BURACO #2) | futuro `lab/e25_tabelas_teds/` | A+C |
 | [T092](open/T092_indexacao_utility_proxies.md) | (o) | Utilidade de indexação — proxies tool-agnostic + valida `pass2_warranted` | futuro `lab/e26_indexacao_proxies/` | A+B |
 | [T180](open/T180_reconstrucao_vetorial_imagens.md) | (o) | Reconstrução vetorial (texto + fonte + brasão residual) — escopo refinado pós-e16/e17 | `lab/e16_image_decompose/` + `lab/e17_vlm_full_page/` | E |
-| [T190](open/T190_mermaid_render_md2pdf.md) | (o) | Mermaid no md→pdf (client-side, mesmo mecanismo do KaTeX) — destrava round-trip de diagramas | futuro `lab/e22_mermaid_render/` | C |
+| [T190](closed/T190_mermaid_render_md2pdf.md) | (c) | Mermaid no md→pdf — **entregue 2026-06-10** (e22: 20/20, determinístico; `md_to_pdf(mermaid=True)` + `pdfs --mermaid`) | `lab/e22_mermaid_render/` | C |
 | [T191](research/T191_diagram_to_mermaid_vlm.md) | (r) | Diagrama→mermaid via VLM local (research-tier, VLM-as-tool; irmão do T180) | futuro `lab/e23_diagram_vlm/` | E |
 | [T410](research/T410_testar_ferramentas_alternativas_nougat_mineru_pdftotext.md) | (r) | Marker × Nougat × MinerU 2.5 × olmOCR-2 × Docling | família `lab/e1X_*` | A+B+C |
 | [T420](research/T420_fallback_low_resource_sem_gpu_sem_modelos_ml_pesados.md) | (r) | Fallback low-resource (sem GPU) | futuro `lab/eXX_low_resource/` | B |
