@@ -89,9 +89,14 @@ comparar células de benchmarks diferentes.
 
 ## F3 — Concorrentes na mesma régua → o comparativo conciso
 
+**Pré-requisito: [T195](../open/T195_roundtrip_prova_fidelidade.md)** — o
+instrumento de fidelidade não-supervisionada PROVADO. Só com ele dá pra rodar
+a saída de qualquer extrator externo na nossa régua sem GT. Sem T195, F3 é
+"comparar contra GT que não temos".
+
 Rodar na MESMA máquina, MESMOS corpora (sintético v1.2 + subsets F2), MESMAS
-métricas (F1), telemetria ligada (custo JUNTO da qualidade — o eixo que os
-benchmarks não publicam): MinerU 2.5-Pro (AGPL, venv isolado), Docling (MIT,
+métricas (F1 + os 2 eixos do T195), telemetria ligada (custo JUNTO da
+qualidade — o eixo que os benchmarks não publicam): MinerU 2.5-Pro (AGPL, venv isolado), Docling (MIT,
 CPU viável), **Granite-Docling-258M** (CPU-only — desafia nosso caminho CPU),
 Unstructured fast/hi_res/auto (concorrente DIRETO da tese do roteador),
 Nougat (referência math), olmOCR-2 se couber em 12GB (senão registrar como
