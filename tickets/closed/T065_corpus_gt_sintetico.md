@@ -84,9 +84,9 @@ renderer: external-capability opcional (modelo do doctor), nunca no pyproject.
 
 ## Conexão
 
-- Destrava [T075](T075_tabelas_teds.md), [T092](../open/T092_indexacao_utility_proxies.md),
+- Destrava [T075](T075_tabelas_teds.md), [T092](T092_indexacao_utility_proxies.md),
   [T191](../research/T191_diagram_to_mermaid_vlm.md); insumo para
-  [T180](T180_reconstrucao_vetorial_imagens.md) (logos sintéticos).
+  [T180](../open/T180_reconstrucao_vetorial_imagens.md) (logos sintéticos).
 - Materializa o princípio delta-E articulado em T060 pg03.
 - Resolve a tensão corpus público × direitos (RIGHTS.md trivial: tudo autoral).
 
@@ -201,6 +201,6 @@ inversão diagrama/logo) + fixtures herméticos de teste.
   tipografias) — rodam em qualquer clone, sem zcache/pandoc/chrome.
 
 Fora do escopo do fechamento (registrado onde pertence): resíduo CM do
-cropper (3 itens, euler/cnot/bmatrix4) segue no [T192](T192_cropper_robustez_tipografia.md);
+cropper (3 itens, euler/cnot/bmatrix4) segue no [T192](../open/T192_cropper_robustez_tipografia.md);
 consumo do corpus por TEDS/indexação segue em [T075](T075_tabelas_teds.md)/
-[T092](../open/T092_indexacao_utility_proxies.md).
+[T092](T092_indexacao_utility_proxies.md).
