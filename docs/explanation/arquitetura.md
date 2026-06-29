@@ -179,9 +179,10 @@ concorrente deles.
 os 2 eixos separam os degenerados, o instrumento pegou uma falha real sem GT **e**
 (onda 2) uma **alucinação de VLM real**: o Nougat confabulou prosa-matemática fluente
 e bem-formada sobre um scan (qualidade alta — passaria num check "é MD bom"), e o
-eixo-1 flagrou (fidelidade 0.030, **sem GT**) onde a qualidade seria enganada. O auditor
-também credita a fidelidade real do Nougat no terreno dele (não é enviesado). Falta
-ampliar a evidência (mais VLMs) e promover `fidelity_report()`.
+eixo-1 flagrou (fidelidade 0.030, **sem GT**) onde a qualidade seria enganada — e
+**replicado num 2º VLM** (GOT-OCR2.0; N=2). O auditor também credita a fidelidade real
+dos VLMs no terreno deles (não é enviesado) e não foi enganado em nenhum dos 10 casos.
+Falta promover `fidelity_report()` e ampliar o N.
 Código atual do eixo visual: [`pixel_roundtrip.py`](../../src/pdf2md/pixel_roundtrip.py)
 (extra `[rtpixel]`).
 

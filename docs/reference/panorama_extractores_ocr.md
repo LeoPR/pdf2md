@@ -101,8 +101,10 @@ como extrator — esse sub-papel está perdido.**
   de VLM real**: o Nougat confabulou prosa-matemática fluente sobre o mesmo scan
   (qualidade ALTA, passaria por "MD bom") e o auditor flagrou (fid=0.030, sem GT) onde a
   qualidade seria enganada, sem ser enviesado (credita o Nougat fiel no terreno dele,
-  arxiv_math 0.864 > pdftotext). A lacuna "ainda é só tese" está **fechada** no caso
-  difícil; falta **ampliar** (mais VLMs da shortlist, N maior) — é o que a shortlist
+  arxiv_math 0.864 > pdftotext). **Replicado num 2º VLM** (GOT-OCR2.0): mesmo padrão
+  (alucina nos OOD com qualidade alta/fid baixa, fiel no terreno dele) — N=2 VLMs, e em
+  nenhum dos 10 casos o auditor foi enganado. A lacuna "ainda é só tese" está **fechada**
+  no caso difícil; falta **ampliar** o N (PaddleOCR-VL CPU-first) — é o que a shortlist
   abaixo serve para
   testar.
 - **CPU-first sozinho perde força** (Docling + PaddleOCR-VL já ocupam o terreno). O

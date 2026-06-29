@@ -208,8 +208,27 @@ não é discriminador limpo fora do extremo; a **fidelidade** é o sinal real.
 sem-GT detecta alucinação de VLM real no caso difícil (qualidade alta, conteúdo
 inventado) e credita fidelidade real — fechando a lacuna que o
 [panorama](../../docs/reference/panorama_extractores_ocr.md) apontava ("ainda é tese").
-Próximo: generalizar `fidelity_report()` promovível (T194-F3) e rodar mais VLMs da
-shortlist (PaddleOCR-VL/GOT) p/ ampliar a evidência.
+
+**Replicação cross-VLM (onda 2b — GOT-OCR2.0, mesmo venv/zero-install):** a conclusão
+NÃO é específica do Nougat. 2º VLM, arquitetura e modos de falha distintos, mesmos 5 docs:
+
+| doc | fid pt | fid Nougat | fid GOT | qual GOT | leitura GOT (spot-check) |
+|---|---:|---:|---:|---:|---|
+| arxiv_math | 0.830 | 0.864 | 0.823 | 1720 | fiel (terreno dele) — auditor credita |
+| cdc | 0.694 | 0.582 | 0.677 | 2781 | fiel-ish |
+| arxiv_excerpt | 0.949 | 0.883 | 0.649 | 670 | perdeu a capa (pg0 só 209c) → fid cai |
+| wilson (scan) | 0.076 | 0.030 | 0.031 | 772 | **alucinação garbada** (qual alta, fid ~0) |
+| irs (form) | 0.585 | 0.002 | 0.082 | 1243 | rich-but-wrong (labels reais + `\section` espúrio + loop rep 0.91) |
+
+GOT replica o H4: nos OOD (wilson, irs) produz saída de **qualidade alta** (772/1243 —
+parece MD rico) mas **infiel** (fid 0.031/0.082), e o auditor flagra SEM GT; credita a
+fidelidade real no terreno dele (arxiv_math 0.823 ≈ pdftotext 0.830). Em **nenhum dos 10
+casos** (5 docs × 2 VLMs) a alucinação marcou fid alta. Texturas de falha distintas
+(Nougat: confabulação fluente + loop `[`; GOT: OCR garbado + `\section` repetido) — todas
+pegas pela FIDELIDADE, não pela qualidade. **Evidência do moat: N=2 VLMs.**
+
+**Próximo:** generalizar `fidelity_report()` promovível (T194-F3); opcional ampliar p/
+PaddleOCR-VL (CPU-first) p/ N=3.
 
 ## Método (ondas)
 
