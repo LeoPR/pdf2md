@@ -7,16 +7,20 @@ com aviso honesto** se a stack ideal não couber no host (nunca finge qualidade 
 quebra em silêncio). `pdf2md doctor --intent <nome>` mostra o que aquele intent
 usaria **neste** host.
 
+**Os intents aceitam inglês ou português** (equivalentes, com ou sem acento):
+`fast`/`rapido` · `quality`/`qualidade` · `balanced`/`balanceado` · `auto` ·
+`indexing`/`indexacao` · `low-resource`.
+
 ## Tabela de decisão
 
-| Intent | Use quando… | PRIMARY (com marker/GPU) | PRIMARY (sem GPU) |
+| Intent (EN / PT) | Use quando… | PRIMARY (com marker/GPU) | PRIMARY (sem GPU) |
 |---|---|---|---|
-| `--rapido` | indexar/pré-processar em massa; quer wall-time mínimo | pdftotext (ignora GPU **de propósito**) | pdftotext |
-| `--low-resource` | máquina magra (RAM apertada) | pdftotext (teto 160 MB) | pdftotext |
-| `--indexacao` | milhares de docs; refinar só os que valem | pass1 pdftotext · pass2 marker enfileirável | pass1 pdftotext · pass2 ∅ |
-| `--balanceado` (default) | uso geral | marker | pdftotext (adapta, não degrada) |
-| `--qualidade` | máxima fidelidade; math/layout/tabelas | marker (+ refiners) | pdftotext + pix2tex (**degrada c/ aviso**) |
-| `--auto` | "faça a melhor coisa que cabe aqui" | converge p/ qualidade | melhor caminho CPU |
+| `fast` / `rapido` | indexar/pré-processar em massa; quer wall-time mínimo | pdftotext (ignora GPU **de propósito**) | pdftotext |
+| `low-resource` | máquina magra (RAM apertada) | pdftotext (teto 160 MB) | pdftotext |
+| `indexing` / `indexacao` | milhares de docs; refinar só os que valem | pass1 pdftotext · pass2 marker enfileirável | pass1 pdftotext · pass2 ∅ |
+| `balanced` / `balanceado` (default) | uso geral | marker | pdftotext (adapta, não degrada) |
+| `quality` / `qualidade` | máxima fidelidade; math/layout/tabelas | marker (+ refiners) | pdftotext + pix2tex (**degrada c/ aviso**) |
+| `auto` | "faça a melhor coisa que cabe aqui" | converge p/ qualidade | melhor caminho CPU |
 
 ## O que cada intent liga
 

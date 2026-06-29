@@ -86,7 +86,9 @@ Código: [`src/pdf2md/routing.py`](../../src/pdf2md/routing.py) (`route()` +
 `HostInfo`/`DocInfo` + `pass2_warranted`), perfis em
 [`src/pdf2md/_profiles.py`](../../src/pdf2md/_profiles.py), execução em
 [`executor.py`](../../src/pdf2md/executor.py). Intents detalhados em
-[`how-to/escolher_intent.md`](../how-to/escolher_intent.md).
+[`how-to/escolher_intent.md`](../how-to/escolher_intent.md). Os intents aceitam
+**inglês ou português** (`fast`/`rapido`, `quality`/`qualidade`, `balanced`/`balanceado`,
+`auto`, `indexing`/`indexacao`, `low-resource`).
 
 ---
 
@@ -219,7 +221,7 @@ Instalação e uso ficam no [README](../../README.md) e em [§8](#8-instalação
 ```bash
 pip install pdf2md-tool            # núcleo CPU — nada externo, sem GPU/rede/modelos
 pdf2md doctor                      # o que o host tem (core sempre OK; resto opcional)
-pdf2md convert paper.pdf --intent rapido --out out/
+pdf2md convert paper.pdf --intent fast --out out/
 ```
 
 - Extras pip puros: `[rtpixel]` (validador visual), `[ocr]` (wrapper tesseract),

@@ -279,10 +279,12 @@ def doctor(intent: str = typer.Option(
 
     # --- --intent: o que o roteador faria NESTE host (ponte capabilities↔intent) ---
     if intent:
-        from pdf2md.routing import INTENTS, DocInfo, RoutingError, route
+        from pdf2md.routing import DocInfo, RoutingError, normalize_intent, route
         typer.echo("")
-        if intent not in INTENTS:
-            typer.secho(f"intent inválido: {intent!r}. Válidos: {', '.join(INTENTS)}", fg=typer.colors.RED)
+        try:
+            intent = normalize_intent(intent)   # EN/PT → canônico
+        except RoutingError as e:
+            typer.secho(str(e), fg=typer.colors.RED)
             raise typer.Exit(1)
         # doc genérico (text-layer, com math e logos) p/ revelar os refiners possíveis
         doc = DocInfo(n_pages=10, has_text_layer=True, math_density=1.0,
@@ -311,7 +313,7 @@ def version():
 def route(
     pdf: Path = typer.Argument(..., help="PDF a rotear"),
     intent: str = typer.Option("auto", "--intent", "-i",
-                               help="rapido|qualidade|balanceado|auto|indexacao|low-resource"),
+                               help="EN/PT: fast/rapido · quality/qualidade · balanced/balanceado · auto · indexing/indexacao · low-resource"),
     execute: bool = typer.Option(False, "--execute", "-x",
                                  help="Executa o pipeline decidido (default: só dry-run)"),
     out: Path = typer.Option(None, "--out", "-o", help="Diretório de saída (com --execute)"),
@@ -681,10 +683,13 @@ def convert(
     book: bool = typer.Option(False, "--book", help="Força split por capítulo (default: auto via TOC)"),
     paper: bool = typer.Option(False, "--paper", help="Força flat (sem restructure)"),
     intent: str = typer.Option(None, "--intent", "-i",
-        help="Roteamento profile-aware (T090): rapido|qualidade|balanceado|auto|indexacao|low-resource. "
-             "Escolhe a stack por host+doc. Substitui --quick/--best."),
-    quick: bool = typer.Option(False, "--quick", "-q", help="[legado] Pula otimização + round-trip"),
-    best: bool = typer.Option(False, "--best", help="[legado] Otimização total + multi-roundtrip 3 iter + rt-pixel"),
+        help="Roteamento por intent (EN/PT): fast/rapido · quality/qualidade · "
+             "balanced/balanceado · auto · indexing/indexacao · low-resource. "
+             "Escolhe a stack mais barata que satisfaz o intent (degrada com aviso)."),
+    quick: bool = typer.Option(False, "--quick", "-q", hidden=True,
+                               help="[compat] pula otimização + round-trip"),
+    best: bool = typer.Option(False, "--best", hidden=True,
+                              help="[compat] otimização total + multi-roundtrip + rt-pixel"),
     no_optimize: bool = typer.Option(False, "--no-optimize", help="Não otimiza imagens"),
     no_stats: bool = typer.Option(False, "--no-stats", help="Não gera _stats.md"),
     no_provenance: bool = typer.Option(False, "--no-provenance", help="Não marca proveniência"),
@@ -693,16 +698,11 @@ def convert(
 ):
     """[MACRO] Pipeline completo: extract + restructure + optimize + stats + provenance.
 
-    Decide via auto-detect:
-    - Se PDF tem TOC nivel >= 2 ⇒ livro (restructure por capítulo)
+    Decide a stack pelo --intent (fast/quality/auto/indexing/low-resource, EN ou PT),
+    medindo host + documento. E via auto-detect:
+    - Se PDF tem TOC nível >= 2 ⇒ livro (restructure por capítulo)
     - Senão ⇒ paper (flat)
-    Use --book / --paper para forçar.
-
-    Presets:
-    - --quick: pula otimize + skip rt
-    - --best: --no-optimize=false + rt-multi 3 iter
-
-    Cada etapa pode ser desligada com --no-*.
+    Use --book / --paper para forçar; cada etapa pode ser desligada com --no-*.
     """
     if book and paper:
         typer.secho("--book e --paper são exclusivos", fg=typer.colors.RED)

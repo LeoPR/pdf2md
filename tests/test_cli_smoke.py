@@ -52,12 +52,16 @@ def test_help_lists_macro_and_subcommands():
         assert cmd in out
 
 
-def test_convert_help_describes_presets():
+def test_convert_help_leads_with_intent_not_legacy():
     r = _run(["convert", "--help"])
     assert r.returncode == 0
     out = r.stdout
-    for flag in ("--book", "--paper", "--quick", "--best", "--intent"):
+    # superfície do usuário: intent + book/paper aparecem
+    for flag in ("--book", "--paper", "--intent"):
         assert flag in out, f"convert --help não menciona {flag}"
+    # --quick/--best continuam funcionando (back-compat) mas NÃO são anunciados:
+    # história interna não vai pra superfície de quem chega agora.
+    assert "--quick" not in out and "--best" not in out
 
 
 # --- T090: roteamento por intent (in-process via exe editável) ---

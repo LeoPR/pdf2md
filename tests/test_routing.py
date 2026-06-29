@@ -201,6 +201,24 @@ def test_invalid_intent_raises():
     with pytest.raises(RoutingError):
         route("turbo", host_gpu_full(), doc_text())
 
+
+def test_intent_aliases_en_pt_normalize_equal():
+    from pdf2md.routing import normalize_intent
+    pairs = [("fast", "rapido"), ("quality", "qualidade"),
+             ("balanced", "balanceado"), ("indexing", "indexacao")]
+    for en, pt in pairs:
+        assert normalize_intent(en) == normalize_intent(pt)
+    # acento e caixa/espaços e _ também normalizam
+    assert normalize_intent("Rápido") == RAPIDO
+    assert normalize_intent("  INDEXAÇÃO ") == INDEXACAO
+    assert normalize_intent("low_resource") == LOW_RESOURCE
+
+
+def test_route_accepts_english_intent_same_pipeline():
+    h, d = host_cpu(), doc_text()
+    assert route("fast", h, d).summary() == route(RAPIDO, h, d).summary()
+    assert route("low-resource", h, d).summary() == route(LOW_RESOURCE, h, d).summary()
+
 def test_summary_runs():
     assert "pdftotext" in route(RAPIDO, host_cpu(), doc_text()).summary()
 

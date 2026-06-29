@@ -36,6 +36,35 @@ INDEXACAO = "indexacao"
 LOW_RESOURCE = "low-resource"
 INTENTS = (RAPIDO, QUALIDADE, BALANCEADO, AUTO, INDEXACAO, LOW_RESOURCE)
 
+# Aliases EN↔PT → intent canônico. Os canônicos mantêm os nomes publicados
+# (back-compat 0.8.x); aceitamos as duas línguas (com/sem acento) p/ padronizar a UX.
+INTENT_ALIASES = {
+    "fast": RAPIDO, "rapido": RAPIDO, "rápido": RAPIDO,
+    "quality": QUALIDADE, "qualidade": QUALIDADE,
+    "balanced": BALANCEADO, "balanceado": BALANCEADO,
+    "auto": AUTO,
+    "indexing": INDEXACAO, "indexacao": INDEXACAO, "indexação": INDEXACAO,
+    "low-resource": LOW_RESOURCE, "baixo-recurso": LOW_RESOURCE,
+}
+# Pares canônicos (EN / PT) para help e docs — fonte única do vocabulário de intent.
+INTENT_PAIRS = (
+    ("fast", "rapido"), ("quality", "qualidade"), ("balanced", "balanceado"),
+    ("auto", "auto"), ("indexing", "indexacao"), ("low-resource", "low-resource"),
+)
+
+
+def normalize_intent(intent: str) -> str:
+    """Aceita intent em EN ou PT (com/sem acento, `_`/`-`) → valor canônico.
+
+    Levanta `RoutingError` se desconhecido. Mantém os canônicos publicados, então
+    não quebra quem já usa `--intent rapido`; `--intent fast` passa a funcionar igual.
+    """
+    key = (intent or "").strip().lower().replace("_", "-")
+    if key in INTENT_ALIASES:
+        return INTENT_ALIASES[key]
+    pairs = ", ".join(f"{en}/{pt}" if en != pt else en for en, pt in INTENT_PAIRS)
+    raise RoutingError(f"intent inválido: {intent!r}. Válidos (EN/PT): {pairs}")
+
 MARKER_VRAM_MIN_MB = 4096       # gate p/ hardware gpu-required (pico medido 3400 + folga)
 LOW_RESOURCE_RAM_CEIL_MB = 160  # teto de RAM do pipeline em --low-resource
 
@@ -224,8 +253,7 @@ def _ram_budget_mb(algos: list[str], profiles: dict) -> int:
 # ---------------------------------------------------------------------------
 
 def route(intent: str, host: HostInfo, doc: DocInfo, profiles: dict | None = None) -> Pipeline:
-    if intent not in INTENTS:
-        raise RoutingError(f"intent inválido: {intent!r}. Válidos: {INTENTS}")
+    intent = normalize_intent(intent)   # EN/PT (fast↔rapido, …) → canônico
     profiles = profiles or load_active_profiles()
     pipe = Pipeline(intent=intent)
 

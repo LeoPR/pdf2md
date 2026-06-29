@@ -7,6 +7,17 @@ Releases do `pdf2md` por ordem decrescente. Formato inspirado em
 ## [Unreleased] — master (0.8.2-dev)
 
 ### Adicionado
+- **Intents bilíngues EN/PT**: `--intent fast` ≡ `rapido`, `quality` ≡ `qualidade`,
+  `balanced` ≡ `balanceado`, `indexing` ≡ `indexacao` (aliases em
+  `routing.normalize_intent`, com/sem acento). Os canônicos publicados seguem
+  válidos — `--intent rapido` continua funcionando (back-compat).
+- **Auditor de fidelidade — roundtrip como prova (T195, ondas 0/1)**: instrumento
+  de 2 eixos (fidelidade reconstrutiva via régua OCR-de-texto — SSIM falsificado —
+  e qualidade representacional) que mede fidelidade **sem ground-truth**; já pegou
+  uma falha real (PDF escaneado, fid 0.076). Pesquisa em `lab/e28`.
+- **Painel de arquitetura reescrito** (`docs/explanation/arquitetura.md`): roteador
+  + auditor, com diagramas mermaid em etapas. **Panorama de extratores OCR
+  2023–2026** (`docs/reference/panorama_extractores_ocr.md`): confronto honesto.
 - **Mermaid no md→pdf (T190)**: `md_to_pdf(mermaid=True)` / `pdfs --mermaid` —
   diagramas ```mermaid``` viram SVG no PDF (mermaid 11.4.1 vendorado +
   filtro Lua; offline). Validado 20/20 com SSIM determinístico (e22).
@@ -20,6 +31,14 @@ Releases do `pdf2md` por ordem decrescente. Formato inspirado em
   prosa) + gerador determinístico + fixtures herméticos de teste em 2
   tipografias (KaTeX e Computer Modern). Instrumento validado contra âncoras
   do corpus real (e24, ondas 1-4); v1.1 redesenha os tiers de tabela (e25).
+
+### Alterado
+- **README reescrito em redação progressiva** (utilidade → por que é útil → teoria
+  simplificada → status), reposicionando o projeto como **roteador + auditor**
+  (não "mais um extrator").
+- **`--quick`/`--best` removidos da superfície**: continuam funcionando (back-compat)
+  mas ficam ocultos no `--help` — o roteamento é por `--intent`. Migração antiga é
+  história (changelog), não documentação de abertura.
 
 ### Corrigido
 - **Cropper de fórmulas multi-tipografia (T192)**: detector era cego a fontes
