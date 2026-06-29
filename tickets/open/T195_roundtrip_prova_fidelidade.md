@@ -179,7 +179,9 @@ O teste decisivo do moat: confrontar um VLM de OCR que **alucina** (Nougat,
 | irs | 0.585 | **0.002** | 263 | **0.96** | **loop degenerado** (`# [ [ [ …`) |
 | wilson (scan) | 0.076 | **0.030** | **502** | 0.72 | **alucinação fluente** (prosa-math plausível, inventada) |
 
-**H4 CONFIRMADO no caso DIFÍCIL (wilson):** num scan que não conseguiu ler, o
+**H4 CONFIRMADO no caso DIFÍCIL (wilson):** ⚠ *revisado na onda 2c — `wilson` é ZONA
+CEGA do auditor (referência OCR do scan é lixo); o H4 limpo re-ancora em GOT-`irs`.*
+num scan que não conseguiu ler, o
 Nougat **confabulou** prosa-matemática fluente e bem-formada — *"Release the given
 number of the regions it by the rules in Reduction, then multiply the scenario…"* —
 que **passaria num check "é MD bom"** (qual=502, ênfases, sem garbage óbvio), mas é
@@ -227,8 +229,59 @@ casos** (5 docs × 2 VLMs) a alucinação marcou fid alta. Texturas de falha dis
 (Nougat: confabulação fluente + loop `[`; GOT: OCR garbado + `\section` repetido) — todas
 pegas pela FIDELIDADE, não pela qualidade. **Evidência do moat: N=2 VLMs.**
 
-**Próximo:** generalizar `fidelity_report()` promovível (T194-F3); opcional ampliar p/
-PaddleOCR-VL (CPU-first) p/ N=3.
+**Próximo:** generalizar `fidelity_report()` promovível (T194-F3); ampliado p/ N=3
+na onda 2c (PaddleOCR-VL) abaixo.
+
+## Resultados — onda 2c (N=3, PaddleOCR-VL, 2026-06-29)
+
+3º VLM, ecossistema PaddlePaddle (venv próprio `Z:\venvs\pdf2md_lab_e29_paddle`,
+`paddle_run.py`). PaddleOCR-VL 0.9B é o mais MODERNO/forte e mais CONSERVADOR dos três
+— e revelou **uma confirmação E um limite**.
+
+| doc (ref) | fid pt | fid Nougat | fid GOT | fid Paddle | qual Paddle | leitura Paddle (spot-check) |
+|---|---:|---:|---:|---:|---:|---|
+| arxiv_excerpt (digital) | 0.949 | 0.883 | 0.649 | 0.832 | 877 | fiel — leu a capa (auditor credita **> GOT**) |
+| arxiv_math (digital) | 0.830 | 0.864 | 0.823 | 0.817 | 1692 | fiel (terreno) |
+| cdc (digital) | 0.694 | 0.582 | 0.677 | 0.570 | 2801 | fiel-ish |
+| irs (digital) | 0.585 | 0.002 | 0.082 | 0.064 | 74 | **honesto-esparso** (só cabeçalhos REAIS, sem confabular) |
+| wilson (SCAN) | 0.076 | 0.030 | 0.031 | 0.038 | 272 | **fiel** (regra real de divisão + LaTeX) MAS fid falso-baixo |
+
+**Confirma (refs born-digital, OCR-legíveis):** o auditor CREDITA o VLM mais forte onde
+ele é mais fiel — Paddle leu a capa do arxiv (0.832) e o GOT não (0.649). Em **nenhum
+dos 15 casos** (5×3) uma alucinação marcou fid alta — o auditor nunca foi enganado p/ CIMA.
+
+**Os 2 eixos distinguem o TIPO de falha (irs, ref confiável):** os 3 VLMs falham no
+formulário (fid 0.002–0.082 << pdftotext 0.585), mas a QUALIDADE separa: Paddle
+**honesto-esparso** (qual 74 — extraiu só "Form 1040…", "Cat. No. 11320B" reais, sem
+confabular) vs GOT **junk-confiante** (qual 1243 — labels + `\section` repetido) vs
+Nougat loop (qual 263). O eixo-2 diz QUE tipo: "não consegui ler" (Paddle) ≠ "inventei
+rico" (GOT/Nougat). É o ganho dos 2 eixos num caso real.
+
+**LIMITE MEDIDO (o achado que o 3º VLM revelou): `wilson` é ZONA CEGA do auditor.** O
+PaddleOCR-VL **leu o scan fielmente** (regra de divisão de 1799 + LaTeX) e ainda assim
+levou **fid=0.038 — FALSO-BAIXO**. Prova: a saída fiel-e-rica do Paddle (0.038) ficou
+ABAIXO da quase-vazia do pdftotext (0.076) — invertido, só possível se a REFERÊNCIA for
+lixo. E é: a referência é o Tesseract OCR-ando o render do scan archaico, que ele lê como
+garbage. ⇒ **quando o render original NÃO é OCR-legível (scan archaico/degradado), a
+régua OCR é não-confiável e pode FALSO-PENALIZAR um extrator bom.** É a fronteira
+régua-circular / qualidade-da-referência que a revisão adversarial apontou — agora medida.
+
+**Correção honesta (supersede a onda 2):** o "Nougat-`wilson` = caso difícil limpo do H4"
+estava **confundido** por esta zona cega (o fid baixo do Nougat em wilson pode ser a zona
+cega, não só a alucinação — o Paddle FIEL também ficou baixo lá). O **H4 limpo re-ancora
+no GOT-`irs`** (ref born-digital confiável; GOT qual 1243 "rico" mas fid 0.082 << pdftotext
+0.585 → auditor pega a falha de qualidade-alta) e no comportamento geral em born-digital.
+
+**Envelope (honesto):** o auditor é régua de fidelidade válida SEM-GT em **renders
+OCR-legíveis** (born-digital / impressão limpa — a maioria dos PDFs reais): credita fiel,
+pega falha confiante, distingue tipo-de-falha pelos 2 eixos, nunca enganado p/ cima. É
+**não-confiável em scans duros** (typografia archaica onde o próprio Tesseract falha) →
+pode falso-penalizar extração boa.
+
+**Decisão:** N=3 fortalece o moat nos born-digital E o **bounda honestamente**. Próximo:
+**gate de confiança** — se a referência (OCR do render original) sai esparsa/baixa-confiança,
+marcar o audit como "inconclusivo (página não-OCR-legível)" em vez de "fid baixa";
+converte a zona cega de bug em limite DECLARADO. + promover `fidelity_report()` com esse gate.
 
 ## Método (ondas)
 

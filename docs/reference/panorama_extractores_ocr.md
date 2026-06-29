@@ -96,16 +96,18 @@ como extrator — esse sub-papel está perdido.**
 **Onde é FRÁGIL (honestidade obrigatória):**
 - **Régua circular?** se a régua (OCR-de-texto, já que o SSIM caiu — T195) tiver os
   mesmos pontos cegos do VLM que audita, o auditor herda o viés do auditado. Risco real.
-- **Evidência (T195, ondas 1–2):** o instrumento pegou a falha catastrófica do
-  pdftotext no `wilson` (scan, fid=0.076 **sem GT**) **e** — onda 2 — uma **alucinação
-  de VLM real**: o Nougat confabulou prosa-matemática fluente sobre o mesmo scan
-  (qualidade ALTA, passaria por "MD bom") e o auditor flagrou (fid=0.030, sem GT) onde a
-  qualidade seria enganada, sem ser enviesado (credita o Nougat fiel no terreno dele,
-  arxiv_math 0.864 > pdftotext). **Replicado num 2º VLM** (GOT-OCR2.0): mesmo padrão
-  (alucina nos OOD com qualidade alta/fid baixa, fiel no terreno dele) — N=2 VLMs, e em
-  nenhum dos 10 casos o auditor foi enganado. A lacuna "ainda é só tese" está **fechada**
-  no caso difícil; falta **ampliar** o N (PaddleOCR-VL CPU-first) — é o que a shortlist
-  abaixo serve para
+- **Evidência (T195, ondas 1–2c, 3 VLMs):** em docs **born-digital** (refs OCR-legíveis)
+  o auditor pega alucinação de VLM **sem GT** e credita fidelidade real, sem nunca ser
+  enganado p/ cima (15 casos / 3 VLMs). H4 limpo: no formulário IRS o GOT produz saída
+  "rica" (qual 1243) mas o auditor flagra (fid 0.082 ≪ pdftotext 0.585); e os 2 eixos
+  distinguem a falha "honesto-esparsa" do PaddleOCR-VL (qual 74, só cabeçalhos reais) da
+  "alucinação-rica" do GOT/Nougat. **Limite MEDIDO (onda 2c):** em **scan archaico**
+  (`wilson`) o PaddleOCR-VL leu o conteúdo FIELMENTE e ainda assim levou fid falso-baixo
+  (0.038) — porque o leitor OCR da referência também falha no scan; logo a régua é
+  **não-confiável quando o render original não é OCR-legível** (a circularidade da régua,
+  medida). O moat vale em renders OCR-legíveis (maioria dos PDFs reais); falta um **gate
+  de confiança da referência** p/ marcar scans duros como "inconclusivo" em vez de "infiel".
+  Próximo é promover o instrumento — é o que a shortlist abaixo serve para
   testar.
 - **CPU-first sozinho perde força** (Docling + PaddleOCR-VL já ocupam o terreno). O
   diferencial tem que ser **roteador + auditor juntos**.
@@ -141,10 +143,12 @@ auditor/harness que falta a todos eles, e fica MAIS necessário conforme o extra
 um VLM falível. Mas isso só é fosso de verdade se (a) o pdf2md **parar de se vender como
 extrator** e se reposicionar como roteador+auditor que roda EM CIMA desses modelos, e
 (b) **provar empiricamente** que a régua (OCR-de-texto) pega uma alucinação real sem
-herdar o viés do que audita. As ondas 1–2 (T195) deram essa evidência: o auditor pegou
-falha real **e** alucinação de VLM (Nougat confabulando sobre um scan) sem GT, no caso
-difícil (qualidade alta, conteúdo inventado), sem ser enganado em nenhum dos 5 docs.
-Falta **ampliar** (mais VLMs da shortlist, N maior) e promover o instrumento.
+herdar o viés do que audita. As ondas 1–2c (T195, **3 VLMs**) deram essa evidência em
+docs born-digital: o auditor pega a alucinação-rica do VLM sem GT (ex.: GOT no formulário
+IRS), credita o VLM fiel e nunca foi enganado p/ cima (15 casos). Mas também **mediram o
+limite**: em scan archaico a régua OCR herda a cegueira do leitor e pode falso-penalizar
+uma extração boa (PaddleOCR-VL leu o scan fiel e levou fid falso-baixo). Falta um **gate
+de confiança da referência** (scans duros → "inconclusivo") e promover o instrumento.
 
 ## Fontes
 
