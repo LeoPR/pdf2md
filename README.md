@@ -161,7 +161,8 @@ telemetria por step · round-trip textual + pixel-roundtrip · TEDS de tabelas �
 otimização adaptativa de imagens · corpus em 3 tiers (com sintético GT-por-construção).
 
 **Em desenvolvimento:** o **auditor de fidelidade** (round-trip como prova, 2 eixos —
-já mede sem gabarito e já pegou uma falha real, falta cobrir alucinação de VLM) ·
+já mede sem gabarito; pegou uma falha real **e** uma alucinação de VLM real
+(Nougat confabulou sobre um scan — o auditor flagrou sem GT)) ·
 confronto com extratores externos na mesma régua · reconstrução vetorial de logos ·
 perfis cross-hardware. Estado e desenho no [painel de arquitetura](docs/explanation/arquitetura.md).
 

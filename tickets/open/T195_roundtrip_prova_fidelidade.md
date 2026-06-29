@@ -164,6 +164,53 @@ régua e ver se o instrumento o desmascara. **Envelope honesto já medido:** o
 instrumento discrimina bem em doc text-bearing reflowável e pega falha grosseira;
 é cego/não-monotônico em form-template e satura em doc redundante.
 
+## Resultados — onda 2 (2026-06-28, lab e28 nougat_run.py + wave2.py)
+
+O teste decisivo do moat: confrontar um VLM de OCR que **alucina** (Nougat,
+`facebook/nougat-base` via transformers no venv do marker — GPU, saída CRUA sem
+`post_process_generation`, que removeria as repetições que queremos ver) e medir,
+**sem GT**, se o auditor pega a alucinação. Régua = `ocr_jacc` cross-engine (onda 1).
+
+| doc | fid pdftotext | fid Nougat | qual Nougat | rep Nougat | leitura (spot-check) |
+|---|---:|---:|---:|---:|---|
+| arxiv_excerpt | 0.949 | 0.883 | 996 | 0.56 | Nougat fiel (título/autores reais) |
+| arxiv_math | 0.830 | **0.864** | 1607 | 0.70 | **Nougat MAIS fiel** (terreno dele) — auditor credita |
+| cdc | 0.694 | 0.582 | 2079 | 0.69 | Nougat moderadamente pior (OOD multi-col) |
+| irs | 0.585 | **0.002** | 263 | **0.96** | **loop degenerado** (`# [ [ [ …`) |
+| wilson (scan) | 0.076 | **0.030** | **502** | 0.72 | **alucinação fluente** (prosa-math plausível, inventada) |
+
+**H4 CONFIRMADO no caso DIFÍCIL (wilson):** num scan que não conseguiu ler, o
+Nougat **confabulou** prosa-matemática fluente e bem-formada — *"Release the given
+number of the regions it by the rules in Reduction, then multiply the scenario…"* —
+que **passaria num check "é MD bom"** (qual=502, ênfases, sem garbage óbvio), mas é
+pura invenção. O **eixo-1 (fid=0.030, cross-engine, SEM GT) pegou** exatamente onde o
+eixo-2 (qualidade) seria enganado. É a materialização, num VLM REAL, do quadrante
+perigoso da onda 0 (alucinação engana qualidade, fidelidade pega) — os 2 eixos juntos
+são o que separa. O irs (loop, fid 0.002) é o caso ÓBVIO; o wilson é o caso que prova
+o moat.
+
+**Auditor NÃO é enviesado contra VLM:** credita a fidelidade real do Nougat no
+terreno dele (arxiv_math 0.864 **>** pdftotext 0.830). Logo "fid baixa" significa
+infidelidade real, não "penalidade Nougat".
+
+**Sem circularidade / sem engano:** em NENHUM dos 5 docs a alucinação do Nougat
+marcou fid alta; o ranking do auditor bateu com o spot-check manual nos 5. O risco de
+régua-circular (auditor herdar o viés do auditado) que a revisão adversarial apontou
+**não se materializou** neste conjunto.
+
+**Caveats honestos:** (1) a heurística automática de H4 (qual alta + fid<pdftotext)
+**super-sinaliza** — marcou arxiv/cdc, que o spot-check mostra fiéis; o árbitro é o
+spot-check, não a heurística. (2) N pequeno (5 docs, 1 VLM, 1 host). (3) `rep_ratio`
+~0.68 é normal em prosa (palavras comuns repetem); só ~0.96 (irs) é loop inequívoco —
+não é discriminador limpo fora do extremo; a **fidelidade** é o sinal real.
+
+**Decisão:** o moat saiu de **tese** para **evidência medida**. O auditor de fidelidade
+sem-GT detecta alucinação de VLM real no caso difícil (qualidade alta, conteúdo
+inventado) e credita fidelidade real — fechando a lacuna que o
+[panorama](../../docs/reference/panorama_extractores_ocr.md) apontava ("ainda é tese").
+Próximo: generalizar `fidelity_report()` promovível (T194-F3) e rodar mais VLMs da
+shortlist (PaddleOCR-VL/GOT) p/ ampliar a evidência.
+
 ## Método (ondas)
 
 1. **Onda 0 — régua e calibração (sintético, barata, CPU):** reusar

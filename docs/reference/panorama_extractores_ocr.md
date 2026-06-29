@@ -96,11 +96,14 @@ como extrator — esse sub-papel está perdido.**
 **Onde é FRÁGIL (honestidade obrigatória):**
 - **Régua circular?** se a régua (OCR-de-texto, já que o SSIM caiu — T195) tiver os
   mesmos pontos cegos do VLM que audita, o auditor herda o viés do auditado. Risco real.
-- **Ainda é tese:** T195 está aberto. **Evidência já obtida (onda 1):** o instrumento
-  pegou a falha catastrófica do pdftotext no `wilson` (PDF escaneado, sem camada de
-  texto) reportando **fid=0.076 sem nenhum GT** — primeira evidência de que ele detecta
-  falha real sem ground-truth. **O que falta:** mostrar que pega uma **alucinação de
-  VLM** (caso mais difícil que uma falha-vazia) — é o que a shortlist abaixo serve para
+- **Evidência (T195, ondas 1–2):** o instrumento pegou a falha catastrófica do
+  pdftotext no `wilson` (scan, fid=0.076 **sem GT**) **e** — onda 2 — uma **alucinação
+  de VLM real**: o Nougat confabulou prosa-matemática fluente sobre o mesmo scan
+  (qualidade ALTA, passaria por "MD bom") e o auditor flagrou (fid=0.030, sem GT) onde a
+  qualidade seria enganada, sem ser enviesado (credita o Nougat fiel no terreno dele,
+  arxiv_math 0.864 > pdftotext). A lacuna "ainda é só tese" está **fechada** no caso
+  difícil; falta **ampliar** (mais VLMs da shortlist, N maior) — é o que a shortlist
+  abaixo serve para
   testar.
 - **CPU-first sozinho perde força** (Docling + PaddleOCR-VL já ocupam o terreno). O
   diferencial tem que ser **roteador + auditor juntos**.
@@ -136,8 +139,10 @@ auditor/harness que falta a todos eles, e fica MAIS necessário conforme o extra
 um VLM falível. Mas isso só é fosso de verdade se (a) o pdf2md **parar de se vender como
 extrator** e se reposicionar como roteador+auditor que roda EM CIMA desses modelos, e
 (b) **provar empiricamente** que a régua (OCR-de-texto) pega uma alucinação real sem
-herdar o viés do que audita. A onda 1 deu o primeiro passo (pegou falha real sem GT);
-o teste decisivo (pegar alucinação de VLM) é a próxima onda.
+herdar o viés do que audita. As ondas 1–2 (T195) deram essa evidência: o auditor pegou
+falha real **e** alucinação de VLM (Nougat confabulando sobre um scan) sem GT, no caso
+difícil (qualidade alta, conteúdo inventado), sem ser enganado em nenhum dos 5 docs.
+Falta **ampliar** (mais VLMs da shortlist, N maior) e promover o instrumento.
 
 ## Fontes
 

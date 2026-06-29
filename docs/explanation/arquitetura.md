@@ -175,10 +175,13 @@ roda EM CIMA de qualquer extrator** (inclusive dos VLMs do panorama), não um
 concorrente deles.
 
 **Estado (honesto):** é a tese do [T195](../../tickets/open/T195_roundtrip_prova_fidelidade.md)
-(aberto). Já **medido** (ondas 0/1): a régua OCR rastreia conteúdo (SSIM não), os 2
-eixos separam os degenerados, e o instrumento **pegou uma falha real sem GT** (um PDF
-escaneado em que o pdftotext extraiu quase nada → fidelidade 0.076). **Falta** provar
-que pega uma **alucinação de VLM** (mais difícil que a falha-vazia) — próxima onda.
+(aberto, ondas 0–2 medidas). Já **medido**: a régua OCR rastreia conteúdo (SSIM não),
+os 2 eixos separam os degenerados, o instrumento pegou uma falha real sem GT **e**
+(onda 2) uma **alucinação de VLM real**: o Nougat confabulou prosa-matemática fluente
+e bem-formada sobre um scan (qualidade alta — passaria num check "é MD bom"), e o
+eixo-1 flagrou (fidelidade 0.030, **sem GT**) onde a qualidade seria enganada. O auditor
+também credita a fidelidade real do Nougat no terreno dele (não é enviesado). Falta
+ampliar a evidência (mais VLMs) e promover `fidelity_report()`.
 Código atual do eixo visual: [`pixel_roundtrip.py`](../../src/pdf2md/pixel_roundtrip.py)
 (extra `[rtpixel]`).
 
@@ -208,7 +211,7 @@ Instalação e uso ficam no [README](../../README.md) e em [§8](#8-instalação
 
 | Frente | Onde |
 |---|---|
-| **Auditor de fidelidade** (roundtrip-como-prova, 2 eixos) | [T195](../../tickets/open/T195_roundtrip_prova_fidelidade.md) — ondas 0/1 feitas; onda 2 = pegar alucinação de VLM |
+| **Auditor de fidelidade** (roundtrip-como-prova, 2 eixos) | [T195](../../tickets/open/T195_roundtrip_prova_fidelidade.md) — ondas 0–2 feitas (pegou alucinação de VLM real sem GT); falta promover `fidelity_report()` + mais VLMs |
 | **Confronto com extratores externos** na régua sem-GT | [T194-F3](../../tickets/research/T194_programa_comparativo_cientifico.md) + [panorama](../reference/panorama_extractores_ocr.md) (shortlist CPU-viável) |
 | **Recalibração do braço de densidade** do `pass2_warranted` | [T193](../../tickets/open/T193_pass2_densidade_sparse_saudavel.md) |
 | **Release 0.8.2** (mermaid + cropper + TEDS + README_PYPI no master, não no PyPI) | — |
