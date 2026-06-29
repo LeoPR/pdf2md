@@ -120,6 +120,50 @@ clamar qualquer coisa: (a) fixar régua+alvo de fidelidade; (b) reportar a
 magnitude com os caveats swap/saturação; (c) tratar fidelidade+qualidade como
 par indissociável no `fidelity_report()`.
 
+## Resultados — onda 1 (2026-06-28, lab/e28_roundtrip_prova/wave1.py, .venv)
+
+Teste de verdade do moat: 5 PDFs REAIS (corpus/examples), **cross-engine, sem
+GT**. Referência = rasterização nativa do PDF real; variante = md_to_pdf(extração
+pdftotext). Régua FIXADA (pré-req da onda 0) = **ocr_jacc** (fidelidade-de-conjunto,
+robusta a reflow). Arms: pdftotext · drop30/drop60 (degradação controlada) ·
+embed_png.
+
+**Achado-headline (o moat funcionando): o instrumento pegou uma falha
+catastrófica de extração SEM nenhum GT.** `wilson_mathematics_excerpt` é um PDF
+ESCANEADO (563 chars de texto em 2 pg, 4 imagens) — pdftotext não tem o que
+extrair; o instrumento reportou **fid(jacc)=0.076**, sinalizando corretamente
+"esta extração não regenera o observável". Primeira evidência concreta de
+detecção de falha sem ground-truth.
+
+**H3 — PARCIAL (envelope claro):**
+- monotonia fid(pdftotext) ≥ drop30 ≥ drop60: **4/5** docs. Margens: drop30
+  +0.043 (min **−0.058**), drop60 +0.192.
+- **FORTE** em prosa acadêmica reflowável: arxiv 0.949→0.834→0.471 (drop limpo,
+  margem grande); arxiv_math 0.830→0.707→0.564.
+- **FRACO/quebra** em form-template: `irs_f1040` é **NÃO-monotônico** (drop30
+  0.643 > pdftotext 0.585) — o observável do formulário é dominado pelo template
+  (rótulos fixos), não pelos dados dropados → a régua não enxerga a perda.
+- **SATURA** em relatório redundante: `cdc` drop30 margem só 0.025 (vocabulário
+  redundante em 5 pg; mesma saturação da prosa sintética da onda 0).
+
+**Confirma as escolhas de régua (medido no real):**
+- SSIM cross-engine é **inútil**: μ=0.583 e — pior — embed_png SSIM (0.715) >
+  pdftotext (0.631) no arxiv: o SSIM **ranquearia o raster como MAIS fiel** que a
+  extração boa. Régua tem de ser OCR-texto.
+- ocr_seq é punido por reflow 2col→1col (cdc: jacc 0.694 vs seq 0.471) → em
+  cross-engine a régua é **ocr_jacc** (conjunto), não ocr_seq (ordem).
+- eixo-2 pega o raster: qual(pdftotext) μ=1440 vs qual(embed_png) μ=4.
+
+**O que falta p/ fechar o moat:** pegar uma **alucinação de VLM** (caso mais
+difícil que a falha-vazia do wilson — texto plausível mas inventado), não só
+falha catastrófica. É a próxima onda, ligada ao
+[panorama de extratores](../../docs/reference/panorama_extractores_ocr.md) +
+[T194](../research/T194_programa_comparativo_cientifico.md)-F3: rodar um extrator
+VLM CPU-viável da shortlist (PaddleOCR-VL / Nougat — conhecido por alucinar) na
+régua e ver se o instrumento o desmascara. **Envelope honesto já medido:** o
+instrumento discrimina bem em doc text-bearing reflowável e pega falha grosseira;
+é cego/não-monotônico em form-template e satura em doc redundante.
+
 ## Método (ondas)
 
 1. **Onda 0 — régua e calibração (sintético, barata, CPU):** reusar

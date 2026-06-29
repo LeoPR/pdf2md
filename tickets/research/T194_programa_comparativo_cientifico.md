@@ -93,14 +93,26 @@ comparar células de benchmarks diferentes.
 instrumento de fidelidade não-supervisionada PROVADO. Só com ele dá pra rodar
 a saída de qualquer extrator externo na nossa régua sem GT. Sem T195, F3 é
 "comparar contra GT que não temos".
+**Status 2026-06-28:** T195 onda 0+1 deram a 1ª evidência (o instrumento pegou
+falha catastrófica do pdftotext no `wilson` escaneado, fid=0.076, **sem GT**) e
+fixaram a régua cross-engine = **ocr_jacc**. Gate restante p/ destravar F3 de
+verdade: provar que pega **alucinação de VLM** (não só falha-vazia).
+
+**Paisagem dos concorrentes levantada:**
+[docs/reference/panorama_extractores_ocr.md](../../docs/reference/panorama_extractores_ocr.md)
+(8 frentes, 2023-2026, `verificado`). Veredito honesto: como EXTRATOR o pdf2md
+está superado; o que sobrevive é roteador + **auditor de fidelidade sem-GT** (que
+NENHUM dos 8 entrega).
 
 Rodar na MESMA máquina, MESMOS corpora (sintético v1.2 + subsets F2), MESMAS
 métricas (F1 + os 2 eixos do T195), telemetria ligada (custo JUNTO da
-qualidade — o eixo que os benchmarks não publicam): MinerU 2.5-Pro (AGPL, venv isolado), Docling (MIT,
-CPU viável), **Granite-Docling-258M** (CPU-only — desafia nosso caminho CPU),
-Unstructured fast/hi_res/auto (concorrente DIRETO da tese do roteador),
-Nougat (referência math), olmOCR-2 se couber em 12GB (senão registrar como
-borda, não omitir).
+qualidade — o eixo que os benchmarks não publicam). **Shortlist priorizada (do
+panorama, por implementação aberta + viabilidade CPU/GPU-modesta):**
+Docling toolkit (MIT, CPU-first medido), MinerU pipeline clássico (CPU-only),
+**PaddleOCR-VL 0.9B** (único VLM CPU-first — desafia DIRETO o flanco CPU e é
+sujeito-de-teste de alucinação), **Nougat** (alucinação/loops conhecidos — caso
+ideal p/ provar que o roundtrip pega alucinação), GOT-OCR2.0 (2º sujeito barato);
+olmOCR-2/MinerU2.5-VLM se couber em GPU (senão registrar como borda, não omitir).
 
 Saída "ampla→detalhe" (`docs/reference/comparativo.md`, gerado de RESULT.json):
 1 página com matriz elemento×ferramenta em bandas, e drill-down por elemento
