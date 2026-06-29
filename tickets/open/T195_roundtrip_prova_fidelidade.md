@@ -63,6 +63,63 @@ O quadrante perigoso (alucinação) é o que benchmark one-shot não pega.
   SEM usar nenhum ground-truth — e separa pdftotext de marker de forma coerente
   com um spot-check humano pequeno.
 
+## Resultados — onda 0 (2026-06-28, lab/e28_roundtrip_prova, .venv)
+
+Calibração no sintético (11 docs: prosa/tabela/formula; 68 pares doc×variante;
+1 renderer Chrome+KaTeX). Réguas de fidelidade candidatas comparadas img(ref)×
+img(var); fidelidade-de-conteúdo CONHECIDA medida no espaço MD contra o GT
+(`tok_recall` ordem-insensível, `seq_sim` ordem-sensível). Robustez em
+`robustness.py` + revisão adversarial independente.
+
+**Achado forte (não-trivial): SSIM é FALSIFICADO como régua de fidelidade de
+conteúdo.** ρ(SSIM, tok_recall)=+0.05; ρ(SSIM, seq_sim)=+0.49 — às vezes
+negativo ao remover o contraste fácil. Duas métricas pixel-derivadas divergindo
+desse jeito é evidência real: similaridade estrutural de pixels mede LAYOUT, não
+conteúdo. → a régua de fidelidade do instrumento NÃO deve ser SSIM cru.
+
+**OCR-de-texto rastreia conteúdo (com ressalvas de magnitude):**
+ρ(ocr_jacc, tok_recall)=+0.82; ρ(ocr_seq, seq_sim)=+0.84; leave-one-doc-out
+estável ([0.80,0.84] e [0.82,0.91]). MAS a magnitude ≥0.7 é *swap-driven* (cai
+p/ 0.71 sem a variante swap) e o label `tok_recall` SATURA na prosa repetitiva
+do sintético (variância ~0). Honesto: "OCR>SSIM, sinal robusto; magnitude
+inflada pelo contraste fácil + label saturado" — NÃO "ρ=0.82 calibrado".
+
+**Os 2 eixos são CONJUNTAMENTE necessários (correção da narrativa ingênua do
+ticket acima, que dizia embed-PNG→fidelidade≈1.0 "resposta correta"):** na régua
+ADOTADA (OCR), o `embed_png` é *enganosamente fiel* (ocr_jacc=0.69 > drop50/75=
+0.64 >> swap=0.37) — o Tesseract lê o texto DA imagem rasterizada. Logo o
+EIXO-1 (fidelidade) NÃO pega o raster; só o EIXO-2 (qualidade — `embed_png` é o
+mínimo global, 2.6σ < bom) pega. Inversamente, a alucinação (`swap`, conteúdo
+errado) é pega pelo EIXO-1 (fid 0.37) e NÃO pelo eixo-2 (qual alta — é MD
+bem-formado). Nenhum eixo sozinho separa os dois degenerados ⇒ **nunca colapsar
+fidelidade+qualidade num escore único.** Isto PROVA a tese dos 2 eixos (em vez
+de assumi-la). Por-doc: 0 contra-exemplos (margem alucinação: min fid(identity)=
+0.93 vs max fid(swap)=0.64 → separável).
+
+**Status das hipóteses:**
+- H1 — PARCIAL. SSIM falsificado (forte); OCR rastreia (sinal robusto, magnitude
+  com caveat). "A régua" ainda SUBESPECIFICADA: `ocr_jacc`↔conjunto vs
+  `ocr_seq`↔ordem discordam (Δρ~0.56) — fixar alvo antes da onda 1.
+- H2 — PASSA, porém o eixo-2 carrega SOZINHO a defesa contra o raster (não o
+  eixo-1, como o desenho ingênuo sugeria).
+- H3 — não tocada (é onda 1).
+
+**Limites de envelope (registrar honestamente):**
+- `corrupt` (1 dígito trocado na fórmula) é invisível ATÉ ao label
+  (`tok_recall=seq_sim=1.0`) e a todas as réguas → onda 0 dá ZERO evidência
+  sobre detecção de erro semântico de math (o perigo real em fórmula).
+- onda 0 é **same-engine** (ref e var saem do mesmo `md_to_pdf`); o real é
+  **cross-engine** (ref = rasterização do PDF original, fonte serif/2-col/ruído ≠
+  motor da reconstrução). O caminho de OCR cross-engine NÃO foi exercido aqui —
+  é exatamente o teste da onda 1.
+- N pequeno (11 docs), 1 renderer, prosa quasi-clonada.
+
+**Decisão:** seguir p/ onda 1 como EXPLORAÇÃO (o teste de verdade é o
+cross-engine sem GT), NÃO como "instrumento calibrado". Pré-requisitos antes de
+clamar qualquer coisa: (a) fixar régua+alvo de fidelidade; (b) reportar a
+magnitude com os caveats swap/saturação; (c) tratar fidelidade+qualidade como
+par indissociável no `fidelity_report()`.
+
 ## Método (ondas)
 
 1. **Onda 0 — régua e calibração (sintético, barata, CPU):** reusar
