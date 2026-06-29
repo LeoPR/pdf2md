@@ -18,6 +18,14 @@ pdf2md convert paper.pdf --intent rapido
 > No PyPI o pacote chama-se **`pdf2md-tool`** (o slug `pdf2md` estava reservado por
 > outra conta). O **comando** e o **import** continuam `pdf2md`.
 
+> **Posicionamento (o diferencial).** O pdf2md **não disputa** o posto de "melhor
+> extrator" — a onda de OCR/VLM 2024–2026 ganha esse posto
+> ([panorama honesto](docs/reference/panorama_extractores_ocr.md)). Ele é **roteador
+> + AUDITOR**: além de escolher o caminho, **mede a fidelidade da extração por
+> documento, SEM ground-truth**, via round-trip de imagem em 2 eixos — algo que
+> nenhum extrator entrega e que permite **auditar (e desafiar) qualquer um deles**.
+> Desenho e teoria no **[painel de arquitetura](docs/explanation/arquitetura.md)**.
+
 ---
 
 ## Quickstart sem GPU (o caminho portável)
@@ -64,6 +72,7 @@ quer marker/GPU) — `pdf2md doctor --intent qualidade` diz exatamente o que fal
 | **MD → PDF** pandoc + Chrome + KaTeX | Estável | |
 | **Round-trip textual + multi-iteração** | Estável | validador sem ground-truth |
 | **Pixel-roundtrip visual L0.5** (SSIM + align) | Estável | extra `[rtpixel]` |
+| **Auditor de fidelidade** (roundtrip 2-eixos, sem GT) — *o diferencial* | Pesquisa (T195 ondas 0/1) | régua OCR-texto (SSIM falsificado); já pegou falha real sem GT |
 | **Otimização adaptativa de imagens** | Estável | −38.6% em N&C, sem perda visual |
 | **Telemetria por step + agregada** | Estável | `psutil` + `nvidia-smi` |
 | **TEDS de tabelas** (`pdf2md.table_teds`) | Estável (T075) | extra `[tables]`; marker no teto do formato pipe |
@@ -209,8 +218,9 @@ row/colspan — exatamente o **teto do formato pipe**; pdftotext 0.0 em estrutur
 
 ## Documentação
 
-- Avaliação (formato artigo, medido × literatura): [`docs/explanation/avaliacao.md`](docs/explanation/avaliacao.md)
-- Arquitetura: [`docs/explanation/arquitetura.md`](docs/explanation/arquitetura.md) · Filosofia: [`philosophy.md`](docs/explanation/philosophy.md)
+- **Painel de arquitetura** (posicionamento, fluxo, desenhos, teoria, estado): [`docs/explanation/arquitetura.md`](docs/explanation/arquitetura.md)
+- Panorama de extratores OCR (confronto 2023–2026): [`docs/reference/panorama_extractores_ocr.md`](docs/reference/panorama_extractores_ocr.md)
+- Avaliação (formato artigo, medido × literatura): [`docs/explanation/avaliacao.md`](docs/explanation/avaliacao.md) · Filosofia: [`philosophy.md`](docs/explanation/philosophy.md)
 - Perfis medidos: [`docs/profiles/`](docs/profiles/) · Tecnologias: [`docs/reference/tecnologias.md`](docs/reference/tecnologias.md)
 - Referência de CLI: [`docs/reference/cli.md`](docs/reference/cli.md) · Escolher intent: [`docs/how-to/escolher_intent.md`](docs/how-to/escolher_intent.md)
 - Direitos do corpus: [`corpus/RIGHTS.md`](corpus/RIGHTS.md) · Timeline: [`docs/explanation/diario.md`](docs/explanation/diario.md)
